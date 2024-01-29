@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.ComponentModel;
+
+
 namespace ValoLibrary
 {
     [ComVisible(true)]
-
+    [Guid("839187c8-9765-4e76-a508-61ec3dd1a504")]
+    [InterfaceType(ComInterfaceType.InterfaceIsDual)]
     public interface IUDF
     {
         double CallPrice(double K, double T, string underlying);
@@ -11,12 +15,15 @@ namespace ValoLibrary
         double test();
         double Sensibility(double K, double T, string underlying);
     }
+
     [ComVisible(true)]
     [ProgId("ValoLibrary.UDF")]
-    [Guid("122D3198-A973-4DCF-85A3-8A4C81C12733")]
-    [ClassInterface(ClassInterfaceType.AutoDual)]
+    [Guid("14041acd-3ec6-4ba1-922b-87858755d0e7")] 
+    [ClassInterface(ClassInterfaceType.None)]
     public class UDF : IUDF
-    {          
+    {
+        //public object BlackScholes{ get; private set; }
+
         public double test() 
         { 
             return 7;
