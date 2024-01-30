@@ -2,7 +2,7 @@
 
 namespace ValoLibrary
 {
-    internal class BlackScholes
+    public class BlackScholes
     {
         public static double Price(char callPutFlag, double S, double sigma, double r, double K, double T)
         {

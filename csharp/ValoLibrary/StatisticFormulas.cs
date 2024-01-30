@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ValoLibrary
 {
-    internal class StatisticFormulas
+    public class StatisticFormulas
     {
         public static double linearInterpol(double x, double x0, double x1, double y0, double y1)
         {

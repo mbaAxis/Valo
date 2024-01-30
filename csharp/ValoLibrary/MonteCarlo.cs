@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ValoLibrary
 {
-    internal class MonteCarlo
+    public class MonteCarlo
     {
         public static double Price(char callPutFlag, double S0, double sigma, double r, double K, double T)
         {

@@ -1,18 +1,22 @@
-﻿namespace ValoLibrary
+﻿using Microsoft.Office.Interop.Excel;
+using System;
+
+namespace ValoLibrary
 {
-    internal class Calibration
+    public class Calibration
     {
         public static double GetRepo(string underlying, double T)
         {
             var data = GetData.Data(underlying);
             var repoRates = data["repoRates"];
+
             var ts = PosMaturitiesToInterpol(T);
             var i_t1 = ts[0];
             var i_t2 = ts[1];
-            var t1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 1));
-            var t2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 1));
-            var r1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 2));
-            var r2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 2));
+            var t1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 0));
+            var t2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 0));
+            var r1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 1));
+            var r2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 1));
             return StatisticFormulas.linearInterpol(T, t1, t2, r1, r2);
         }
 
@@ -23,10 +27,10 @@
             var ts = PosMaturitiesToInterpol(T);
             var i_t1 = ts[0];
             var i_t2 = ts[1];
-            var t1 = System.Convert.ToDouble(dividends.GetValue(i_t1, 1));
-            var t2 = System.Convert.ToDouble(dividends.GetValue(i_t2, 1));
-            var d1 = System.Convert.ToDouble(dividends.GetValue(i_t1, 2));
-            var d2 = System.Convert.ToDouble(dividends.GetValue(i_t2, 2));
+            var t1 = System.Convert.ToDouble(dividends.GetValue(i_t1, 0));
+            var t2 = System.Convert.ToDouble(dividends.GetValue(i_t2, 0));
+            var d1 = System.Convert.ToDouble(dividends.GetValue(i_t1, 1));
+            var d2 = System.Convert.ToDouble(dividends.GetValue(i_t2, 1));
             return StatisticFormulas.linearInterpol(T, t1, t2, d1, d2);
         }
 
@@ -46,12 +50,11 @@
         }
         public static int[] PosMaturitiesToInterpol(double T)
         {
-
             var maturities = GetData.Data("FTSE")["maturities"];
             int i = 1;
             while (System.Convert.ToDouble(maturities.GetValue(i, 1)) < T)
             {
-                i = i + 1;
+                i=i+1;
             }
             int[] Ts = new int[2];
             Ts[0] = i - 1;

@@ -6,10 +6,10 @@ using _Excel = Microsoft.Office.Interop.Excel;
 
 namespace ValoLibrary
 {
-    internal class GetData
+    public class GetData
     {
         //public static Dictionary<string, Array> DATA = Data("FTSE");
-        public static string _filePath = @"C:\Users\l.baduet\OneDrive - AXIS ALTERNATIVES\Documents\mon pricing\projet\Valo\common\ExcelFile.xlsm";
+        public static string _filePath = @"C:\Users\l.baduet\OneDrive - AXIS ALTERNATIVES\Documents\mon pricing\projet\Valo\common\ExcelFile.xls";
         // To release Excel from RAM in order to be able to charge the data from excel.
         public static void ReleaseMemory(ref _Application excel, ref Workbook wb, ref Worksheet ws,
             ref _Excel.Range usedRange)
@@ -55,8 +55,10 @@ namespace ValoLibrary
             var pricesMatrix = ws.Range[reference.Offset[3, 1], reference.Offset[18, 15]].Cells.Value2;
             var repoRates = ws.Range[reference.Offset[2, 18], reference.Offset[18, 19]].Cells.Value2;
             var dividends = ws.Range[reference.Offset[2, 21], reference.Offset[18, 22]].Cells.Value2;
+
             //var spot = ws.Range[reference.Offset[0, 1]].Cells.Value2;
             //var date = ws.Range[reference.Offset[-1, 1]].Cells.Value2;
+
             var maturities = ws.Range[reference.Offset[3, 0], reference.Offset[18, 0]].Cells.Value2;
             var strikes = ws.Range[reference.Offset[2, 1], reference.Offset[2, 16]].Cells.Value2;
 
@@ -66,8 +68,10 @@ namespace ValoLibrary
             data["prices"] = (Array)pricesMatrix;
             data["repoRates"] = (Array)repoRates;
             data["dividends"] = (Array)dividends;
+
             //data["spot"] = spot;
             //data["date"] = date;
+
             data["maturities"] = (Array)maturities;
             data["strikes"] = (Array)strikes;
             ReleaseMemory(ref excel, ref wb, ref ws, ref used_range);
@@ -95,7 +99,7 @@ namespace ValoLibrary
         public static double GetTime(string underlying)
         {
             // to further investigate: commented code generate error
-            return 44626;
+            return 44624;
             //int sheet = 1;
             //_Application excel = new _Excel.Application();
             //var workbooks = excel.Workbooks;
