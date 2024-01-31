@@ -9,7 +9,11 @@ namespace ValoLibrary
     public class GetData
     {
         //public static Dictionary<string, Array> DATA = Data("FTSE");
-        public static string _filePath = @"C:\Users\l.baduet\OneDrive - AXIS ALTERNATIVES\Documents\mon pricing\projet\Valo\common\ExcelFile.xls";
+        public static string _filePath = @"C:\Users\l.baduet\OneDrive - AXIS ALTERNATIVES\Documents\mon pricing\projet\Valo\common\MyInputs.xlsm";
+        
+        
+        public static object Cells { get; private set; }
+
         // To release Excel from RAM in order to be able to charge the data from excel.
         public static void ReleaseMemory(ref _Application excel, ref Workbook wb, ref Worksheet ws,
             ref _Excel.Range usedRange)
@@ -56,8 +60,8 @@ namespace ValoLibrary
             var repoRates = ws.Range[reference.Offset[2, 18], reference.Offset[18, 19]].Cells.Value2;
             var dividends = ws.Range[reference.Offset[2, 21], reference.Offset[18, 22]].Cells.Value2;
 
-            //var spot = ws.Range[reference.Offset[0, 1]].Cells.Value2;
-            //var date = ws.Range[reference.Offset[-1, 1]].Cells.Value2;
+            //var spot = ws.Range[reference.Offset[1, 0], reference.Offset[1, 0]].Cells.Value2;
+            //var date = ws.Range[reference.Offset[-1, 0], reference.Offset[0, -1]].Cells.Value2;
 
             var maturities = ws.Range[reference.Offset[3, 0], reference.Offset[18, 0]].Cells.Value2;
             var strikes = ws.Range[reference.Offset[2, 1], reference.Offset[2, 16]].Cells.Value2;

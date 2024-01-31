@@ -10,13 +10,13 @@ namespace ValoLibrary
             var data = GetData.Data(underlying);
             var repoRates = data["repoRates"];
 
-            var ts = PosMaturitiesToInterpol(T);
+            var ts = PosMaturitiesToInterpol(underlying, T);
             var i_t1 = ts[0];
             var i_t2 = ts[1];
-            var t1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 0));
-            var t2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 0));
-            var r1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 1));
-            var r2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 1));
+            var t1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 1));
+            var t2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 1));
+            var r1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 2));
+            var r2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 2));
             return StatisticFormulas.linearInterpol(T, t1, t2, r1, r2);
         }
 
@@ -24,20 +24,23 @@ namespace ValoLibrary
         {
             var data = GetData.Data(underlying);
             var dividends = data["dividends"];
-            var ts = PosMaturitiesToInterpol(T);
+
+            var ts = PosMaturitiesToInterpol(underlying, T);
             var i_t1 = ts[0];
             var i_t2 = ts[1];
-            var t1 = System.Convert.ToDouble(dividends.GetValue(i_t1, 0));
-            var t2 = System.Convert.ToDouble(dividends.GetValue(i_t2, 0));
-            var d1 = System.Convert.ToDouble(dividends.GetValue(i_t1, 1));
-            var d2 = System.Convert.ToDouble(dividends.GetValue(i_t2, 1));
+            //add
+
+            double t1 = Convert.ToDouble(dividends.GetValue(i_t1, 1));
+            double t2 = Convert.ToDouble(dividends.GetValue(i_t2, 1));
+            double d1 = Convert.ToDouble(dividends.GetValue(i_t1, 2));
+            double d2 = Convert.ToDouble(dividends.GetValue(i_t2, 2));
             return StatisticFormulas.linearInterpol(T, t1, t2, d1, d2);
         }
 
-        public static int[] PosStrikesToInterpol(double k)
+        public static int[] PosStrikesToInterpol(string underlying, double k)
         {
             //var exampleIndex = "FTSE";
-            var strikes = GetData.Data("FTSE")["strikes"];
+            var strikes = GetData.Data(underlying)["strikes"];
             int i = 1;
             while (System.Convert.ToDouble(strikes.GetValue(1, i)) < k)
             {
@@ -48,10 +51,12 @@ namespace ValoLibrary
             Ks[1] = i;
             return Ks;
         }
-        public static int[] PosMaturitiesToInterpol(double T)
+        public static int[] PosMaturitiesToInterpol(string underlying, double T)
         {
-            var maturities = GetData.Data("FTSE")["maturities"];
+            var maturities = GetData.Data(underlying)["maturities"];
             int i = 1;
+            //while (System.Convert.ToDouble(maturities.GetValue(i, 1)) < T)
+
             while (System.Convert.ToDouble(maturities.GetValue(i, 1)) < T)
             {
                 i=i+1;
@@ -63,8 +68,8 @@ namespace ValoLibrary
         }
         public static double interpolatePrice(double K, double T, string underlying)
         {
-            var posStrikesInterval = PosStrikesToInterpol(K);
-            var posMaturitiesInterval = PosMaturitiesToInterpol(T);
+            var posStrikesInterval = PosStrikesToInterpol(underlying, K);
+            var posMaturitiesInterval = PosMaturitiesToInterpol(underlying, T);
             var data = GetData.Data(underlying);
             var prices = data["prices"];
             var maturities = data["maturities"];

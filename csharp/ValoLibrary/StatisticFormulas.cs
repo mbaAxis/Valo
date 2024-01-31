@@ -22,6 +22,7 @@ namespace ValoLibrary
         {
             return 1 / (std * Math.Sqrt(2.0 * Math.PI)) * Math.Exp(-0.5 * (Math.Pow((x - mean) / std, 2)));
         }
+        
         public static double Cfd(double x)
         {
             const double a1 = 0.254829592;
@@ -38,6 +39,12 @@ namespace ValoLibrary
             double y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.Exp(-x * x);
 
             return 0.5 * (1.0 + sign * y);
+        }
+        public static double GauCumDisFunction(double x)
+        {
+            // You can implement or use existing functions for the cumulative distribution function of a standard normal distribution.
+            // This is a simplified version for demonstration purposes.
+            return 0.5 * (1 + Math.Tanh(Math.PI / Math.Sqrt(3.0) * x));
         }
 
         public static double RandomNormal(double mean, double stddev)
