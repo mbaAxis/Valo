@@ -1,3 +1,4 @@
 {
-    "dotnet.defaultSolution": "OptionPricing.sln"
+    "dotnet.defaultSolution": "OptionPricing.sln",
+    "dotnet.preferCSharpExtension": true
 }
