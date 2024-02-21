@@ -495,4 +495,5 @@ $RECYCLE.BIN/
 # exclude Mac file
 .DS_Store
 
-###data
+###add common folder
+.common/
