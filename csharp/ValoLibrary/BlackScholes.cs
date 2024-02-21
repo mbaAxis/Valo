@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MathNet.Numerics.RootFinding;
+using MathNet.Numerics;
+using System;
 using System.Diagnostics;
 
 namespace ValoLibrary
@@ -97,28 +99,38 @@ namespace ValoLibrary
 
         }
 
-        public static double ImpliedVol(string callPutFlag, double S, double price, double r, double K, double T)
+        public static double ImpliedVol(string callPutFlag, double S, double price, 
+            double r, double K, double T)
         {
-            const double tolerance = 1e-6;
-            const int convergence = 100;
-            int i = 0;
+            double tolerance = 1e-6;
+            int convergence = 100;
+            double sigma;
 
-            double vol = Math.Sqrt(2 * Math.PI / T) * price / S;
-            double BS_price = Price(callPutFlag, S, vol, r, K, T);
-            while (Math.Abs(price - BS_price) > tolerance)
+            for (int i = 0; i < convergence; i++)
             {
-                if (i < convergence)
+                sigma = Math.Sqrt(2 * Math.PI / T) * price / S;
+                double BS_price = Price(callPutFlag, S, sigma, r, K, T);
+
+                double vega = Vega(callPutFlag,S, sigma, r,  K, T);                  
+
+                if (Math.Abs(BS_price - price)> tolerance)
                 {
-                    i = i + 1;
-                    double vega = Vega(callPutFlag, S, vol, r, K, T);
-                    vol = vol - (BS_price - price) / vega;
+                    return sigma;
                 }
-                break;
+
+                sigma -= (BS_price - price) / vega;
+
+                // Clamp sigma to avoid negative or extreme values
+                sigma = Math.Max(sigma, 0.001);
+                sigma = Math.Min(sigma, 5.0);
             }
 
-            return Math.Sqrt(2 * Math.PI / T) * price / S;
-
-
+            // If maxIterations reached without convergence, return NaN or throw an exception
+            return double.NaN;
         }
+
+
+
+
     }
 }

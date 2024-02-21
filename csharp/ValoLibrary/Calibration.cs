@@ -66,7 +66,7 @@ namespace ValoLibrary
             Ts[1] = i;
             return Ts;
         }
-        public static double interpolatePrice(double K, double T, string underlying)
+        public static double InterpolatePrice(double K, double T, string underlying)
         {
             var posStrikesInterval = PosStrikesToInterpol(underlying, K);
             var posMaturitiesInterval = PosMaturitiesToInterpol(underlying, T);
