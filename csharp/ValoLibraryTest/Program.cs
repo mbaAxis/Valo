@@ -1,63 +1,50 @@
-﻿using ValoLibrary;
+﻿using System.Diagnostics;
+using System.Runtime.Intrinsics.X86;
+using ValoLibrary;
 using static ValoLibrary.UDF;
-
-
-//double T = 44989;
-//double strike = 100;
-//string underlying = "CAC40";
-//double r = 0.97;
-//double r = Calibration.GetRepo(underlying, T);
-//double d = Calibration.GetDiv(underlying, T);
-//double vol = BlackScholes.ImpliedVol("c", 100, 53.765, r, strike, T);
-
-//double inter = Calibration.interpolatePrice(strike, T, "FTSE");
-//Console.WriteLine("interpolate price is: = " + inter);
-//Console.WriteLine("Repo est:");
-//Console.WriteLine("div 5 ans est:" + d);
-//Console.WriteLine("repo 5 ans est:" + r);
-//Console.WriteLine("vol est:" + vol);
-////Console.WriteLine("vol2 est:" + vol2);
-///
-//Console.WriteLine("================== Test UDF.CallPrice ============");
-//UDF exemple = new();
-//double price2 = exemple.CallPrice(strike, T, underlying);
-//Console.WriteLine(price2);
-//Console.WriteLine("================== End Test UDF.CallPrice =========");
-
+using static ValoLibrary.BlackScholes;
 
 
 //=========================================================================================================
 double T = 1;
+double T2 = 44989;
+double S = 100;
 double strike = 100;
-double r = 0.97;
+//double r = 0.05;
+double r = 0.967197916277398;
+//double sigma = 0.2;
+double sigma = Math.Sqrt(2 * Math.PI / T) * 0.16 / S;
+string underlying = "CAC40";
 UDF exemple = new();
-
-Dictionary<string, double> sensitivities = exemple.SensitivitiesBS("c", 100, 0.2, r, strike, T);
-foreach (var kvp in sensitivities)
-{
-    Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-}
+double q = 0.306845697901433;
 
 
-Console.WriteLine("next");
-double T1 = 44989;
-Dictionary<string, double> sensi = exemple.Sensitivities("c", strike, T1, "CAC40");
-foreach (var kvp in sensi)
-{
-    Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-}
 
-////// option portefolio
-/////
-//List<OptionParameters> optionPortfolio = new List<OptionParameters>
+string Flag = "call";
+string Flag1 = "put";
+
+double mc = exemple.GetMCEurOptionPrice(Flag, S, sigma, r, strike, T);
+
+double prix = exemple.GetBSOptionPrice(Flag, S, sigma, r, strike, T, q);
+double prix3 = exemple.GetBSOptionPrice(Flag1, S, sigma, r, strike, T, q);
+double[,] sensi = exemple.GetSensiOptionBS(Flag, S, sigma, r, strike, T, q);
+//double[,] sensi2 = exemple.GetSensiOption(Flag, strike, T2, underlying);
+
+double prix5= exemple.GetOptionPrice(Flag, strike, T2, underlying);
+
+Console.WriteLine("mc call =" + mc);
+
+Console.WriteLine("BS call ="+ prix);
+Console.WriteLine("BS put =" + prix3);
+
+Console.WriteLine("call =" + prix5);
+
+//foreach (var kvp in sensi)
 //{
-//    new OptionParameters { Underlying = "CAC40", Strike = 100, Expiry = T, OptionType = "C" },
-//    new OptionParameters { Underlying = "CAC40", Strike = 100, Expiry = T, OptionType = "P" },
-//    // Ajoutez d'autres options au besoin
-//};
+//    Console.WriteLine($"sensi cal BS: {kvp}");
+//}
+//foreach (var sen in sensi2)
+//{
+//    Console.WriteLine($"{sen}");
+//}
 
-//// Appelez la fonction pour obtenir le prix total du portefeuille
-//double portfolioPrice = UDF.PortfolioOptionPrice(optionPortfolio);
-
-//// Faites quelque chose avec le prix total du portefeuille
-//Console.WriteLine("Prix total du portefeuille : " + portfolioPrice);

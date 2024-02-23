@@ -8,7 +8,7 @@ namespace ValoLibrary
 {
     public class StatisticFormulas
     {
-        public static double linearInterpol(double x, double x0, double x1, double y0, double y1)
+        public static double LinearInterpol(double x, double x0, double x1, double y0, double y1)
         {
             if ((x1 - x0) == 0)
             {
@@ -60,7 +60,7 @@ namespace ValoLibrary
             return y1 * stddev + mean;
         }
 
-        static public double linearInterpolation(double x, double x0, double x1, double y0, double y1)
+        static public double LinearInterpolation(double x, double x0, double x1, double y0, double y1)
         {
             if ((x1 - x0) == 0)
             {

@@ -6,17 +6,19 @@ namespace ValoLibrary
 {
     public class MonteCarlo
     {
-        public static double Price(char callPutFlag, double S0, double sigma, double r, double K, double T)
+        public static double MCEurOptionPrice(string optionFlag, double S0, double sigma, double r, double K, double T, double?q = null)
         {
             int numberSimulation = 100000;
-            double payOff = 0;
-            double S = 0;
+            double payOff;
+            double S;
             List<double> samples = new List<double>();
-            if (callPutFlag == 'c')
+            
+
+            if (optionFlag.ToLower() == "call")
             {
                 for (int i = 0; i < numberSimulation; i++)
                 {
-                    S = S0 * Math.Exp((r - sigma * sigma / 2) * T + sigma * Math.Sqrt(T) * StatisticFormulas.RandomNormal(0, 1));
+                    S = S0 * Math.Exp((r - q.GetValueOrDefault() - sigma * sigma / 2) * T + sigma * Math.Sqrt(T) * StatisticFormulas.RandomNormal(0, 1));
                     payOff = Math.Max(S - K, 0);
                     samples.Add(payOff);
                 }
@@ -26,12 +28,12 @@ namespace ValoLibrary
             {
                 for (int i = 0; i < numberSimulation; i++)
                 {
-                    S = S0 * Math.Exp((r - sigma * sigma / 2) * T + sigma * Math.Sqrt(T) * StatisticFormulas.RandomNormal(0, 1));
+                    S = S0 * Math.Exp((r - q.GetValueOrDefault() -  sigma * sigma / 2) * T + sigma * Math.Sqrt(T) * StatisticFormulas.RandomNormal(0, 1));
                     payOff = Math.Max(K - S, 0);
                     samples.Add(payOff);
                 }
             }
-            return samples.Average() * Math.Exp(-r * T);
+            return samples.Average() * Math.Exp(-r  * T);
         }
     }
 }

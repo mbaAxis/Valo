@@ -61,6 +61,7 @@
     <Compile Include="Calibration.cs" />
     <Compile Include="GetData.cs" />
     <Compile Include="MonteCarlo.cs" />
+    <Compile Include="BlackScholesMD.cs" />
     <Compile Include="StatisticFormulas.cs" />
     <Compile Include="UDF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

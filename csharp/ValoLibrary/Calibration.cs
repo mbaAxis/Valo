@@ -8,19 +8,19 @@ namespace ValoLibrary
         public static double GetRepo(string underlying, double T)
         {
             var data = GetData.Data(underlying);
-            var repoRates = data["repoRates"];
+            var repoRates = data["riskFreeRates"];
 
             var ts = PosMaturitiesToInterpol(underlying, T);
             var i_t1 = ts[0];
             var i_t2 = ts[1];
-            var t1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 1));
-            var t2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 1));
-            var r1 = System.Convert.ToDouble(repoRates.GetValue(i_t1, 2));
-            var r2 = System.Convert.ToDouble(repoRates.GetValue(i_t2, 2));
-            return StatisticFormulas.linearInterpol(T, t1, t2, r1, r2);
+            var t1 = Convert.ToDouble(repoRates.GetValue(i_t1, 1));
+            var t2 = Convert.ToDouble(repoRates.GetValue(i_t2, 1));
+            var r1 = Convert.ToDouble(repoRates.GetValue(i_t1, 2));
+            var r2 = Convert.ToDouble(repoRates.GetValue(i_t2, 2));
+            return StatisticFormulas.LinearInterpol(T, t1, t2, r1, r2);
         }
 
-        public static double GetDiv(string underlying, double T)
+        public static double GetDividend(string underlying, double T)
         {
             var data = GetData.Data(underlying);
             var dividends = data["dividends"];
@@ -34,7 +34,7 @@ namespace ValoLibrary
             double t2 = Convert.ToDouble(dividends.GetValue(i_t2, 1));
             double d1 = Convert.ToDouble(dividends.GetValue(i_t1, 2));
             double d2 = Convert.ToDouble(dividends.GetValue(i_t2, 2));
-            return StatisticFormulas.linearInterpol(T, t1, t2, d1, d2);
+            return StatisticFormulas.LinearInterpol(T, t1, t2, d1, d2);
         }
 
         public static int[] PosStrikesToInterpol(string underlying, double k)
@@ -79,16 +79,16 @@ namespace ValoLibrary
             int i1_t = posMaturitiesInterval[0];
             int i2_t = posMaturitiesInterval[1];
 
-            var k1 = System.Convert.ToDouble(strikes.GetValue(1, i1_k));
-            var k2 = System.Convert.ToDouble(strikes.GetValue(1, i2_k));
-            var t1 = System.Convert.ToDouble(maturities.GetValue(i1_t, 1));
-            var t2 = System.Convert.ToDouble(maturities.GetValue(i2_t, 1));
+            var k1 = Convert.ToDouble(strikes.GetValue(1, i1_k));
+            var k2 = Convert.ToDouble(strikes.GetValue(1, i2_k));
+            var t1 = Convert.ToDouble(maturities.GetValue(i1_t, 1));
+            var t2 = Convert.ToDouble(maturities.GetValue(i2_t, 1));
 
-            double p1 = StatisticFormulas.linearInterpol(K, k1, k2, System.Convert.ToDouble(prices.GetValue(i1_t, i1_k)),
-                System.Convert.ToDouble(prices.GetValue(i1_t, i2_k)));
-            double p2 = StatisticFormulas.linearInterpol(K, k1, k2, System.Convert.ToDouble(prices.GetValue(i2_t, i1_k)),
-                System.Convert.ToDouble(prices.GetValue(i2_t, i2_k)));
-            double interpolatedPrice = StatisticFormulas.linearInterpol(T, t1, t2, p1, p2);
+            double p1 = StatisticFormulas.LinearInterpol(K, k1, k2, Convert.ToDouble(prices.GetValue(i1_t, i1_k)),
+                Convert.ToDouble(prices.GetValue(i1_t, i2_k)));
+            double p2 = StatisticFormulas.LinearInterpol(K, k1, k2, Convert.ToDouble(prices.GetValue(i2_t, i1_k)),
+                Convert.ToDouble(prices.GetValue(i2_t, i2_k)));
+            double interpolatedPrice = StatisticFormulas.LinearInterpol(T, t1, t2, p1, p2);
 
             return interpolatedPrice;
         }

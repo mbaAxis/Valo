@@ -496,4 +496,4 @@ $RECYCLE.BIN/
 .DS_Store
 
 ###add common folder
-.common/
+common/
