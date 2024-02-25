@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Collections.Specialized;
 
 namespace ValoLibrary
 {
@@ -13,18 +14,19 @@ namespace ValoLibrary
     [ClassInterface(ClassInterfaceType.None)]
     public class BSParameters
     {
-        public string optionFlag { get; set; }
-        public double s { get; set; }
-        public double sigma { get; set; }
-        public double r { get; set; }
-        public double k { get; set; }
-        public double T { get; set; }
-        public double? q { get; set; }
+        public string optionFlag;
+        public string position;
+        public double s;
+        public double sigma;
+        public double r;
+        public double k;
+        public double T;
+        public double? q;
     }
     public class BlackScholes
     {
 
-        public static double BSOptionPrice(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null)
+        public static double BSOptionPrice(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
             double price = 0;
             double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
@@ -35,29 +37,63 @@ namespace ValoLibrary
 
             if (optionFlag.ToLower() == "call")
             {
-                price = expQT * s * StatisticFormulas.Cfd(d1) - k * expRT * StatisticFormulas.Cfd(d2);
+                if (position.ToLower() == "long")
+                {
+                    price = expQT * s * StatisticFormulas.Cfd(d1) - k * expRT * StatisticFormulas.Cfd(d2);
+                }
+                else if (position.ToLower() == "short")
+                {
+                    price = -(expQT * s * StatisticFormulas.Cfd(d1) - k * expRT * StatisticFormulas.Cfd(d2));
+                }
             }
             else if (optionFlag.ToLower() == "put")
             {
-                price = -expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2);
+                if (position.ToLower() == "long")
+                {
+                    price = -expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2);
+
+                }
+                else if(position.ToLower() == "short")
+                {
+                    price = -(-expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2));
+
+                }
             }
 
             return price;
         }
-        public static double DeltaBS(string optionFlag, double s, double sigma, double r, double k, double T, double? q=null)
+        public static double DeltaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
 
+            double delta = 0.0;
             double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
             double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
 
 
             if (optionFlag.ToLower() == "call")
             {
-                return expQT * StatisticFormulas.Cfd(d1);
+                if (position.ToLower() == "long")
+                {
+                    delta = expQT * StatisticFormulas.Cfd(d1);
+                }
+                else if (position.ToLower() == "short")
+                {
+                    delta = -(expQT * StatisticFormulas.Cfd(d1));
+                }
             }
+
             else if (optionFlag.ToLower() == "put")
             {
-                return expQT * (StatisticFormulas.Cfd(d1) - 1);
+                if (position.ToLower() == "long")
+                {
+                    delta = expQT * (StatisticFormulas.Cfd(d1) - 1);
+
+                }
+                else if(position.ToLower() == "short")
+                {
+                    delta = -(expQT * (StatisticFormulas.Cfd(d1) - 1));
+
+                }
             }
 
             else
@@ -65,27 +101,43 @@ namespace ValoLibrary
                 Console.WriteLine("ERROR : check call/put flag !");
                 return 0;
             }
+
+            return delta;
         }
 
-        public static double GammaBS(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null)
+        public static double GammaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
+            double gamma = 0.0;
             double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
             double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
 
 
             if (optionFlag.ToLower() == "call" || optionFlag.ToLower() == "put")
             {
-                return expQT * StatisticFormulas.NormalDensity(d1, 0, 1) / (s * sigma * Math.Sqrt(T));
+                if (position.ToLower() == "long")
+                {
+                    gamma = expQT * StatisticFormulas.NormalDensity(d1, 0, 1) / (s * sigma * Math.Sqrt(T));
+                }
+                else if (position.ToLower() == "short")
+                {
+                    gamma = -(expQT * StatisticFormulas.NormalDensity(d1, 0, 1) / (s * sigma * Math.Sqrt(T)));
+
+                }
+
             }
+
             else
             {
                 Console.WriteLine("ERROR : check call/put flag !");
                 return 0;
             }
+
+            return gamma;
         }
 
-        public static double ThetaBS(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null)
+        public static double ThetaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
+            double theta = 0.0;
             double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
             double d2 = d1 - sigma * Math.Sqrt(T);
 
@@ -94,31 +146,58 @@ namespace ValoLibrary
 
             if (optionFlag.ToLower() == "call")
             {
-                return (expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2* Math.Sqrt(T))
-                   - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2));
+                if (position.ToLower() == "long")
+                {
+                    theta = (expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+                  - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2));
+                }
+                else if (position.ToLower() == "short")
+                {
+                    theta = -( (expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+               - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)) );
+
+                }
+            
             }
             else if (optionFlag.ToLower() == "put")
             {
-                return (expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+                if (position.ToLower() == "long")
+                {
+                    theta = (expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
                    + (r * k * StatisticFormulas.Cfd(d2) * expRT) - (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2));
+                }
+                else if (position.ToLower() == "short")
+                {
+                    theta = - ( (expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+                   + (r * k * StatisticFormulas.Cfd(d2) * expRT) - (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)) );
+                }   
             }
+
             else
             {
                 Console.WriteLine("ERROR : check call/put flag !");
                 return 0;
             }
 
+            return theta;
         }
 
-        public static double VegaBS(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null)
+        public static double VegaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-
+            double vega = 0.0;
             double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
             double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
 
             if (optionFlag.ToLower() == "call" || optionFlag.ToLower() == "put")
             {
-                return expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T);
+                if (position.ToLower() == "long")
+                {
+                    vega =  expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T);
+                }
+                else if (position.ToLower() == "short")
+                {
+                    vega = - (expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T));
+                }
             }
 
             else
@@ -126,22 +205,41 @@ namespace ValoLibrary
                 Console.WriteLine("ERROR : check call/put flag !");
                 return 0;
             }
+
+            return vega;
         }
 
-        public static double RhoBS(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null)
+        public static double RhoBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-
+            double rho = 0.0;
             double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
             double d2 = d1 - sigma * Math.Sqrt(T);
 
-            if (optionFlag.ToLower() == "call") 
+            if (optionFlag.ToLower() == "call")
             {
-                return k*T*Math.Exp(-r*T)*StatisticFormulas.Cfd(d2);
+                if (position.ToLower() == "lonng")
+                {
+                    rho =  k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(d2);
+                }
+                else if(position.ToLower() == "short")
+                {
+                    rho = -(k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(d2));
+                }
+                
             }
 
             else if (optionFlag.ToLower() == "put")
             {
-                return -k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(-d2);
+
+                if (position.ToLower() == "lonng")
+                {
+                    rho = -k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(-d2); ;
+                }
+                else if (position.ToLower() == "short")
+                {
+                    rho = -(-k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(-d2));
+                }
+                
             }
 
             else
@@ -149,22 +247,24 @@ namespace ValoLibrary
                 Console.WriteLine("ERROR : check call/put flag !");
                 return 0;
             }
+
+            return rho;
         }
 
-        public static double[,] SensiOptionBS(string optionFlag, double s, double sigma, double r, double k, double T, double? q=null)
+        public static double[,] SensiOptionBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
             double[,] sensitivities = new double[5, 1]; // Tableau 2D pour simuler une colonne
 
-            sensitivities[0, 0] = BlackScholes.DeltaBS(optionFlag, s, sigma, r, k, T, q);
-            sensitivities[1, 0] = BlackScholes.GammaBS(optionFlag, s, sigma, r, k, T, q);            
-            sensitivities[2, 0] = BlackScholes.ThetaBS(optionFlag, s, sigma, r, k, T, q);
-            sensitivities[3, 0] = BlackScholes.VegaBS(optionFlag, s, sigma, r, k, T, q);
-            sensitivities[4, 0] = BlackScholes.RhoBS(optionFlag, s, sigma, r, k, T, q);
+            sensitivities[0, 0] = BlackScholes.DeltaBS(optionFlag, position, s, sigma, r, k, T, q) ;
+            sensitivities[1, 0] = BlackScholes.GammaBS(optionFlag, position, s, sigma, r, k, T, q);
+            sensitivities[2, 0] = BlackScholes.ThetaBS(optionFlag, position, s, sigma, r, k, T, q);
+            sensitivities[3, 0] = BlackScholes.VegaBS(optionFlag, position, s, sigma, r, k, T, q);
+            sensitivities[4, 0] = BlackScholes.RhoBS(optionFlag, position, s, sigma, r, k, T, q);
 
             return sensitivities;
         }
 
-        public static double ImpliedVol(string optionFlag, double s, double price, double r, double k, double T, double? q=null)
+        public static double ImpliedVol(string optionFlag, string position, double s, double price, double r, double k, double T, double? q = null)
         {
             double tolerance = 1e-6;
             int convergence = 100;
@@ -174,11 +274,11 @@ namespace ValoLibrary
 
             for (int i = 0; i < convergence; i++)
             {
-                double BS_price = BSOptionPrice(optionFlag.ToLower(), s, sigma, r, k, T, q);
+                double BS_price = BSOptionPrice(optionFlag, position, s, sigma, r, k, T, q);
 
-                double vega = VegaBS(optionFlag.ToLower(),s, sigma, r,  k, T, q);                  
+                double vega = VegaBS(optionFlag, position, s, sigma, r, k, T, q);
 
-                if (Math.Abs(BS_price - price)> tolerance)
+                if (Math.Abs(BS_price - price) > tolerance)
                 {
                     return sigma;
                 }
@@ -206,7 +306,7 @@ namespace ValoLibrary
 
             foreach (BSParameters option in options)
             {
-                double optionPrice = BSOptionPrice(option.optionFlag, option.s, option.sigma, option.r,
+                double optionPrice = BSOptionPrice(option.optionFlag, option.position, option.s, option.sigma, option.r,
                     option.k, option.T, option.q);
 
                 portfolioPrice += optionPrice;
@@ -214,27 +314,6 @@ namespace ValoLibrary
 
             return portfolioPrice;
         }
-
-        public static double PortfolioDelta(int numberOfOptions, BSParameters[] options)
-        {
-
-            if (options.Length != numberOfOptions)
-            {
-                throw new ArgumentException("Le nombre d'options ne correspond pas à la valeur spécifiée.");
-            }
-            double totalDelta = 0.0;
-
-            foreach (var option in options)
-            {
-                totalDelta += DeltaBS(option.optionFlag, option.s, option.sigma, option.r,
-                    option.k, option.T, option.q);
-            }
-
-            return totalDelta;
-        }
-
     }
-      
-
-
 }
+

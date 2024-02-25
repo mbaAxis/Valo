@@ -11,18 +11,32 @@ namespace ValoLibrary
     public interface IUDF
     {
         // using user data
-        double GetBSOptionPrice(string optionFlag, double s, double sigma, double r, double k, double T, double? q=null);
-        double[,] GetSensiOptionBS(string optionFlag, double s, double sigma, double r, double k, double T, double? q=null);
+        double GetBSOptionPrice(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q=null);
+        double[,] GetSensiOptionBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q=null);
         double GetBSOptionPortfolioPrice(int numberOfOptions, BSParameters[] options);
+        double GetDeltaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
+        double GetGammaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
+        double GetThetaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
+        double GetVegaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
 
 
+
+
+        ///========================================================================================================================================================
         // using market data
-        double GetOptionPrice(string optionFlag, double k, double T, string underlying, double? q = null);        
-        double[,] GetSensiOption(string optionFlag, double k, double T, string underlying, double? q = null);
+        double GetOptionPrice(string optionFlag, string position, double k, double T, string underlying, double? q = null);        
+        double[,] GetSensiOption(string optionFlag, string position, double k, double T, string underlying, double? q = null);
         double GetOptionPortfolioPrice(int numberOfOptions, Parameters[] options);
+        double GetDelta(string optionFlag, string position, double k, double T, string underlying, double? q = null);
+        double GetGamma(string optionFlag, string position, double k, double T, string underlying, double? q = null);
+        double GetTheta(string optionFlag, string position, double k, double T, string underlying, double? q = null);
+        double GetVega(string optionFlag, string position, double k, double T, string underlying, double? q = null);
+
+
+        ///========================================================================================================================================================
 
         // using Monte Carlo
-        double GetMCEurOptionPrice(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null);
+        double GetMCEurOptionPrice(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
         double GetMCEurOptionPortfolioPrice(int numberOfOptions, BSParameters[] options);
 
 
@@ -39,9 +53,9 @@ namespace ValoLibrary
     public class UDF : IUDF
     {
         // using user data
-        public double GetBSOptionPrice(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null)
+        public double GetBSOptionPrice(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            return BlackScholes.BSOptionPrice(optionFlag, s, sigma, r, k, T, q);
+            return BlackScholes.BSOptionPrice(optionFlag, position, s, sigma, r, k, T, q);
         }
 
         public double GetBSOptionPortfolioPrice(int numberOfOptions, BSParameters[] options)
@@ -49,32 +63,75 @@ namespace ValoLibrary
             return BlackScholes.BSOptionPortfolioPrice(numberOfOptions, options);
         }
 
-        public double[,] GetSensiOptionBS(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null)
+        public double[,] GetSensiOptionBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            return BlackScholes.SensiOptionBS(optionFlag, s, sigma, r, k, T, q);
+            return BlackScholes.SensiOptionBS(optionFlag, position, s, sigma, r, k, T, q);
         }
+
+        public double GetDeltaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
+        {
+            return BlackScholes.DeltaBS(optionFlag, position, s, sigma, r, k, T, q);
+        }
+        public double GetGammaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
+        {
+            return BlackScholes.GammaBS(optionFlag, position, s, sigma, r, k, T, q);
+        }
+
+        public double GetThetaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
+        {
+            return BlackScholes.ThetaBS(optionFlag, position, s, sigma, r, k, T, q);
+        }
+        public double GetVegaBS(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
+        {
+            return BlackScholes.VegaBS(optionFlag, position, s, sigma, r, k, T, q);
+        }
+
+
+        ///=======================================================================================================================================================
+
 
         //using market data
 
-        public double GetOptionPrice(string optionFlag, double k, double T, string underlying, double? q = null)
+        public double GetOptionPrice(string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
-            return BlackScholesMD.OptionPrice(optionFlag, k, T, underlying, q); ;
+            return BlackScholesMD.OptionPrice(optionFlag, position, k, T, underlying, q); ;
         }
 
-        public double[,] GetSensiOption(string optionFlag, double k, double T, string underlying, double? q = null)
+        public double[,] GetSensiOption(string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
-            return BlackScholesMD.SensiOption(optionFlag, k, T, underlying, q);
+            return BlackScholesMD.SensiOption(optionFlag, position, k, T, underlying, q);
         }
         public double GetOptionPortfolioPrice(int numberOfOptions, Parameters[] options)
         {
             return BlackScholesMD.OptionPortfolioPrice(numberOfOptions, options);
         }
 
+        public double GetDelta(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        {
+            return BlackScholesMD.Delta(optionFlag, position, k, T, underlying, q);
+        }
+        public double GetGamma(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        {
+            return BlackScholesMD.Gamma(optionFlag, position, k, T, underlying, q);
+        }
+
+        public double GetTheta(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        {
+            return BlackScholesMD.Theta(optionFlag, position, k, T, underlying, q);
+        }
+
+        public double GetVega(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        {
+            return BlackScholesMD.Vega(optionFlag, position, k, T, underlying, q);
+        }
+
+        ///==================================================================================================================================================
+
         //Using Monte Carlo
 
-        public double GetMCEurOptionPrice(string optionFlag, double s, double sigma, double r, double k, double T, double? q = null)
+        public double GetMCEurOptionPrice(string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            return MonteCarlo.MCEurOptionPrice(optionFlag, s, sigma, r, k, T, q);
+            return MonteCarlo.MCEurOptionPrice(optionFlag, position, s, sigma, r, k, T, q);
         }
 
         public double GetMCEurOptionPortfolioPrice(int numberOfOptions, BSParameters[] options)
