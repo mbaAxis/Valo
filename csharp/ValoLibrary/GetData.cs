@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Office.Interop.Excel;
 using _Excel = Microsoft.Office.Interop.Excel;
@@ -9,8 +10,10 @@ namespace ValoLibrary
 {
     public class GetData
     {
-        
-        public static string _filePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\..\Valo\common\MyInputs.xlsm"));
+
+        public static string _filePath = @"C:\Users\l.baduet\OneDrive - AXIS ALTERNATIVES\Documents\mon pricing\projet\Valo\common\MyInputs.xlsm";
+
+        //public static string _filePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\..\Valo\common\MyInputs.xlsm"));
         public static object Cells { get; private set; }
 
         // To release Excel from RAM in order to be able to charge the data from excel.

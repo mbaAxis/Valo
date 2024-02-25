@@ -12,7 +12,7 @@ namespace ValoLibrary
         {
             double S = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
-            q = Calibration.GetDividend(underlying, T);
+            q =  q ?? Calibration.GetDividend(underlying, T);
             double date = GetData.GetTime(underlying);
             double timeToMaturity = (T - date) / 365;
             double price = Calibration.InterpolatePrice(K, T, underlying);
@@ -102,35 +102,35 @@ namespace ValoLibrary
 
 
         ////// option portfolio
-        public static double PortfolioOptionPrice(List<OptionParameters> optionParameters)
+        ///
+        public static double OptionPortfolioPrice(int numberOfOptions, Parameters[] options)
         {
-            double totalPrice = 0.0;
-
-            foreach (var parameters in optionParameters)
+            if (options.Length != numberOfOptions)
             {
-                double S = GetData.GetSpot(parameters.Underlying);
-                double r = Calibration.GetRepo(parameters.Underlying, parameters.Expiry);
-                double date = GetData.GetTime(parameters.Underlying);
-                double timeToMaturity = (parameters.Expiry - date) / 365;
-                double price = Calibration.InterpolatePrice(parameters.Strike, parameters.Expiry, parameters.Underlying);
-                double vol = BlackScholes.ImpliedVol(parameters.OptionType, S, price, r, parameters.Strike, timeToMaturity);
-                double optionPrice = BlackScholes.BSOptionPrice(parameters.OptionType, S, vol, r, parameters.Strike, timeToMaturity);
-
-                totalPrice += optionPrice;
+                throw new ArgumentException("Le nombre d'options ne correspond pas à la valeur spécifiée.");
             }
 
-            return totalPrice;
+            double portfolioPrice = 0;
+
+            foreach (Parameters option in options)
+            {
+                double optionPrice = OptionPrice(option.optionFlag, option.strike, option.maturity, option.underlying, option.dividend);
+
+                portfolioPrice += optionPrice;
+            }
+
+            return portfolioPrice;
         }
-
-        public class OptionParameters
-        {
-            public string Underlying;
-            public double Strike;
-            public double Expiry;
-            public string OptionType; // "c" pour call, "p" pour put, par exemple
-
-        }
-
 
     }
+
+    public class Parameters
+    {
+        public string optionFlag;
+        public double strike;
+        public double maturity;
+        public string underlying;
+        public double? dividend;
+    }
+
 }

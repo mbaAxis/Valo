@@ -62,6 +62,7 @@
     <Compile Include="GetData.cs" />
     <Compile Include="MonteCarlo.cs" />
     <Compile Include="BlackScholesMD.cs" />
+    <Compile Include="OptionPortfolioParameters.cs" />
     <Compile Include="StatisticFormulas.cs" />
     <Compile Include="UDF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

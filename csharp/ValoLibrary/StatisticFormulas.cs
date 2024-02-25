@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ValoLibrary
 {
-    public class StatisticFormulas
+    public static  class StatisticFormulas
     {
         public static double LinearInterpol(double x, double x0, double x1, double y0, double y1)
         {
@@ -60,7 +60,17 @@ namespace ValoLibrary
             return y1 * stddev + mean;
         }
 
-        static public double LinearInterpolation(double x, double x0, double x1, double y0, double y1)
+        public static double NextGaussian(this Random random)
+        {
+            double u1 = 1.0 - random.NextDouble();
+            double u2 = 1.0 - random.NextDouble();
+            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2);
+            return randStdNormal;
+        }
+
+
+
+        public static double LinearInterpolation(double x, double x0, double x1, double y0, double y1)
         {
             if ((x1 - x0) == 0)
             {
