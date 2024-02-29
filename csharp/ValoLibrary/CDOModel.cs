@@ -87,7 +87,8 @@ namespace ValoLibrary
             return distrib;
         }
 
-        public static object GetDefaultDistribution(int numberOfIssuer, double[] defaultProbability, double[] betaVector, int? maxRequest = null, double[] inputThreshold = null, int? factorIndex = null, bool withGreeks = false)
+        public static double[,] GetDefaultDistribution(int numberOfIssuer, double[] defaultProbability, double[] betaVector,
+            int? maxRequest = null, double[] inputThreshold = null, int? factorIndex = null, bool withGreeks = false)
         {
             double[,] defaultDistribKnowingFactor;
             double[,] defaultDistrib;
@@ -100,6 +101,7 @@ namespace ValoLibrary
             int factorCounter;
             int nbOfGaussHermitePoints = 64;
             double[] gaussHermiteAbscissa = new double[]
+
             {
                 -10.5261231679605, -9.89528758682953, -9.37315954964672, -8.90724909996476, -8.47752908337986, -8.07368728501022, -7.68954016404049, -7.32101303278094,
                 -6.9652411205511, -6.62011226263602, -6.28401122877482, -5.95566632679948, -5.63405216434997, -5.31832522463327, -5.00777960219876, -4.70181564740749,
@@ -280,7 +282,8 @@ namespace ValoLibrary
             return defaultDistrib;
         }
 
-        public static double[,] RecursionLossUnit(int numberOfIssuer, double[] defaultProbKnowingfFactor, double[] lossUnitIssuer, int[] cumulLossUnitIssuer, int? maxRequest = null, bool withGreeks = false)
+        public static double[,] RecursionLossUnit(int numberOfIssuer, double[] defaultProbKnowingfFactor, double[] lossUnitIssuer, 
+            int[] cumulLossUnitIssuer, int? maxRequest = null, bool withGreeks = false)
         {
             double[,] distrib;
             double p, omp;
@@ -411,7 +414,9 @@ namespace ValoLibrary
             return distrib;
         }
 
-        public static double[,] GetDefaultDistributionLossUnit(int numberOfIssuer, double[] defaultProbability, int[] lossUnitIssuer, int[] cumulLossUnitIssuer, double[] betaVector, int? maxRequest = null, double[] inputThreshold = null, int? factorIndex = null, bool withGreeks = false, double dBeta = 0.1)
+        public static double[,] GetDefaultDistributionLossUnit(int numberOfIssuer, double[] defaultProbability, int[] lossUnitIssuer, 
+            int[] cumulLossUnitIssuer, double[] betaVector, int? maxRequest = null, 
+            double[] inputThreshold = null, int? factorIndex = null, bool withGreeks = false, double dBeta =0.1)
         {
             double[,] defaultDistribKnowingFactor;
             double[] defaultDistrib;
@@ -426,7 +431,7 @@ namespace ValoLibrary
             int forcedMaxRequest;
             int factorCounter;
             int nbOfGaussHermitePoints = 64;
-            int gaussHermiteAbscissaLength = 64;
+            //int gaussHermiteAbscissaLength = 64;
             double gaussHermiteMidTable = nbOfGaussHermitePoints / 2 + 1;
             double[] gaussHermiteAbscissa = new double[]
             {
@@ -624,19 +629,23 @@ namespace ValoLibrary
 
             return defaultDistribArray;
         }
-
-        public static object[,] EuropeanCDOLossUnitFunction(int numberOfIssuer, double lossUnitAmount, double[] strikes, double[] defaultProbability,
+        public static object[,] EuropeanCDOLossUnit(int numberOfIssuer, double lossUnitAmount, double[] strikes, double[] defaultProbability,
         double correl, double[] betaAdder, double zC, double[] nominalIssuer, double[] recoveryIssuer, bool withGreeks = false, double dBeta = 0.1)
         {
-            int resRowCount, resColCount;
-            dynamic[,] res;
-            GetResultDimensions(numberOfIssuer, strikes.Length, withGreeks, out resRowCount, out resColCount);
+            int r, c;
+            object[,] res;
 
-            res = new dynamic[resRowCount, resColCount];
-
-            for (int i = 0; i < resRowCount; i++)
+            if (withGreeks)
             {
-                for (int j = 0; j < resColCount; j++)
+                r = 1 + 2 * numberOfIssuer;
+            }
+            else { r = 1; }
+            c = strikes.Length + 1;
+            res = new object[r, c];
+
+            for (int i = 0; i < r; i++)
+            {
+                for (int j = 0; j < c; j++)
                 {
                     res[i, j] = 0.0;
                 }
@@ -648,77 +657,97 @@ namespace ValoLibrary
             {
                 for (int j = 1; j <= strikes.Length; j++)
                 {
-                    res[0, j] = 0.0;
+                    res[1, j] = 0.0;
                 }
 
-                for (int i = 1; i <= numberOfIssuer * 2; i++)
+                for (int i = 1; i < numberOfIssuer * 2; i++)
                 {
                     if (i <= numberOfIssuer)
                     {
-                        res[i, 0] = "dpv prob " + i;
+                        res[i+1, 0] = "dpv prob " + i;
                     }
                     else
                     {
-                        res[i, 0] = "dpv beta " + (i - numberOfIssuer);
+                        res[i+1, 0] = "dpv beta " + (i - numberOfIssuer);
                     }
 
                     for (int j = 1; j <= strikes.Length; j++)
                     {
-                        res[i, j] = 0.0;
+                        res[i+1 , j] = 0.0;
+
                     }
                 }
             }
+
             else
             {
                 for (int j = 1; j <= strikes.Length; j++)
                 {
-                    res[0, j] = 0.0;
+                    res[0, j] = 0;
                 }
             }
 
-            int[] lossUnitIssuer = new int[numberOfIssuer + 1];
-            int[] cumulLossUnitIssuer = new int[numberOfIssuer + 1];
+            int[] lossUnitIssuer = new int[numberOfIssuer];
+            int[] cumulLossUnitIssuer = new int[numberOfIssuer];
 
             lossUnitIssuer[0] = 0;
             cumulLossUnitIssuer[0] = 0;
 
-            for (int issuerCounter = 1; issuerCounter <= numberOfIssuer; issuerCounter++)
+            for (int issuerCounter = 1; issuerCounter < numberOfIssuer; issuerCounter++)
             {
                 lossUnitIssuer[issuerCounter] = (int)Math.Round((nominalIssuer[issuerCounter] * (1 - recoveryIssuer[issuerCounter])) / lossUnitAmount);
+                
             }
+            Console.WriteLine("iici 12");
 
             cumulLossUnitIssuer[1] = lossUnitIssuer[1];
-            for (int issuerCounter = 2; issuerCounter <= numberOfIssuer; issuerCounter++)
-            {
-                cumulLossUnitIssuer[issuerCounter] = lossUnitIssuer[issuerCounter] + cumulLossUnitIssuer[issuerCounter - 1];
+
+            for (int issuerCounter = 2; issuerCounter < numberOfIssuer; issuerCounter++)
+            {               
+                cumulLossUnitIssuer[issuerCounter] = lossUnitIssuer[issuerCounter] + cumulLossUnitIssuer[issuerCounter];
             }
 
-            int sumLossUnit = cumulLossUnitIssuer[numberOfIssuer];
 
-            int maxNumLossUnitToReachStrikes = (int)(strikes.Max() / lossUnitAmount) + 1;
+            int sumLossUnit = cumulLossUnitIssuer[numberOfIssuer-1];
 
-            if (maxNumLossUnitToReachStrikes > sumLossUnit - 1)
-            {
+            int maxNumLossUnitToReachStrikes = (int)(strikes.Max() / lossUnitAmount)+1;
+
+            if (maxNumLossUnitToReachStrikes > sumLossUnit -1)
+            {            
                 maxNumLossUnitToReachStrikes = sumLossUnit - 1;
             }
 
-            double[] betaVector = new double[numberOfIssuer + 1];
+            double[] betaVector = new double[numberOfIssuer];
             double sqrtCorrel = Math.Sqrt(correl);
 
-            for (int i = 1; i <= numberOfIssuer; i++)
+            for (int i = 0; i < numberOfIssuer; i++)
             {
                 betaVector[i] = sqrtCorrel + betaAdder[i];
             }
 
-            var defaultDistribution = GetDefaultDistributionLossUnit(numberOfIssuer, defaultProbability, lossUnitIssuer, 
-                cumulLossUnitIssuer,
-                betaVector, maxNumLossUnitToReachStrikes, null, null, withGreeks, dBeta);
+            Console.WriteLine("hvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
 
+            Console.WriteLine("lossUnitIssuer0=" + lossUnitIssuer[0]);
+            Console.WriteLine("lossUnitIssuer1=" + lossUnitIssuer[1]);
+            Console.WriteLine("lossUnitIssuer2=" + lossUnitIssuer[2]);
+            Console.WriteLine("lossUnitIssuer.lengh" + lossUnitIssuer.Length);
+            Console.WriteLine("cumulLossUnitIssue0r=" + cumulLossUnitIssuer[0]);
+            Console.WriteLine("cumulLossUnitIssuer1=" + cumulLossUnitIssuer[1]);
+            Console.WriteLine("cumulLossUnitIssuer2=" + cumulLossUnitIssuer[2]);
+            Console.WriteLine("cumulLossUnitIssuerlenng=" + cumulLossUnitIssuer.Length);
+            Console.WriteLine("betaVector0=" + betaVector[0]);
+            Console.WriteLine("betaVector1=" + betaVector[1]);
+            Console.WriteLine("betaVector2=" + betaVector[2]);
+            Console.WriteLine("betaVectorlengh=" + betaVector.Length);
+
+            double[,] defaultDistribution = GetDefaultDistributionLossUnit(numberOfIssuer, defaultProbability, lossUnitIssuer, 
+                cumulLossUnitIssuer, betaVector, maxNumLossUnitToReachStrikes, null, null, withGreeks, dBeta);
 
             for (int strikeCounter = 1; strikeCounter <= strikes.Length; strikeCounter++)
-            {
+            {                              
                 double strike = strikes[strikeCounter - 1] / lossUnitAmount;
                 maxNumLossUnitToReachStrikes = (int)strike;
+
                 if (maxNumLossUnitToReachStrikes > sumLossUnit - 1)
                 {
                     maxNumLossUnitToReachStrikes = sumLossUnit - 1;
@@ -726,69 +755,56 @@ namespace ValoLibrary
 
                 double calcPV = 0.0;
                 double residualProb = 1.0 - defaultDistribution[0, 0];
-
+               
                 for (int lossUnitCounter = 1; lossUnitCounter <= maxNumLossUnitToReachStrikes; lossUnitCounter++)
                 {
                     calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, 0];
                     residualProb -= defaultDistribution[lossUnitCounter, 0];
                 }
 
-                calcPV += Math.Min(strike, sumLossUnit) * residualProb;
+                calcPV += UtilityLittleFunctions.MinOf(strike, sumLossUnit) * residualProb;
 
                 res[0, strikeCounter] = calcPV * zC * lossUnitAmount;
 
                 if (withGreeks)
                 {
-                    for (int i = 1; i <= numberOfIssuer; i++)
+                    for (int i = 0; i < numberOfIssuer; i++)
                     {
-                        double calcPVProb = 0.0;
+                        calcPV = 0.0;
                         residualProb = 0.0 - defaultDistribution[0, i];
 
-                        for (int lossUnitCounter = 1; lossUnitCounter <= maxNumLossUnitToReachStrikes; lossUnitCounter++)
+                        for (int lossUnitCounter = 0; lossUnitCounter < maxNumLossUnitToReachStrikes; lossUnitCounter++)
                         {
-                            calcPVProb += lossUnitCounter * defaultDistribution[lossUnitCounter, i];
+                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i];
                             residualProb -= defaultDistribution[lossUnitCounter, i];
                         }
 
-                        calcPVProb += Math.Min(strike, sumLossUnit) * residualProb;
+                        calcPV += UtilityLittleFunctions.MinOf(strike, sumLossUnit) * residualProb;
 
                         if (defaultProbability[i] == 0.0)
                         {
-                            res[1 + i, strikeCounter] = calcPVProb * zC * lossUnitAmount / (0.0001);
+                            res[1 + i, strikeCounter] = calcPV * zC * lossUnitAmount / (0.0001);
                         }
                         else
                         {
-                            res[1 + i, strikeCounter] = calcPVProb * zC * lossUnitAmount / (defaultProbability[i] * 0.05);
+                            res[1 + i, strikeCounter] = calcPV * zC * lossUnitAmount / (defaultProbability[i] * 0.05);
                         }
 
-                        double calcPVBeta = 0.0;
+                        calcPV = 0.0;
                         residualProb = 0.0 - defaultDistribution[0, i + numberOfIssuer];
-
                         for (int lossUnitCounter = 1; lossUnitCounter <= maxNumLossUnitToReachStrikes; lossUnitCounter++)
                         {
-                            calcPVBeta += lossUnitCounter * defaultDistribution[lossUnitCounter, i + numberOfIssuer];
+                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i + numberOfIssuer];
                             residualProb -= defaultDistribution[lossUnitCounter, i + numberOfIssuer];
                         }
 
-                        calcPVBeta += Math.Min(strike, sumLossUnit) * residualProb;
-                        res[1 + i + numberOfIssuer, strikeCounter] = calcPVBeta * zC * lossUnitAmount;
+                        calcPV += UtilityLittleFunctions.MinOf(strike, sumLossUnit) * residualProb;
+                        res[1 + i + numberOfIssuer, strikeCounter] = calcPV * zC * lossUnitAmount;
                     }
                 }
             }
 
             return res;
         }
-
-        public static void GetResultDimensions(int numberOfIssuer, int strikesCount, bool withGreeks, out int rowCount, out int colCount)
-        {
-            rowCount = 1;
-            colCount = strikesCount + 1;
-
-            if (withGreeks)
-            {
-                rowCount += numberOfIssuer * 2;
-            }
-        }
-
     }
 }

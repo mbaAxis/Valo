@@ -10,98 +10,110 @@ namespace ValoLibrary
 {
     public class UtilityDates
     {
-        public static double MonthPeriod(dynamic period, DateTime referenceDate = default)
+        public static double MonthPeriod2(string period, DateTime referenceDate = default)
         {
-            string datePostFix;
+            double result;
 
-            if (IsNumeric(period))
+            if (double.TryParse(period, out result))
             {
-                return Math.Round((double)(period - referenceDate) / 365.25 * 12, 0);
+                return Math.Round((result - referenceDate.ToOADate()) / 365.25 * 12, 0);
             }
 
-            if (IsDate(period))
+            if (DateTime.TryParse(period, out DateTime dateResult))
             {
-                return Math.Round((double)(period - referenceDate) / 365.25 * 12, 0);
+                return Math.Round((dateResult.ToOADate() - referenceDate.ToOADate()) / 365.25 * 12, 0);
             }
 
-            datePostFix = period.Substring(period.Length - 1, 1);
+            char datePostFix = period[period.Length - 1];
 
-            switch (datePostFix.ToUpper())
+            switch (char.ToUpper(datePostFix))
             {
-                case "Y":
-                    return 12 * double.Parse(period.Substring(0, period.Length - 1));
-                case "M":
-                    return double.Parse(period.Substring(0, period.Length - 1));
+                case 'Y':
+                    result = 12 * double.Parse(period.Substring(0, period.Length - 1));
+                    break;
+                case 'M':
+                    result = double.Parse(period.Substring(0, period.Length - 1));
+                    break;
                 default:
-                    Console.WriteLine($"Don't understand period - Called from "+ datePostFix);
-                    return double.NaN;
+                    Console.WriteLine($"Don't understand period");
+                    result = double.NaN;
+                    break;
             }
+
+            return result;
+        }
+        public static double MonthPeriod3(DateTime period, DateTime referenceDate = default)
+        {
+            double result;
+
+            result = Math.Round((period.ToOADate() - referenceDate.ToOADate()) / 365.25 * 12, 0);
+
+            return result;
         }
 
-        public static DateTime ConvertDate(dynamic paramDate, dynamic maturityDate)
+
+        public static DateTime ConvertDate2(DateTime paramDate, string maturityDate)
         {
-            string datePostFix;
-            int y, m, d;
+            int y = paramDate.Year;
+            int m = paramDate.Month;
+            int d = paramDate.Day;
 
-            y = paramDate.Year;
-            m = paramDate.Month;
-            d = paramDate.Day;
-
-            datePostFix = maturityDate.Substring(maturityDate.Length - 1, 1);
+            string datePostFix = maturityDate.Substring(maturityDate.Length - 1);
 
             switch (datePostFix.ToUpper())
             {
                 case "Y":
-                    return new DateTime(y, m + 12 * int.Parse(maturityDate.Substring(0, maturityDate.Length - 1)), d);
+                    int years = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
+                    return new DateTime(y, m, d).AddYears(years);
                 case "M":
-                    return new DateTime(y, m + int.Parse(maturityDate.Substring(0, maturityDate.Length - 1)), d);
+                    int months = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
+                    return new DateTime(y, m, d).AddMonths(months);
                 default:
-                    if (!IsNumeric(maturityDate - paramDate))
+                    if (!double.TryParse(maturityDate, out _))
                     {
-                        Console.WriteLine($"Don't understand Maturity Date ({maturityDate}): should be under the format xY or yM or a regular Excel Date - Called from " + datePostFix);
+                        Console.WriteLine($"Je ne comprends pas la date de maturité ({maturityDate}) : elle devrait être au format xY ou yM ou une date Excel régulière.");
                         return DateTime.MinValue;
                     }
-                    return maturityDate;
+                    return DateTime.Parse(maturityDate);
             }
         }
 
         public static double DurationYear(DateTime endDate, DateTime startDate)
         {
-            int numberOfYear = 0;
+            double numberOfYear = 0;
             DateTime date2;
 
             do
             {
                 numberOfYear++;
-                date2 = DateAndTime.DateSerial(startDate.Year + numberOfYear, startDate.Month, startDate.Day);
+                date2 = DateAndTime.DateSerial((int)(startDate.Year + numberOfYear) , startDate.Month, startDate.Day);
             } while (date2 < endDate);
 
-            numberOfYear += - (date2 - endDate).Days / 365;
+            numberOfYear += - (date2 - endDate).Days / 365.25;
 
             return numberOfYear;
         }
 
-        public static DateTime[] GetSwapSchedule(dynamic paramDate, dynamic maturity, dynamic cpnLastSettle, dynamic cpnPeriod, dynamic cpnConvention)
+
+        public static DateTime[] GetSwapSchedule(DateTime paramDate, string maturity, DateTime cpnLastSettle, string cpnPeriod, string cpnConvention)
         {
-            DateTime[] maturityDates = SwapSchedule(paramDate, maturity, cpnLastSettle, cpnPeriod, cpnConvention);
-            return maturityDates;
+  
+            return SwapSchedule(paramDate, maturity, cpnLastSettle, cpnPeriod, cpnConvention);
         }
 
-        public static DateTime[] SwapSchedule(dynamic paramDate, dynamic maturity, dynamic cpnLastSettle, dynamic cpnPeriod, dynamic cpnConvention)
+        public static DateTime[] SwapSchedule(DateTime paramDate, string maturity, DateTime cpnLastSettle, string cpnPeriod, string cpnConvention)
         {
-            int freq, numberOfDates, i, j;
-            DateTime currentDate, nextDate;
-            bool isFirst, isShort;
-            DateTime[] schedule;
+            
+            double freq, numberOfDates;
+            bool isFirst, isShort, continueIf;
+            DateTime lastSettle, nextDate, currentDate, maturityDate;
 
-            freq = (int)MonthPeriod(cpnPeriod);
-            isFirst = cpnConvention.EndsWith("First", StringComparison.OrdinalIgnoreCase);
-            isShort = cpnConvention.StartsWith("Short", StringComparison.OrdinalIgnoreCase);
+            freq = MonthPeriod(cpnPeriod);
+            isFirst = (cpnConvention.EndsWith("First"));
+            isShort = (cpnConvention.StartsWith("Short"));
+            maturityDate = ConvertDate(paramDate, maturity);
 
-            DateTime maturityDate = ConvertDate(paramDate, maturity);
-
-            DateTime lastSettle;
-            if (cpnLastSettle == null || cpnLastSettle == DBNull.Value || string.IsNullOrWhiteSpace(cpnLastSettle.ToString()))
+            if (cpnLastSettle == null || cpnLastSettle == DateTime.MinValue)
             {
                 lastSettle = paramDate;
             }
@@ -112,7 +124,7 @@ namespace ValoLibrary
 
             if (isFirst)
             {
-                freq = -freq; // backward
+                freq = -freq;
                 currentDate = maturityDate;
             }
             else
@@ -122,39 +134,24 @@ namespace ValoLibrary
 
             numberOfDates = 0;
 
-            bool continueIf;
-
             do
             {
                 numberOfDates++;
-                currentDate = new DateTime(currentDate.Year, currentDate.Month + freq, currentDate.Day);
-                nextDate = new DateTime(currentDate.Year, currentDate.Month + freq, currentDate.Day);
+                currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+                nextDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
 
                 if (isFirst)
                 {
-                    if (isShort)
-                    {
-                        continueIf = (currentDate > lastSettle);
-                    }
-                    else
-                    {
-                        continueIf = (nextDate >= lastSettle);
-                    }
+                    continueIf = isShort ? (currentDate > lastSettle) : (nextDate >= lastSettle);
                 }
                 else
                 {
-                    if (isShort)
-                    {
-                        continueIf = (currentDate < maturityDate);
-                    }
-                    else
-                    {
-                        continueIf = (nextDate <= maturityDate);
-                    }
+                    continueIf = isShort ? (currentDate < maturityDate) : (nextDate <= maturityDate);
                 }
             } while (continueIf);
 
-            schedule = new DateTime[numberOfDates + 1];
+            DateTime[] schedule = new DateTime[(int)numberOfDates + 1];
+
             if (isFirst)
             {
                 currentDate = maturityDate;
@@ -164,17 +161,19 @@ namespace ValoLibrary
                 currentDate = lastSettle;
             }
 
-            for (i = 1; i <= numberOfDates; i++)
+            for (int i = 1; i <= numberOfDates; i++)
             {
                 if (isFirst)
                 {
-                    j = numberOfDates - i + 1;
+                    int j = (int)(numberOfDates - i + 1);
+                    schedule[j] = currentDate;
+                    if (isFirst) currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
                 }
                 else
                 {
-                    j = i;
-                    currentDate = new DateTime(currentDate.Year, currentDate.Month + freq, currentDate.Day);
-                    nextDate = new DateTime(currentDate.Year, currentDate.Month + freq, currentDate.Day);
+                    int j = i;
+                    currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+                    nextDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
 
                     if (isShort)
                     {
@@ -190,9 +189,9 @@ namespace ValoLibrary
                             currentDate = maturityDate;
                         }
                     }
+
+                    schedule[j] = currentDate;
                 }
-                schedule[j] = currentDate;
-                if (isFirst) currentDate = new DateTime(currentDate.Year, currentDate.Month + freq, currentDate.Day);
             }
 
             if (schedule[1] == paramDate)
@@ -202,27 +201,21 @@ namespace ValoLibrary
             }
             else
             {
-                int xxx;
+                int xxx = isShort ? Math.Abs((int)freq) : Math.Abs((int)freq) * 2;
+                DateTime comparisonDate = DateAndTime.DateSerial(schedule[1].Year, schedule[1].Month - xxx, schedule[1].Day);
 
-                if (isShort)
-                {
-                    xxx = Math.Abs(freq);
-                }
-                else
-                {
-                    xxx = Math.Abs(freq) * 2;
-                }
-
-                if (schedule[1].AddMonths(-xxx) > lastSettle)
+                if (comparisonDate > lastSettle)
                 {
                     Console.WriteLine($"Coupon Settlement Date should be parameter date as time to maturity is a multiple of {cpnPeriod}");
                     return null;
                 }
             }
-            schedule[0] = lastSettle;
 
+            schedule[0] = lastSettle;
             return schedule;
         }
+
+
 
         public static bool IsNumeric(object expression)
         {
@@ -233,5 +226,66 @@ namespace ValoLibrary
         {
             return DateTime.TryParse(expression.ToString(), out _);
         }
+
+
+
+        // Convert a period input as "2m" or "6M" or "5y" or "7Y" into an integer number of months
+        public static double MonthPeriod(string period, DateTime? referenceDate = null)
+        {
+            if (double.TryParse(period, out double numericValue))
+            {
+                return Math.Round((numericValue - (referenceDate ?? DateTime.Now).Ticks) / 365.25 * 12);
+            }
+
+            if (DateTime.TryParse(period, out DateTime dateValue))
+            {
+                return Math.Round((dateValue.Ticks - (referenceDate ?? DateTime.Now).Ticks) / 365.25 * 12);
+            }
+
+            char datePostFix = period[period.Length - 1];
+
+            switch (datePostFix)
+            {
+                case 'y':
+                case 'Y':
+                    return 12 * double.Parse(period.Substring(0, period.Length - 1));
+                case 'm':
+                case 'M':
+                    return double.Parse(period.Substring(0, period.Length - 1));
+                default:
+                    Console.WriteLine($"Don't understand period - Called from {Environment.StackTrace}");
+                    return -1; // or throw an exception, or handle the error accordingly
+            }
+        }
+
+        // Convert a date under the format "3Y" or "6m" into a date as per Excel convention
+        public static DateTime ConvertDate(DateTime paramDate, string maturityDate)
+        {
+            int y = paramDate.Year;
+            int m = paramDate.Month;
+            int d = paramDate.Day;
+
+            char datePostFix = maturityDate[maturityDate.Length - 1];
+
+            switch (datePostFix)
+            {
+                case 'y':
+                case 'Y':
+                    return DateAndTime.DateSerial(y, m + (int.Parse(maturityDate.Substring(0, maturityDate.Length - 1)) * 12), d);
+                case 'm':
+                case 'M':
+                    return DateAndTime.DateSerial(y, m + int.Parse(maturityDate.Substring(0, maturityDate.Length - 1)), d);
+                default:
+                    if (!double.TryParse(maturityDate, out _))
+                    {
+                        Console.WriteLine($"Don't understand Maturity Date ({maturityDate}): should be under the format xY or yM or a regular Excel Date - Called from {Environment.StackTrace}");
+                        // Handle the error accordingly, you can also throw an exception
+                        return DateTime.MinValue;
+                    }
+                    return paramDate;
+            }
+        }
+
     }
 }
+
