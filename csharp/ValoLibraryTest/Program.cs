@@ -20,29 +20,28 @@
 //Console.WriteLine("===================End Test Utility Matrix====================");
 
 ///===============================================================================================================================
-//Console.WriteLine("===================Test Utility Dates====================");
+Console.WriteLine("===================Test Utility Dates====================");
 
-//DateTime paramDate2 = DateTime.Now;
+//DateTime paramDate2 = new(2024, 3, 3);
 //string period = "2y";
 //double monthPeriod = UtilityDates.MonthPeriod(period, paramDate2);
 //Console.WriteLine($"monthPeriod: {monthPeriod}");
 
-//string maturityDate = "2Y";
+//string maturityDate = "2m";
 //DateTime convertedDate = UtilityDates.ConvertDate(paramDate2, maturityDate);
 //Console.WriteLine($"convertedDate: {convertedDate}");
 
-//DateTime startDate = new (2020, 1, 1);
-//DateTime endDate = new (2024, 1, 1);
+//DateTime startDate = new (2024, 3, 1);
+//DateTime endDate = new(2026, 4, 1);
 //double duration = UtilityDates.DurationYear(endDate, startDate);
 //Console.WriteLine($"Durée en années : {duration}");
 
-//DateTime paramDate2 = new (2022, 1, 1);
 //string maturity = "1Y";
-//DateTime cpnLastSettle = new (2022, 3, 30);
+//DateTime cpnLastSettle = new(2024, 3, 30);
 //string cpnPeriod = "3M";
-//string cpnConvention = "LongFirst";
+//string cpnConvention = "long";
 
-//DateTime[] schedule = UtilityDates.SwapSchedule(paramDate2, maturity, cpnLastSettle, cpnPeriod, cpnConvention);
+//DateTime[] schedule = UtilityDates.SwapSchedule(paramDate3, maturity, cpnLastSettle, cpnPeriod, cpnConvention);
 //if (schedule != null)
 //{
 //    Console.WriteLine("Swap Schedule:");
@@ -55,38 +54,40 @@
 //{
 //    Console.WriteLine("Error in Swap Schedule calculation.");
 //}
+
 //Console.WriteLine("===================End Test Utility Dates====================");
 
 
 //Console.WriteLine("===================Test Stripping IRS====================");
 
-//DateTime paramDate = new(2024,2, 28);
-//string curveName = "JPY";
-//double[] curve = {0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875};  // Exemple de taux de courbe
-//string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y" , "5Y" , "6Y", "7Y" , "8Y", "9Y" , "10Y", "15Y" , "20Y"};  // Exemple de maturités de courbe
-//int swapPeriod = 6;
-//int swapBasis = 1;
-//double fxSpot = 165.5616;
+DateTime paramDate = new(2024, 2, 28);
+string curveName = "JPY";
+double[] curve = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };  // Exemple de taux de courbe
+string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
+int swapPeriod = 6;
+int swapBasis = 1;
+double fxSpot = 165.5616;
 
-//double[] result = StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
+double[] result = StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
 
-//// Affichage des résultats
-//Console.WriteLine($"Stripped ZC for curve {curveName}:");
+// Affichage des résultats
+Console.WriteLine($"Stripped ZC for curve {curveName}:");
 
-//if (result != null)
-//{
-//    // Affichage des résultats
-//    Console.WriteLine($"Stripped ZC for curve {curveName}:");
 
-//    for (int i = 0; i < result.Length; i++)
-//    {
-//        Console.WriteLine($"{result[i]}");
-//    }
-//}
-//else
-//{
-//    Console.WriteLine("Erreur lors du calcul de Stripped ZC.");
-//}
+if (result != null)
+{
+    // Affichage des résultats
+    Console.WriteLine($"Stripped ZC for curve {curveName}:");
+
+    for (int i = 0; i < result.Length; i++)
+    {
+        Console.WriteLine($"{result[i]}");
+    }
+}
+else
+{
+    Console.WriteLine("Erreur lors du calcul de Stripped ZC.");
+}
 
 //Console.WriteLine("===================End Stripping IRS====================");
 
@@ -94,35 +95,35 @@
 //Console.WriteLine("===================Test Stripping CDS====================");
 
 
-int cdsID = 1;
-string CDSName = "EUR";
-DateTime ParamDate = DateTime.Now;
-DateTime CDSRollDate = StrippingCDS.CDSRefDate(ParamDate);
-double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0, 0048 };
-string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
-string CDSCurrency = "EUR";
-double RecoveryRate = 0.4; // Par exemple, 40%
-bool alterMode = false;
-string intensity = "3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//int cdsID = 1;
+//string CDSName = "EUR";
+//DateTime ParamDate = DateTime.Now;
+//DateTime CDSRollDate = StrippingCDS.CDSRefDate(ParamDate);
+//double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0, 0048 };
+//string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+//string CDSCurrency = "EUR";
+//double RecoveryRate = 0.4; // Par exemple, 40%
+//bool alterMode = false;
+//string intensity = "3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
 
-// Appel de la fonction à tester
-double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, ParamDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+//// Appel de la fonction à tester
+//double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, ParamDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
 
-// Vérification du résultat
-if (result != null)
-{
-    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
-    for (int i = 0; i < result.Length; i++)
-    {
-        Console.WriteLine($"Result[{i}] = {result[i]}");
-    }
-}
-else
-{
-    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
-}
+//// Vérification du résultat
+//if (result != null)
+//{
+//    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
+//    for (int i = 0; i < result.Length; i++)
+//    {
+//        Console.WriteLine($"Result[{i}] = {result[i]}");
+//    }
+//}
+//else
+//{
+//    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
+//}
 
-Console.WriteLine("===================End Stripping CDS====================");
+//Console.WriteLine("===================End Stripping CDS====================");
 
 
 //Console.WriteLine("===================Test CDO MOdel====================");

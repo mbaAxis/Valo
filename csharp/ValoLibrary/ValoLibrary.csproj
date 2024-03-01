@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CDOModel.cs" />
+    <Compile Include="ModelInterface.cs" />
     <Compile Include="StrippingCDS.cs" />
     <Compile Include="StrippingIRS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

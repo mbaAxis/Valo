@@ -40,72 +40,65 @@ namespace ValoLibrary
         }
 
         public static IRCurveList InterestRateCurves = new IRCurveList();
-        public static int GetCurveId(string curveName)
-        {
-            int curveId = -1;
-
-            if (double.TryParse(curveName, out double numericCurveName))
-            {
-                numericCurveName = Math.Floor(numericCurveName);
-                Console.WriteLine("numericCurveName" + numericCurveName);
-                if (numericCurveName >= 1 || numericCurveName <= InterestRateCurves.NumberOfCurves)
-                {
-
-                    curveId = (int)numericCurveName;
-                    InterestRateCurves.LastError = false;
-                    return curveId;
-
-                }
-                else
-                {
-                    Console.WriteLine("hhjjh");
-                    return -1;
-                }
-            }
-            Console.WriteLine("InterestRateCurves.NumberOfCurves" + InterestRateCurves.NumberOfCurves);
-
-            for (int i = 0; i < InterestRateCurves.NumberOfCurves; i++)
-            {
-                Console.WriteLine("moi");
-
-                if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName, StringComparison.OrdinalIgnoreCase))
-                {
-                    curveId = i;  // Ajout de 1 car les indices commencent à 1 en VBA
-                    InterestRateCurves.LastError = false;
-                    return curveId;
-                }
-            }
-
-            return -1;
-        }
 
         //public static int GetCurveId(string curveName)
         //{
-        //    if (UtilityDates.IsNumeric(curveName))
+        //    int curveId = -1;
+
+        //    if (double.TryParse(curveName, out double numericCurveName))
         //    {
-        //        curveName = (int)curveName;
-        //        if (curveName >= 1 || curveName <= InterestRateCurves.NumberOfCurves)
+        //        numericCurveName = Math.Floor(numericCurveName);
+        //        if (numericCurveName >= 1 || numericCurveName <= InterestRateCurves.NumberOfCurves)
         //        {
+
+        //            curveId = (int)numericCurveName;
         //            InterestRateCurves.LastError = false;
-        //            return curveName;
+        //            return curveId;
+
         //        }
         //        else
         //        {
         //            return -1;
         //        }
         //    }
-
         //    for (int i = 0; i < InterestRateCurves.NumberOfCurves; i++)
         //    {
         //        if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName, StringComparison.OrdinalIgnoreCase))
         //        {
+        //            curveId = i;  // Ajout de 1 car les indices commencent à 1 en VBA
         //            InterestRateCurves.LastError = false;
-        //            return i;
+        //            return curveId;
         //        }
         //    }
 
         //    return -1;
         //}
+        public static int GetCurveId(object curveName)
+        {
+            if (int.TryParse(curveName.ToString(), out int curveId))
+            {
+                if (curveId >= 1 && curveId <= InterestRateCurves.NumberOfCurves)
+                {
+                    InterestRateCurves.LastError = false;
+                    return curveId;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+
+            for (int i = 0; i < InterestRateCurves.NumberOfCurves; i++)
+            {
+                if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    InterestRateCurves.LastError = false;
+                    return i;
+                }
+            }
+
+            return -1;
+        }
 
 
         public static double VbaGetRiskFreeZC(DateTime paramDate, string maturityDate,
@@ -278,24 +271,83 @@ namespace ValoLibrary
                 case 1:
                     // Act/365 : 30E/365
                     return daysDifference / 365.25;
-                case 2:
-                    // Act/Act : calculer la fraction d'année en utilisant la méthode Act/Act
-                    return CalculateActActYearFraction(startDate, endDate);
-                // Ajoutez d'autres cas selon vos besoins
                 default:
                     throw new ArgumentException("SwapBasis non pris en charge.");
             }
         }
-
-        private static double CalculateActActYearFraction(DateTime startDate, DateTime endDate)
+        public static bool VbaComputeMonthlyRiskyZC(string curveName, DateTime paramDate, DateTime cdsRollDate)
         {
-            int daysInYear = DateTime.IsLeapYear(startDate.Year) ? 366 : 365;
+            int months;
+            int curveId = GetCurveId(curveName);
 
-            return (endDate - startDate).TotalDays / daysInYear;
+            if (curveId == -1)
+            {
+                if (InterestRateCurves.LastError == false)
+                {
+                    Console.WriteLine($"Curve {curveName} was not stripped.");
+                    InterestRateCurves.LastError = true;
+                }
+
+                return false;
+            }
+
+            DateTime testDate;
+            int zcCdsDateOffset = 0;
+
+            if (cdsRollDate > paramDate)
+            {
+                do
+                {
+                    zcCdsDateOffset -= 3;
+                    testDate = UtilityDates.ConvertDate(cdsRollDate, zcCdsDateOffset + "m");
+                } while (testDate <= paramDate);
+            }
+
+            months = InterestRateCurves.Curves[curveId - 1].MonthlyZC.Length - 1;
+            Array.Resize(ref InterestRateCurves.Curves[curveId - 1].MonthlyRollZC, months);
+
+            int cdsRollDateYear = cdsRollDate.Year;
+            int cdsRollDateMonth = cdsRollDate.Month;
+            int cdsRollDateDay = cdsRollDate.Day;
+
+            for (int i = zcCdsDateOffset; i < months; i++)
+            {
+                DateTime zcDate = DateAndTime.DateSerial(cdsRollDateYear, cdsRollDateMonth + i, cdsRollDateDay);
+
+                if (zcDate <= paramDate)
+                {
+                    zcDate = paramDate;
+                    InterestRateCurves.Curves[curveId - 1].MonthlyRollZC[i] = 1;
+                }
+                else
+                {
+                    InterestRateCurves.Curves[curveId - 1].MonthlyRollZC[i] =
+                        VbaGetRiskFreeZC(paramDate, zcDate + "",
+                            InterestRateCurves.Curves[curveId - 1].StrippedZC,
+                            InterestRateCurves.Curves[curveId - 1].CurveDates);
+                }
+            }
+
+            InterestRateCurves.Curves[curveId - 1].IsMonthlyRollZCCalculated = true;
+            return true;
         }
+        public static double GetFXSpot(string curveName)
+        {
+            int curveId = GetCurveId(curveName);
 
+            if (curveId == -1)
+            {
+                if (!InterestRateCurves.LastError)
+                {
+                    Console.WriteLine($"Curve {curveName} was not stripped.");
+                    InterestRateCurves.LastError = true;
+                }
 
+                return 1;
+            }
 
+            return InterestRateCurves.Curves[curveId - 1].FXRate;
+        }
         public static double[] StripZC(DateTime paramDate, string curveName, double[] curve,
             string[] curveMaturity, int swapPeriod, int swapBasis, double fxSpot)
         {
@@ -423,91 +475,8 @@ namespace ValoLibrary
 
         }
 
-        public static string GetCurveName(int curveId)
-        {
-            if (curveId >= 1 || curveId <= InterestRateCurves.NumberOfCurves)
-            {
-                InterestRateCurves.LastError = false;
-                return InterestRateCurves.Curves[curveId - 1].CurveName;
-            }
-            else
-            {
-                return "Curve ID missing";
-            }
-        }
-        public static bool VbaComputeMonthlyRiskyZC(string curveName, DateTime paramDate, DateTime cdsRollDate)
-        {
-            int months;
-            int curveId = GetCurveId(curveName);
-
-            if (curveId == -1)
-            {
-                if (InterestRateCurves.LastError == false)
-                {
-                    Console.WriteLine($"Curve {curveName} was not stripped.");
-                    InterestRateCurves.LastError = true;
-                }
-
-                return false;
-            }
-
-            DateTime testDate;
-            int zcCdsDateOffset = 0;
-
-            if (cdsRollDate > paramDate)
-            {
-                do
-                {
-                    zcCdsDateOffset -= 3;
-                    testDate = UtilityDates.ConvertDate(cdsRollDate, zcCdsDateOffset + "m");
-                } while (testDate <= paramDate);
-            }
-
-            months = InterestRateCurves.Curves[curveId - 1].MonthlyZC.Length - 1;
-            Array.Resize(ref InterestRateCurves.Curves[curveId - 1].MonthlyRollZC, months);
-
-            int cdsRollDateYear = cdsRollDate.Year;
-            int cdsRollDateMonth = cdsRollDate.Month;
-            int cdsRollDateDay = cdsRollDate.Day;
-
-            for (int i = zcCdsDateOffset; i < months; i++)
-            {
-                DateTime zcDate = DateAndTime.DateSerial(cdsRollDateYear, cdsRollDateMonth + i, cdsRollDateDay);
-
-                if (zcDate <= paramDate)
-                {
-                    zcDate = paramDate;
-                    InterestRateCurves.Curves[curveId - 1].MonthlyRollZC[i] = 1;
-                }
-                else
-                {
-                    InterestRateCurves.Curves[curveId - 1].MonthlyRollZC[i] =
-                        VbaGetRiskFreeZC(paramDate, zcDate + "",
-                            InterestRateCurves.Curves[curveId - 1].StrippedZC,
-                            InterestRateCurves.Curves[curveId - 1].CurveDates);
-                }
-            }
-
-            InterestRateCurves.Curves[curveId - 1].IsMonthlyRollZCCalculated = true;
-            return true;
-        }
-        public static double GetFXSpot(string curveName)
-        {
-            int curveId = GetCurveId(curveName);
-
-            if (curveId == -1)
-            {
-                if (!InterestRateCurves.LastError)
-                {
-                    Console.WriteLine($"Curve {curveName} was not stripped.");
-                    InterestRateCurves.LastError = true;
-                }
-
-                return 1;
-            }
-
-            return InterestRateCurves.Curves[curveId - 1].FXRate;
-        }
+       
+       
         public static double GetZC(string maturityDate, string curveName)
         {
             int curveID = GetCurveId(curveName);
@@ -527,6 +496,18 @@ namespace ValoLibrary
             DateTime paramDate = InterestRateCurves.Curves[curveID - 1].ParamDate;
 
             return VbaGetRiskFreeZC(paramDate, maturityDate, zc, zcDates);
+        }
+        public static string GetCurveName(int curveId)
+        {
+            if (curveId >= 1 || curveId <= InterestRateCurves.NumberOfCurves)
+            {
+                InterestRateCurves.LastError = false;
+                return InterestRateCurves.Curves[curveId - 1].CurveName;
+            }
+            else
+            {
+                return "Curve ID missing";
+            }
         }
 
 

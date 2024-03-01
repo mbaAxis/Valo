@@ -8,9 +8,13 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ValoLibrary
 {
+    //' This module contains utility functions that process dates
+    //' Used by many others functions in other modules
+    //' No documentation needed.
     public class UtilityDates
     {
-        public static double MonthPeriod2(string period, DateTime referenceDate = default)
+        //Convert a period input as "2m" or "6M" or "5y" or "7Y" into a integer numberof months
+        public static double MonthPeriod(string period, DateTime referenceDate = default)
         {
             double result;
 
@@ -42,32 +46,24 @@ namespace ValoLibrary
 
             return result;
         }
-        public static double MonthPeriod3(DateTime period, DateTime referenceDate = default)
-        {
-            double result;
 
-            result = Math.Round((period.ToOADate() - referenceDate.ToOADate()) / 365.25 * 12, 0);
-
-            return result;
-        }
-
-
-        public static DateTime ConvertDate2(DateTime paramDate, string maturityDate)
+        //Convert a date under the format "3Y" or "6m" into a date as per Excel convetion
+        public static DateTime ConvertDate(DateTime paramDate, string maturityDate)
         {
             int y = paramDate.Year;
             int m = paramDate.Month;
             int d = paramDate.Day;
 
-            string datePostFix = maturityDate.Substring(maturityDate.Length - 1);
+            string datePostFix = maturityDate.Substring(maturityDate.Length  -1);
 
             switch (datePostFix.ToUpper())
             {
                 case "Y":
                     int years = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
-                    return new DateTime(y, m, d).AddYears(years);
+                    return DateAndTime.DateSerial(y, m, d).AddYears(years);
                 case "M":
                     int months = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
-                    return new DateTime(y, m, d).AddMonths(months);
+                    return DateAndTime.DateSerial(y, m, d).AddMonths(months);
                 default:
                     if (!double.TryParse(maturityDate, out _))
                     {
@@ -78,6 +74,8 @@ namespace ValoLibrary
             }
         }
 
+
+        //MODIF QUANTO
         public static double DurationYear(DateTime endDate, DateTime startDate)
         {
             double numberOfYear = 0;
@@ -87,14 +85,16 @@ namespace ValoLibrary
             {
                 numberOfYear++;
                 date2 = DateAndTime.DateSerial((int)(startDate.Year + numberOfYear) , startDate.Month, startDate.Day);
-            } while (date2 < endDate);
+            } while (date2 >= endDate);
 
-            numberOfYear += - (date2 - endDate).Days / 365.25;
+            numberOfYear -= (date2 - endDate).Days / 365.0;
 
             return numberOfYear;
         }
 
 
+        //' Returns a list of coupon dates according to the maturity date of a swap
+        //' and the First/Last Short/Long coupon convention
         public static DateTime[] GetSwapSchedule(DateTime paramDate, string maturity, DateTime cpnLastSettle, string cpnPeriod, string cpnConvention)
         {
   
@@ -220,70 +220,6 @@ namespace ValoLibrary
         public static bool IsNumeric(object expression)
         {
             return double.TryParse(expression.ToString(), out _);
-        }
-
-        public static bool IsDate(object expression)
-        {
-            return DateTime.TryParse(expression.ToString(), out _);
-        }
-
-
-
-        // Convert a period input as "2m" or "6M" or "5y" or "7Y" into an integer number of months
-        public static double MonthPeriod(string period, DateTime? referenceDate = null)
-        {
-            if (double.TryParse(period, out double numericValue))
-            {
-                return Math.Round((numericValue - (referenceDate ?? DateTime.Now).Ticks) / 365.25 * 12);
-            }
-
-            if (DateTime.TryParse(period, out DateTime dateValue))
-            {
-                return Math.Round((dateValue.Ticks - (referenceDate ?? DateTime.Now).Ticks) / 365.25 * 12);
-            }
-
-            char datePostFix = period[period.Length - 1];
-
-            switch (datePostFix)
-            {
-                case 'y':
-                case 'Y':
-                    return 12 * double.Parse(period.Substring(0, period.Length - 1));
-                case 'm':
-                case 'M':
-                    return double.Parse(period.Substring(0, period.Length - 1));
-                default:
-                    Console.WriteLine($"Don't understand period - Called from {Environment.StackTrace}");
-                    return -1; // or throw an exception, or handle the error accordingly
-            }
-        }
-
-        // Convert a date under the format "3Y" or "6m" into a date as per Excel convention
-        public static DateTime ConvertDate(DateTime paramDate, string maturityDate)
-        {
-            int y = paramDate.Year;
-            int m = paramDate.Month;
-            int d = paramDate.Day;
-
-            char datePostFix = maturityDate[maturityDate.Length - 1];
-
-            switch (datePostFix)
-            {
-                case 'y':
-                case 'Y':
-                    return DateAndTime.DateSerial(y, m + (int.Parse(maturityDate.Substring(0, maturityDate.Length - 1)) * 12), d);
-                case 'm':
-                case 'M':
-                    return DateAndTime.DateSerial(y, m + int.Parse(maturityDate.Substring(0, maturityDate.Length - 1)), d);
-                default:
-                    if (!double.TryParse(maturityDate, out _))
-                    {
-                        Console.WriteLine($"Don't understand Maturity Date ({maturityDate}): should be under the format xY or yM or a regular Excel Date - Called from {Environment.StackTrace}");
-                        // Handle the error accordingly, you can also throw an exception
-                        return DateTime.MinValue;
-                    }
-                    return paramDate;
-            }
         }
 
     }
