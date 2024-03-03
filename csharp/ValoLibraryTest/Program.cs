@@ -20,14 +20,15 @@
 //Console.WriteLine("===================End Test Utility Matrix====================");
 
 ///===============================================================================================================================
-Console.WriteLine("===================Test Utility Dates====================");
+//Console.WriteLine("===================Test Utility Dates====================");
 
 //DateTime paramDate2 = new(2024, 3, 3);
 //string period = "2y";
 //double monthPeriod = UtilityDates.MonthPeriod(period, paramDate2);
 //Console.WriteLine($"monthPeriod: {monthPeriod}");
 
-//string maturityDate = "2m";
+////DateTime maturityDate = new(2025, 3, 3);
+//string maturityDate = "2y";//"2Y";
 //DateTime convertedDate = UtilityDates.ConvertDate(paramDate2, maturityDate);
 //Console.WriteLine($"convertedDate: {convertedDate}");
 
@@ -36,10 +37,11 @@ Console.WriteLine("===================Test Utility Dates====================");
 //double duration = UtilityDates.DurationYear(endDate, startDate);
 //Console.WriteLine($"Durée en années : {duration}");
 
-//string maturity = "1Y";
-//DateTime cpnLastSettle = new(2024, 3, 30);
+//DateTime paramDate3 = new(2024, 3, 3);
+//DateTime maturity = new(2025, 3, 3);
+//DateTime cpnLastSettle = new(2024, 3, 3);
 //string cpnPeriod = "3M";
-//string cpnConvention = "long";
+//string cpnConvention = "ShortFirst";
 
 //DateTime[] schedule = UtilityDates.SwapSchedule(paramDate3, maturity, cpnLastSettle, cpnPeriod, cpnConvention);
 //if (schedule != null)
@@ -60,18 +62,54 @@ Console.WriteLine("===================Test Utility Dates====================");
 
 //Console.WriteLine("===================Test Stripping IRS====================");
 
-DateTime paramDate = new(2024, 2, 28);
-string curveName = "JPY";
-double[] curve = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };  // Exemple de taux de courbe
+
+//object curveName = 9;
+//int getcurve = StrippingIRS.GetCurveId(curveName);
+//Console.WriteLine("getcurvename = " + getcurve);
+
+//================================================================
+
+
+DateTime paramDate1 = new(2024, 3, 1);
+
+//double[]ZC = { 1.0, 1, 1 }; // Exemple de taux de zéro coupon
+
+//string maturityDate = "5Y";
+//string[] ZCDate = { "1Y", "2Y", "4Y" }; // Exemple de dates associées
+////DateTime maturityDate = new(2029, 3, 1);
+////DateTime[] ZCDate = { new(2025, 3, 1), new(2026, 3, 1), new(2028, 3, 1) }; // Exemple de dates associées
+//double result1 = StrippingIRS.VbaGetRiskFreeZC(paramDate1, maturityDate, ZC, ZCDate);
+//Console.WriteLine($"Le taux de zéro coupon à la date de maturité est : {result1}");
+
+//string curveName = "EUR";
+
+//int swapBasis = 2;
+//int swapPeriod = 6;
+//string[] curveDates = { "3M", "6M", "9M" };
+//double[] swapRates = { 0.05, 0.06, 0.07 };
+//double[] strippedZC = { 0.2, 0.3, 0.4 };
+//double fxSpot = 0.4;
+//bool result2 = StrippingIRS.VbaStoreZC(paramDate1, curveName, swapBasis, swapPeriod, curveDates, swapRates, strippedZC, fxSpot);
+//Console.WriteLine("isVBASTRORE ?: " + result2);
+
+//double result4 = StrippingIRS.GetFXSpot (curveName);
+//Console.WriteLine("getfxspot =: " + result4);
+
+
+
+
+string curveName = "EUR";
+DateTime paramDate = new DateTime(2024, 2, 16);
+double[] curve = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };
+double[] curve1 = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
 string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
-int swapPeriod = 6;
-int swapBasis = 1;
-double fxSpot = 165.5616;
+int swapPeriod = 12; //6;
+int swapBasis = 4;//3;
+double fxSpot = 1; // 165.5616;
 
-double[] result = StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
+Console.WriteLine("============================== 1");
 
-// Affichage des résultats
-Console.WriteLine($"Stripped ZC for curve {curveName}:");
+double[] result = StrippingIRS.StripZC(paramDate, curveName, curve1, curveMaturity, swapPeriod, swapBasis, fxSpot);
 
 
 if (result != null)
@@ -93,6 +131,9 @@ else
 
 
 //Console.WriteLine("===================Test Stripping CDS====================");
+
+
+
 
 
 //int cdsID = 1;

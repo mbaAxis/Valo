@@ -48,34 +48,65 @@ namespace ValoLibrary
         }
 
         //Convert a date under the format "3Y" or "6m" into a date as per Excel convetion
-        public static DateTime ConvertDate(DateTime paramDate, string maturityDate)
+        //public static DateTime ConvertDate(DateTime paramDate, string maturityDate)
+        //{
+        //    int y = paramDate.Year;
+        //    int m = paramDate.Month;
+        //    int d = paramDate.Day;
+
+        //    string datePostFix = maturityDate.Substring(maturityDate.Length  -1);
+
+        //    switch (datePostFix.ToUpper())
+        //    {
+        //        case "Y":
+        //            int years = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
+        //            return DateAndTime.DateSerial(y, m, d).AddYears(years);
+        //        case "M":
+        //            int months = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
+        //            return DateAndTime.DateSerial(y, m, d).AddMonths(months);
+        //        default:
+        //            if (!double.TryParse(maturityDate, out _))
+        //            {
+        //                Console.WriteLine($"Je ne comprends pas la date de maturité ({maturityDate}) : elle devrait être au format xY ou yM ou une date Excel régulière.");
+        //                return DateTime.MinValue;
+        //            }
+        //            return DateTime.Parse(maturityDate);
+        //    }
+        //}
+
+
+        //MODIF QUANTO
+
+        public static DateTime ConvertDate(DateTime paramDate, object maturityDate)
         {
             int y = paramDate.Year;
             int m = paramDate.Month;
             int d = paramDate.Day;
 
-            string datePostFix = maturityDate.Substring(maturityDate.Length  -1);
+            if (maturityDate is DateTime maturityDateTime)
+            {
+                return maturityDateTime;
+            }
+
+            string maturityString = maturityDate.ToString();
+            string datePostFix = maturityString.Substring(maturityString.Length - 1, 1);
 
             switch (datePostFix.ToUpper())
             {
                 case "Y":
-                    int years = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
-                    return DateAndTime.DateSerial(y, m, d).AddYears(years);
+                    return DateAndTime.DateSerial(y, m + 12 * int.Parse(maturityString.Substring(0, maturityString.Length - 1)), d);
                 case "M":
-                    int months = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
-                    return DateAndTime.DateSerial(y, m, d).AddMonths(months);
+                    return DateAndTime.DateSerial(y, m + int.Parse(maturityString.Substring(0, maturityString.Length - 1)), d);
                 default:
-                    if (!double.TryParse(maturityDate, out _))
+                    if (!Utils.IsNumeric(maturityString))
                     {
-                        Console.WriteLine($"Je ne comprends pas la date de maturité ({maturityDate}) : elle devrait être au format xY ou yM ou une date Excel régulière.");
-                        return DateTime.MinValue;
+                        Console.WriteLine($"Don't understand Maturity Date ({maturityString}): should be under the format xY or yM or a regular Excel Date");
+                        return DateTime.MinValue; // You can change this to handle the error as needed
                     }
-                    return DateTime.Parse(maturityDate);
+                    return DateTime.Parse(maturityString);
             }
         }
 
-
-        //MODIF QUANTO
         public static double DurationYear(DateTime endDate, DateTime startDate)
         {
             double numberOfYear = 0;
@@ -95,36 +126,151 @@ namespace ValoLibrary
 
         //' Returns a list of coupon dates according to the maturity date of a swap
         //' and the First/Last Short/Long coupon convention
-        public static DateTime[] GetSwapSchedule(DateTime paramDate, string maturity, DateTime cpnLastSettle, string cpnPeriod, string cpnConvention)
+        public static DateTime[] GetSwapSchedule(DateTime paramDate, object maturity, object cpnLastSettle, string cpnPeriod, string cpnConvention)
         {
   
             return SwapSchedule(paramDate, maturity, cpnLastSettle, cpnPeriod, cpnConvention);
         }
 
-        public static DateTime[] SwapSchedule(DateTime paramDate, string maturity, DateTime cpnLastSettle, string cpnPeriod, string cpnConvention)
+        //public static DateTime[] SwapSchedule(DateTime paramDate, string maturity, DateTime cpnLastSettle, string cpnPeriod, string cpnConvention)
+        //{
+
+        //    double freq, numberOfDates;
+        //    bool isFirst, isShort, continueIf;
+        //    DateTime lastSettle, nextDate, currentDate, maturityDate;
+
+        //    freq = MonthPeriod(cpnPeriod);
+        //    isFirst = (cpnConvention.EndsWith("First"));
+        //    isShort = (cpnConvention.StartsWith("Short"));
+        //    maturityDate = ConvertDate(paramDate, maturity);
+
+        //    if (cpnLastSettle == null || cpnLastSettle == DateTime.MinValue)
+        //    {
+        //        lastSettle = paramDate;
+        //    }
+        //    else
+        //    {
+        //        lastSettle = cpnLastSettle;
+        //    }
+
+        //    if (isFirst)
+        //    {
+        //        freq = -freq;
+        //        currentDate = maturityDate;
+        //    }
+        //    else
+        //    {
+        //        currentDate = lastSettle;
+        //    }
+
+        //    numberOfDates = 0;
+
+        //    do
+        //    {
+        //        numberOfDates++;
+        //        currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+        //        nextDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+
+        //        if (isFirst)
+        //        {
+        //            continueIf = isShort ? (currentDate > lastSettle) : (nextDate >= lastSettle);
+        //        }
+        //        else
+        //        {
+        //            continueIf = isShort ? (currentDate < maturityDate) : (nextDate <= maturityDate);
+        //        }
+        //    } while (continueIf);
+
+        //    DateTime[] schedule = new DateTime[(int)numberOfDates + 1];
+
+        //    if (isFirst)
+        //    {
+        //        currentDate = maturityDate;
+        //    }
+        //    else
+        //    {
+        //        currentDate = lastSettle;
+        //    }
+
+        //    for (int i = 1; i <= numberOfDates; i++)
+        //    {
+        //        if (isFirst)
+        //        {
+        //            int j = (int)(numberOfDates - i + 1);
+        //            schedule[j] = currentDate;
+        //            if (isFirst) currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+        //        }
+        //        else
+        //        {
+        //            int j = i;
+        //            currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+        //            nextDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+
+        //            if (isShort)
+        //            {
+        //                if (currentDate > maturityDate)
+        //                {
+        //                    currentDate = maturityDate;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                if (nextDate > maturityDate)
+        //                {
+        //                    currentDate = maturityDate;
+        //                }
+        //            }
+
+        //            schedule[j] = currentDate;
+        //        }
+        //    }
+
+        //    if (schedule[1] == paramDate)
+        //    {
+        //        Console.WriteLine($"Coupon Settlement Date should be parameter date as time to maturity is a multiple of {cpnPeriod}");
+        //        return null;
+        //    }
+        //    else
+        //    {
+        //        int xxx = isShort ? Math.Abs((int)freq) : Math.Abs((int)freq) * 2;
+        //        DateTime comparisonDate = DateAndTime.DateSerial(schedule[1].Year, schedule[1].Month - xxx, schedule[1].Day);
+
+        //        if (comparisonDate > lastSettle)
+        //        {
+        //            Console.WriteLine($"Coupon Settlement Date should be parameter date as time to maturity is a multiple of {cpnPeriod}");
+        //            return null;
+        //        }
+        //    }
+
+        //    schedule[0] = lastSettle;
+        //    return schedule;
+        //}
+
+        public static DateTime[] SwapSchedule(DateTime paramDate, object maturity, object cpnLastSettle, string cpnPeriod, string cpnConvention)
         {
-            
-            double freq, numberOfDates;
+            double freq;
             bool isFirst, isShort, continueIf;
             DateTime lastSettle, nextDate, currentDate, maturityDate;
 
             freq = MonthPeriod(cpnPeriod);
             isFirst = (cpnConvention.EndsWith("First"));
             isShort = (cpnConvention.StartsWith("Short"));
+            ///maturity = maturity;
+
             maturityDate = ConvertDate(paramDate, maturity);
 
-            if (cpnLastSettle == null || cpnLastSettle == DateTime.MinValue)
+            if (cpnLastSettle == null || cpnLastSettle == DBNull.Value || (cpnLastSettle is DateTime lastSettleDateTime && lastSettleDateTime == DateTime.MinValue))
             {
                 lastSettle = paramDate;
             }
             else
             {
-                lastSettle = cpnLastSettle;
+                lastSettle = (cpnLastSettle is DateTime) ? (DateTime)cpnLastSettle : paramDate;
             }
 
             if (isFirst)
             {
-                freq = -freq;
+                freq = -freq;   // backward
                 currentDate = maturityDate;
             }
             else
@@ -132,13 +278,13 @@ namespace ValoLibrary
                 currentDate = lastSettle;
             }
 
-            numberOfDates = 0;
+            int numberOfDates = 0;
 
             do
             {
                 numberOfDates++;
-                currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
-                nextDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+                currentDate = currentDate.AddMonths((int)freq);
+                nextDate = currentDate.AddMonths((int)freq);
 
                 if (isFirst)
                 {
@@ -150,7 +296,8 @@ namespace ValoLibrary
                 }
             } while (continueIf);
 
-            DateTime[] schedule = new DateTime[(int)numberOfDates + 1];
+            DateTime[] schedule = new DateTime[numberOfDates + 1];
+            int j;
 
             if (isFirst)
             {
@@ -165,15 +312,13 @@ namespace ValoLibrary
             {
                 if (isFirst)
                 {
-                    int j = (int)(numberOfDates - i + 1);
-                    schedule[j] = currentDate;
-                    if (isFirst) currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+                    j = numberOfDates - i+1;
                 }
                 else
                 {
-                    int j = i;
-                    currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
-                    nextDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
+                    j = i;
+                    currentDate = currentDate.AddMonths((int)freq);
+                    nextDate = currentDate.AddMonths((int)freq);
 
                     if (isShort)
                     {
@@ -189,12 +334,13 @@ namespace ValoLibrary
                             currentDate = maturityDate;
                         }
                     }
-
-                    schedule[j] = currentDate;
                 }
+
+                schedule[j] = currentDate;
+                if (isFirst) currentDate = currentDate.AddMonths((int)freq);                             
             }
 
-            if (schedule[1] == paramDate)
+            if (schedule[0] == paramDate)
             {
                 Console.WriteLine($"Coupon Settlement Date should be parameter date as time to maturity is a multiple of {cpnPeriod}");
                 return null;
@@ -202,7 +348,7 @@ namespace ValoLibrary
             else
             {
                 int xxx = isShort ? Math.Abs((int)freq) : Math.Abs((int)freq) * 2;
-                DateTime comparisonDate = DateAndTime.DateSerial(schedule[1].Year, schedule[1].Month - xxx, schedule[1].Day);
+                DateTime comparisonDate = schedule[1].AddMonths(-xxx);
 
                 if (comparisonDate > lastSettle)
                 {
@@ -214,7 +360,6 @@ namespace ValoLibrary
             schedule[0] = lastSettle;
             return schedule;
         }
-
 
 
         public static bool IsNumeric(object expression)

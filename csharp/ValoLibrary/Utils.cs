@@ -35,5 +35,11 @@ namespace ValoLibrary
             // Re-sélectionner la sélection d'origine
             currentSelection.Select();
         }
+
+        public static bool IsNumeric(object value)
+        {
+            return value is int || value is double || value is float || value is long || value is short || value is byte;
+        }
+
     }
 }
