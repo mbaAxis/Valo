@@ -314,3 +314,21 @@ Console.WriteLine("===================Test CDO MOdel====================");
 //}
 //Console.WriteLine("===================End CDO Model====================");
 
+Console.WriteLine("=================== Start Model Interface ====================");
+
+//object result = CDS(
+//            issuerId: "123",
+//            maturity: "2024-12-31",
+//            spread: 0.02,
+//            recoveryRate: 0.4,
+//            cpnPeriod: "3m",
+//            cpnConvention: "ACT/360",
+//            cpnLastSettle: "2024-01-01"
+//        );
+
+//// Affichage du résultat
+//Console.WriteLine(result);
+
+
+
+Console.WriteLine("=================== End Model Interface ====================");
