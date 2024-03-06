@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\csharp",
-    "\\csharp\\ValoLibrary"
+    "\\csharp\\ValoLibrary",
+    "\\csharp\\ValoLibraryTest"
   ],
-  "SelectedNode": "\\csharp\\ValoLibrary\\GetData.cs",
+  "SelectedNode": "\\csharp\\ValoLibraryTest",
   "PreviewInSolutionExplorer": false
 }

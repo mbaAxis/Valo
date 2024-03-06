@@ -45,6 +45,13 @@ namespace ValoLibrary
         private const double MinSpreadShock = 0.0001;    // minimum shock to apply on spread
 
 
+        private static double[,] RiskyZC;
+        private static double[,] cdsFloatingLeg;
+        private static double[,] CDSCouponLeg;
+        private static double[,] AmericanLessEuropeanLeg;
+        private static double[,] FullDefaultProb;
+
+
         public static int GetCDSCurveId(string CDSName)
         {
 
@@ -207,7 +214,7 @@ namespace ValoLibrary
                     if (nextDate > maturityDateX)
                     {
                         getdefaultprobabilitywithoutquanto = 1.0 - previousProbNoDef *
-                            Math.Pow(nextProbNoDef / previousProbNoDef, (maturityDateX - previousDate).TotalDays / (nextDate - previousDate).TotalDays);
+                            Math.Pow(nextProbNoDef / previousProbNoDef, (maturityDateX - previousDate).Days / (nextDate - previousDate).Days);
 
                         if (getdefaultprobabilitywithoutquanto <= 0)
                         {
@@ -241,7 +248,7 @@ namespace ValoLibrary
             }
 
             getdefaultprobabilitywithoutquanto = 1.0 - prevPreviousProbNoDef *
-                Math.Pow((previousProbNoDef / prevPreviousProbNoDef), ((maturityDateX - prevPreviousDate).TotalDays / (previousDate - prevPreviousDate).TotalDays));
+                Math.Pow((previousProbNoDef / prevPreviousProbNoDef), ((maturityDateX - prevPreviousDate).Days / (previousDate - prevPreviousDate).Days));
 
             if (issuerCurrency != pricingCurrency)
             {
@@ -255,9 +262,8 @@ namespace ValoLibrary
         }
 
 
-        public static double GetCDS_PV(DateTime paramDate, DateTime CDSRollDate, double[,] CDSFloatingLeg, double[,] CDSCouponLeg,
-            double[,] AmericanLessEuropeanLeg, double[,] RiskyZC, double[] ZC, int PreviousCalcMonth, int NextCalcMonth,
-            double LossRate, double CDSSpread, int Scenario, double[,] MonthlyDP)
+        public static double GetCDS_PV(DateTime paramDate, DateTime CDSRollDate, double[] ZC, int PreviousCalcMonth, int NextCalcMonth,
+            double LossRate, double CDSSpread, int Scenario, int zcCdsDateOffset)
         {
             double DailyProbNoDefIncrease, ProbNoDefaultPreviousMonth, ProbNoDefaultNextMonth;
             double InitialProbNoDefault, CurrentProbNoDefault, NextProbNoDefault;
@@ -265,12 +271,17 @@ namespace ValoLibrary
             double SumOfNotionalDT;
             int y, m, d;
             DateTime NextDate, PreviousDate, InitialDate, PreviousCouponDate;
-            int DT, offsetzc;
+            double DT;
+            int offsetzc;
 
             offsetzc = 1 * 0;
 
-            ProbNoDefaultPreviousMonth = RiskyZC[PreviousCalcMonth, Scenario] / ZC[PreviousCalcMonth + offsetzc];
-            ProbNoDefaultNextMonth = RiskyZC[NextCalcMonth, Scenario] / ZC[NextCalcMonth + offsetzc];
+            //ProbNoDefaultPreviousMonth = (RiskyZC[PreviousCalcMonth, Scenario] / (double) ZC[PreviousCalcMonth + offsetzc]);
+            ProbNoDefaultPreviousMonth = (RiskyZC[PreviousCalcMonth - zcCdsDateOffset, Scenario] / (double) ZC[PreviousCalcMonth - zcCdsDateOffset + offsetzc]);
+            //ProbNoDefaultNextMonth = (RiskyZC[NextCalcMonth, Scenario] / (double) ZC[NextCalcMonth + offsetzc]); 
+            ProbNoDefaultNextMonth = (RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] / (double) ZC[NextCalcMonth - zcCdsDateOffset + offsetzc]);
+
+            Console.WriteLine("ProbNoDefaultPreviousMonth = " + ProbNoDefaultPreviousMonth + " ProbNoDefaultNextMonth = " + ProbNoDefaultNextMonth);
 
             CurrentProbNoDefault = ProbNoDefaultPreviousMonth;
             InitialProbNoDefault = ProbNoDefaultPreviousMonth;
@@ -280,12 +291,12 @@ namespace ValoLibrary
             d = CDSRollDate.Day;
             
 
-            if (PreviousCalcMonth == RiskyZC.GetLowerBound(0))
+            //if (PreviousCalcMonth == RiskyZC.GetLowerBound(0))
+            if (PreviousCalcMonth == zcCdsDateOffset)
             {
                 PreviousDate = paramDate;
                 InitialDate = paramDate;
                 
-
             }
             else
             {
@@ -305,17 +316,18 @@ namespace ValoLibrary
             }
             else
             {
-                DailyProbNoDefIncrease = Math.Pow(ProbNoDefaultNextMonth / ProbNoDefaultPreviousMonth, 1.0 / (NextDate - InitialDate).Days);
+                DailyProbNoDefIncrease = Math.Pow( (ProbNoDefaultNextMonth / (double) ProbNoDefaultPreviousMonth), 1.0 / (double) (NextDate - InitialDate).Days);
             }
 
             PreviousCouponDate = PreviousDate;
             NextCouponMonth = PreviousCalcMonth;
 
-            for (CouponCounter = 1; CouponCounter <= (NextCalcMonth - PreviousCalcMonth) / 3; CouponCounter++)
+            for (CouponCounter = 1; CouponCounter <= (NextCalcMonth - PreviousCalcMonth) / 3.0; CouponCounter++)
             {
+                //NextCouponMonth = PreviousCalcMonth + CouponCounter * 3;
                 NextCouponMonth = PreviousCalcMonth + CouponCounter * 3;
-
-                AmericanLessEuropeanLeg[NextCouponMonth, Scenario] = AmericanLessEuropeanLeg[NextCouponMonth - 3, Scenario];
+                
+                AmericanLessEuropeanLeg[NextCouponMonth - zcCdsDateOffset, Scenario] = AmericanLessEuropeanLeg[NextCouponMonth -zcCdsDateOffset - 3, Scenario];
                 SumOfNotionalDT = 0;
 
                 for (MonthCounter = 2; MonthCounter >= 0; MonthCounter--)
@@ -328,44 +340,56 @@ namespace ValoLibrary
                         NextDate = paramDate;
                     }
 
-                    double totalDays = (NextDate - PreviousDate).TotalDays;
-                    DT = (int)((totalDays / 2.0 - (PreviousCouponDate - PreviousDate).TotalDays) / 360.0);
+                    /*double totalDays = (NextDate - PreviousDate).Days;
+                    DT = (int)((totalDays / 2.0 - (PreviousCouponDate - PreviousDate).Days) / 360.0);*/
+
+                    DateTime tmp = new DateTime((long) ((NextDate.Ticks + PreviousDate.Ticks) / 2));
+
+                    DT = ((tmp - PreviousCouponDate).Days / 360.0);
 
                     if (NextDate > InitialDate)
                     {
-                        NextProbNoDefault = InitialProbNoDefault * Math.Pow(DailyProbNoDefIncrease, (NextDate - InitialDate).TotalDays);
+                        NextProbNoDefault = InitialProbNoDefault * Math.Pow(DailyProbNoDefIncrease, (double) (NextDate - InitialDate).Days);
                     }
                     else
                     {
                         NextProbNoDefault = 1;
                     }
 
-                    RiskyZC[j, Scenario] = NextProbNoDefault * ZC[j + offsetzc];
+                    RiskyZC[j - zcCdsDateOffset, Scenario] = NextProbNoDefault * ZC[j - zcCdsDateOffset + offsetzc];
+
 
                     if (PreviousDate == paramDate)
                     {
                         DateTime Date1 = DateAndTime.DateSerial(y, m + j - 1, d);
-                        DateTime Date2 = DateAndTime.DateSerial(y, m + j, d);
+                        DateTime Date2 = DateAndTime.DateSerial(y, m + j , d);
 
-                        SumOfNotionalDT += Math.Sqrt(ZC[j + offsetzc] * ZC[j - 1 + offsetzc]) * DT * (CurrentProbNoDefault - NextProbNoDefault);
+                        SumOfNotionalDT += Math.Sqrt(ZC[j -zcCdsDateOffset + offsetzc] * ZC[j - zcCdsDateOffset - 1 + offsetzc]) * DT * (CurrentProbNoDefault - NextProbNoDefault);
                     }
                     else
                     {
-                        SumOfNotionalDT += Math.Sqrt(ZC[j + offsetzc] * ZC[j - 1 + offsetzc]) * DT * (CurrentProbNoDefault - NextProbNoDefault);
+                        SumOfNotionalDT += Math.Sqrt(ZC[j - zcCdsDateOffset + offsetzc] * ZC[j - zcCdsDateOffset - 1 + offsetzc]) * DT * (CurrentProbNoDefault - NextProbNoDefault);
                     }
 
-                    AmericanLessEuropeanLeg[NextCouponMonth, Scenario] +=
-                        (ZC[j + offsetzc] - RiskyZC[j, Scenario]) * (1 - ZC[j + offsetzc] / ZC[j + offsetzc - 1]);
+                    AmericanLessEuropeanLeg[NextCouponMonth - zcCdsDateOffset, Scenario] +=
+                        (ZC[j - zcCdsDateOffset + offsetzc] - RiskyZC[j - zcCdsDateOffset, Scenario]) * (1 - ZC[j - zcCdsDateOffset + offsetzc] / (double) ZC[j - zcCdsDateOffset + offsetzc - 1]);
 
                     PreviousDate = NextDate;
                     CurrentProbNoDefault = NextProbNoDefault;
-                    MonthlyDP[j, Scenario] = 1 - NextProbNoDefault;
+                    FullDefaultProb[j - zcCdsDateOffset, Scenario] = 1 - NextProbNoDefault;
                 }
 
-                CDSFloatingLeg[NextCouponMonth, Scenario] =
-                    ZC[NextCouponMonth + offsetzc] -
-                    RiskyZC[NextCouponMonth, Scenario] +
-                    AmericanLessEuropeanLeg[NextCouponMonth, Scenario];
+
+                cdsFloatingLeg[NextCouponMonth - zcCdsDateOffset, Scenario] =
+                    ZC[NextCouponMonth - zcCdsDateOffset + offsetzc] -
+                    RiskyZC[NextCouponMonth - zcCdsDateOffset, Scenario] +
+                    AmericanLessEuropeanLeg[NextCouponMonth - zcCdsDateOffset, Scenario];
+
+
+                Console.WriteLine("?? cdsFloatingLeg[NextCouponMonth, Scenario] = " + cdsFloatingLeg[NextCouponMonth, Scenario]);
+
+
+
 
                 NextDate = DateAndTime.DateSerial(y, m + NextCouponMonth, d);
                 if (NextDate < paramDate)
@@ -373,10 +397,13 @@ namespace ValoLibrary
                     NextDate = paramDate;
                 }
 
-                CDSCouponLeg[NextCouponMonth, Scenario] =
-                    CDSCouponLeg[NextCouponMonth - 3, Scenario] +
-                    RiskyZC[NextCouponMonth, Scenario] * (NextDate - PreviousCouponDate).TotalDays / 360.0 +
+
+                CDSCouponLeg[NextCouponMonth - zcCdsDateOffset, Scenario] =
+                    CDSCouponLeg[NextCouponMonth - zcCdsDateOffset - 3, Scenario] +
+                    RiskyZC[NextCouponMonth - zcCdsDateOffset, Scenario] * (NextDate - PreviousCouponDate).Days / 360.0 +
                     SumOfNotionalDT;
+
+                Console.WriteLine("KKKKKKK CDSCouponLeg[NextCouponMonth - 3, Scenario] = " + CDSCouponLeg[NextCouponMonth - zcCdsDateOffset - 3, Scenario] + " RiskyZC[NextCouponMonth, Scenario] = " + RiskyZC[NextCouponMonth - zcCdsDateOffset, Scenario] * (NextDate - PreviousCouponDate).Days / 360.0 + " CDSSpread = " + CDSSpread + " SumOfNotionalDT = " + SumOfNotionalDT);
 
                 PreviousCouponDate = DateAndTime.DateSerial(y, m + NextCouponMonth, d);
                 if (PreviousCouponDate < paramDate)
@@ -384,15 +411,14 @@ namespace ValoLibrary
                     PreviousCouponDate = paramDate;
                 }
             }
-
-            return LossRate * CDSFloatingLeg[NextCalcMonth, Scenario] - CDSSpread * CDSCouponLeg[NextCouponMonth, Scenario];
+            Console.WriteLine("LossRate = " + LossRate + " cdsFloatingLeg[NextCalcMonth, Scenario] = " + cdsFloatingLeg[NextCalcMonth - zcCdsDateOffset, Scenario] + " CDSSpread = " + CDSSpread + " CDSCouponLeg[NextCouponMonth, Scenario] = " + CDSCouponLeg[NextCouponMonth - zcCdsDateOffset, Scenario] + " RiskyZC[NextCouponMonth, Scenario] = " + RiskyZC[NextCouponMonth - zcCdsDateOffset, Scenario] + " AmericanLessEuropeanLeg[NextCouponMonth, Scenario] = " + AmericanLessEuropeanLeg[NextCouponMonth - zcCdsDateOffset, Scenario]);
+            return LossRate * cdsFloatingLeg[NextCalcMonth - zcCdsDateOffset, Scenario] - CDSSpread * CDSCouponLeg[NextCouponMonth - zcCdsDateOffset, Scenario]; 
         }
 
 
-        public static double GetCDS_PV_3m(DateTime paramDate, DateTime cdsRollDate, double[,] cdsFloatingLeg, double[,] cdsCouponLeg,
-                                           double[,] americanLessEuropeanLeg, double[,] riskyZC, double[] zc, int previousCalcMonth,
+        public static double GetCDS_PV_3m(DateTime paramDate, DateTime cdsRollDate, double[] zc, int previousCalcMonth,
                                            int nextCalcMonth, double lossRate, double cdsSpread, int scenario, double[] previousDefaultIntensity,
-                                           double[] shiftDefaultIntensity, double[,] monthlyDP)
+                                           double[] shiftDefaultIntensity, int zcCdsDateOffset)
         {
             double dailyProbNoDefIncrease, probNoDefaultPreviousMonth;
             double initialProbNoDefault, currentProbNoDefault, nextProbNoDefault;
@@ -400,11 +426,14 @@ namespace ValoLibrary
             double sumOfNotionalDT;
             int y, m, d, j;
             DateTime nextDate, previousDate, initialDate, previousCouponDate;
-            double dt, offsetZC;
+            double dt;
+
+            int offsetZC;
 
             offsetZC = 1 * 0;
 
-            probNoDefaultPreviousMonth = riskyZC[previousCalcMonth, scenario] / zc[previousCalcMonth + (int)offsetZC];
+            //probNoDefaultPreviousMonth = (RiskyZC[previousCalcMonth, scenario] / (double) zc[previousCalcMonth + (int)offsetZC]); 
+            probNoDefaultPreviousMonth = (RiskyZC[previousCalcMonth- zcCdsDateOffset, scenario] / (double) zc[previousCalcMonth - zcCdsDateOffset + (int)offsetZC]); 
             currentProbNoDefault = probNoDefaultPreviousMonth;
             initialProbNoDefault = probNoDefaultPreviousMonth;
 
@@ -417,7 +446,8 @@ namespace ValoLibrary
             m = cdsRollDate.Month;
             d = cdsRollDate.Day;
 
-            if (previousCalcMonth == 0)
+            //if (previousCalcMonth == 0)
+            if (previousCalcMonth == zcCdsDateOffset)
             {
                 previousDate = paramDate;
                 initialDate = paramDate;
@@ -432,23 +462,23 @@ namespace ValoLibrary
                     initialDate = paramDate;
                 }
             }
-
             if (previousDate == paramDate)
             {
                 prevDefaultIntensity = 0;
             }
             else
             {
-                prevPreviousNoDefProb = riskyZC[previousCalcMonth - 1, scenario] / zc[previousCalcMonth - 1 + (int)offsetZC];
+                //prevPreviousNoDefProb = (RiskyZC[previousCalcMonth - 1, scenario] / (double) zc[previousCalcMonth - 1 + (int)offsetZC]);
+                prevPreviousNoDefProb = (RiskyZC[previousCalcMonth - zcCdsDateOffset - 1, scenario] / (double) zc[previousCalcMonth - zcCdsDateOffset - 1 + (int)offsetZC]);
                 prevPreviousDate = DateAndTime.DateSerial(y, m + previousCalcMonth - 1, d);
                 if (prevPreviousDate < paramDate) prevPreviousDate = paramDate;
-                prevDefaultIntensity = -Math.Log(probNoDefaultPreviousMonth / prevPreviousNoDefProb) *
-                                        360.0 / (previousDate - prevPreviousDate).TotalDays;
+                prevDefaultIntensity = -Math.Log(probNoDefaultPreviousMonth / (double) prevPreviousNoDefProb) * 360.0 / (double) (previousDate - prevPreviousDate).Days;
                 if (prevDefaultIntensity < 0) prevDefaultIntensity = 0;
             }
 
+
             curDefaultIntensity = prevDefaultIntensity;
-            nextDate = new DateTime(y, m + nextCalcMonth, d);
+            nextDate = DateAndTime.DateSerial(y, m + nextCalcMonth, d);
             if (nextDate < paramDate)
             {
                 nextDate = paramDate;
@@ -458,10 +488,11 @@ namespace ValoLibrary
             previousCouponDate = previousDate;
             nextCouponMonth = previousCalcMonth;
 
-            for (couponCounter = 1; couponCounter <= (nextCalcMonth - previousCalcMonth) / 3; couponCounter++)
+            for (couponCounter = 1; couponCounter <= (nextCalcMonth - previousCalcMonth) / 3.0; couponCounter++)
             {
+                //nextCouponMonth = previousCalcMonth + couponCounter * 3;
                 nextCouponMonth = previousCalcMonth + couponCounter * 3;
-                americanLessEuropeanLeg[nextCouponMonth, scenario] = americanLessEuropeanLeg[nextCouponMonth - 3, scenario];
+                AmericanLessEuropeanLeg[nextCouponMonth - zcCdsDateOffset, scenario] = AmericanLessEuropeanLeg[nextCouponMonth - zcCdsDateOffset - 3, scenario];
                 sumOfNotionalDT = 0;
                 curDefaultIntensity += shiftDefaultIntensity[scenario];
 
@@ -475,20 +506,22 @@ namespace ValoLibrary
                         nextDate = paramDate;
                     }
 
-                    double totalDays = (nextDate - previousDate).TotalDays;
-                    dt = (int)((totalDays / 2.0 - (previousCouponDate - previousDate).TotalDays) / 360.0);
+                    /*double totalDays = (double) (nextDate - previousDate).Days;
+                    dt = (int)((totalDays / 2.0 - (previousCouponDate - previousDate).Days) / 360.0);*/
+
+                    DateTime tmp = new DateTime((long)((nextDate.Ticks + previousDate.Ticks) / 2));
+                    dt = ((tmp - previousCouponDate).Days / 360.0);
 
                     if (nextDate > initialDate)
                     {
-                        nextProbNoDefault = currentProbNoDefault * Math.Exp(-curDefaultIntensity * (nextDate - previousDate).TotalDays / 360.0);
+                        nextProbNoDefault = currentProbNoDefault * Math.Exp(-curDefaultIntensity * (nextDate - previousDate).Days / 360.0);
                     }
                     else
                     {
                         nextProbNoDefault = 1;
                     }
 
-                    riskyZC[j, scenario] = nextProbNoDefault * zc[j + (int)offsetZC];
-
+                    RiskyZC[j - zcCdsDateOffset, scenario] = nextProbNoDefault * zc[j - zcCdsDateOffset + (int)offsetZC];
                     if (previousDate == paramDate)
                     {
 
@@ -496,29 +529,27 @@ namespace ValoLibrary
                         DateTime Date2 = DateAndTime.DateSerial(y, m + j, d);
 
                         sumOfNotionalDT = sumOfNotionalDT +
-                            Math.Pow(zc[j + (int)offsetZC] * zc[(int)j - 1 + (int)offsetZC], 0.5) * dt *
+                            Math.Pow(zc[j - zcCdsDateOffset + (int)offsetZC] * zc[(int)j - 1 - zcCdsDateOffset + (int)offsetZC], 0.5) * dt *
                             (currentProbNoDefault - nextProbNoDefault);
                     }
                     else
                     {
                         sumOfNotionalDT = sumOfNotionalDT +
-                            Math.Pow(zc[j + (int)offsetZC] * zc[j - 1 + (int)offsetZC], 0.5) * dt *
+                            Math.Pow(zc[j - zcCdsDateOffset + (int)offsetZC] * zc[j - 1 - zcCdsDateOffset + (int)offsetZC], 0.5) * dt *
                             (currentProbNoDefault - nextProbNoDefault);
                     }
 
-                    americanLessEuropeanLeg[nextCouponMonth, scenario] =
-                        americanLessEuropeanLeg[nextCouponMonth, scenario] +
-                        (zc[j + (int)offsetZC] - riskyZC[j, scenario]) *
-                        (1.0 - zc[j + (int)offsetZC] / zc[j + (int)offsetZC - 1]);
+                    AmericanLessEuropeanLeg[nextCouponMonth - zcCdsDateOffset, scenario] =
+                        AmericanLessEuropeanLeg[nextCouponMonth - zcCdsDateOffset, scenario] +
+                        (zc[j - zcCdsDateOffset + (int)offsetZC] - RiskyZC[j - zcCdsDateOffset, scenario]) *
+                        (1.0 - zc[j - zcCdsDateOffset + (int)offsetZC] / (double) zc[j - zcCdsDateOffset + (int)offsetZC - 1]);
 
                     previousDate = nextDate;
                     currentProbNoDefault = nextProbNoDefault;
-                    monthlyDP[j, scenario] = 1 - nextProbNoDefault;
+                    FullDefaultProb[j - zcCdsDateOffset, scenario] = 1 - nextProbNoDefault;
                 }
 
-                cdsFloatingLeg[nextCouponMonth, scenario] =
-                    zc[nextCouponMonth + (int)offsetZC] - riskyZC[nextCouponMonth, scenario] +
-                    americanLessEuropeanLeg[nextCouponMonth, scenario];
+                cdsFloatingLeg[nextCouponMonth - zcCdsDateOffset, scenario] = zc[nextCouponMonth - zcCdsDateOffset + (int)offsetZC] - RiskyZC[nextCouponMonth - zcCdsDateOffset, scenario] + AmericanLessEuropeanLeg[nextCouponMonth - zcCdsDateOffset, scenario];
 
                 nextDate = DateAndTime.DateSerial(y, m + nextCouponMonth, d);
                 if (nextDate < paramDate)
@@ -526,19 +557,15 @@ namespace ValoLibrary
                     nextDate = paramDate;
                 }
 
-                cdsCouponLeg[nextCouponMonth, scenario] = cdsCouponLeg[nextCouponMonth - 3, scenario] +
-                    riskyZC[nextCouponMonth, scenario] * (nextDate - previousCouponDate).TotalDays / 360.0 + sumOfNotionalDT;
+                CDSCouponLeg[nextCouponMonth - zcCdsDateOffset, scenario] = CDSCouponLeg[nextCouponMonth - zcCdsDateOffset - 3, scenario] + RiskyZC[nextCouponMonth - zcCdsDateOffset, scenario] * (nextDate - previousCouponDate).Days / 360.0 + sumOfNotionalDT;
 
-                previousCouponDate = new DateTime(y, m + nextCouponMonth, d);
+                previousCouponDate = DateAndTime.DateSerial(y, m + nextCouponMonth, d);
                 if (previousCouponDate < paramDate)
                 {
                     previousCouponDate = paramDate;
                 }
             }
-
-
-            return lossRate * cdsFloatingLeg[nextCalcMonth, scenario] -
-                   cdsSpread * cdsCouponLeg[nextCouponMonth, scenario];
+            return lossRate * cdsFloatingLeg[nextCalcMonth - zcCdsDateOffset, scenario] - cdsSpread * CDSCouponLeg[nextCouponMonth - zcCdsDateOffset, scenario]; 
         }
 
 
@@ -551,27 +578,24 @@ namespace ValoLibrary
             int ScenarioNumber = 1;
             double[] ZC;
 
-            // Placeholder for the definition of the StrippingIRS.InterestRateCurves class and related methods
-            // Replace the placeholder with the actual class definition
-
             CurveID = StrippingIRS.GetCurveId(CDSCurrency);
 
-            Console.WriteLine("CurveID" + CurveID);
             if (CurveID == -1)
             {
-                
                 if (StrippingIRS.InterestRateCurves.LastError == false)
                 {
-                    Console.WriteLine("iici 1");
-
                     Console.WriteLine($"Curve {CDSCurrency} was not stripped - Called from : ");
                     StrippingIRS.InterestRateCurves.LastError = true;
-                    Console.WriteLine("iici 2");
                 }
                 return null;
             }
 
-            Console.WriteLine("iici 3");
+            /*for (int i = 0; i < StrippingIRS.InterestRateCurves.Curves[1].MonthlyRollZC.Length - 1; i ++)
+            {
+                Console.WriteLine("TAILLE = " + i + " = " + StrippingIRS.InterestRateCurves.Curves[CurveID].MonthlyRollZC[i]);
+            }*/
+
+            //Console.WriteLine("TAILLE1 = " + StrippingIRS.InterestRateCurves.Curves[1].MonthlyRollZC.Length);
 
             // Compute ZC for Risky Curve if not done yet
             if (!StrippingIRS.InterestRateCurves.Curves[CurveID].IsMonthlyRollZCCalculated)
@@ -587,21 +611,48 @@ namespace ValoLibrary
                 }
             }
 
+            
+
             // Other variable declarations
-            double[,] RiskyZC, CDSFloatingLeg, CDSCouponLeg, AmericanLessEuropeanLeg, FullDefaultProb;
+            //double[,] RiskyZC, cdsFloatingLeg, CDSCouponLeg, AmericanLessEuropeanLeg, FullDefaultProb;
             double CDSSpread, LossRate;
             int CDSCurvePointNumber, CurvePointCounter, PreviousCalcMonth, NextCalcMonth;
 
             //CurveID = Convert.ToInt32(cdsID);
-            CDSRollDateOffset = (StrippingIRS.InterestRateCurves.Curves[CurveID].MonthlyRollZC).GetLowerBound(0);
-            ZC = StrippingIRS.InterestRateCurves.Curves[CurveID].MonthlyRollZC;
+            DateTime testDate;
+            int zcCdsDateOffset = 0;
+            if (CDSRollDate > ParamDate)
+            {
+                do
+                {
+                    zcCdsDateOffset -= 3;
+                    testDate = UtilityDates.ConvertDate(CDSRollDate, zcCdsDateOffset + "m");
+                } while (testDate > ParamDate);
+            }
+
+            //CDSRollDateOffset = (StrippingIRS.InterestRateCurves.Curves[CurveID].MonthlyRollZC).GetLowerBound(0);
+            CDSRollDateOffset = 0;
+            ZC = StrippingIRS.InterestRateCurves.Curves[CurveID].MonthlyRollZC; // problème voir le resultat de  VbaComputeMonthlyRiskyZC et comparer avec celui de vba excel
+
+            /*for (int i = 0;  i < ZC.Length; i++)
+            {
+                Console.WriteLine("ZC[" + i + "] =" + ZC[i]);
+
+            }*/
+
+            //add
+            Console.WriteLine("InterestRateCurves.Curves[curveId].MonthlyRollZC = " + StrippingIRS.InterestRateCurves.Curves[CurveID].MonthlyRollZC.Length);
+            Console.WriteLine("ZC = " + ZC.Length);
+            Console.WriteLine("CDSRollDateOffset = " + CDSRollDateOffset);
+
 
             // Initialize arrays
-            RiskyZC = new double[121, 2];
-            CDSFloatingLeg = new double[121, 2];
-            CDSCouponLeg = new double[121, 2];
-            AmericanLessEuropeanLeg = new double[121, 2];
-            FullDefaultProb = new double[121, 2];
+            RiskyZC = new double[121 - zcCdsDateOffset, 2];
+            cdsFloatingLeg = new double[121 - zcCdsDateOffset, 2];
+            CDSCouponLeg = new double[121 - zcCdsDateOffset, 2];
+            AmericanLessEuropeanLeg = new double[121 - zcCdsDateOffset, 2];
+            FullDefaultProb = new double[121 - zcCdsDateOffset, 2];
+
 
             RiskyZC[CDSRollDateOffset, 0] = 1; // initial curve
             RiskyZC[CDSRollDateOffset, 1] = 1; // shocked curve
@@ -609,16 +660,17 @@ namespace ValoLibrary
 
             double[] PreviousDefaultIntensity = new double[2];
             double[] ShiftDefaultIntensity = new double[2];
-            PreviousDefaultIntensity[0] = 1;
-            ShiftDefaultIntensity[1] = 0.000001; // initial and shocked curve
+            //PreviousDefaultIntensity[0] = 1;
+            ShiftDefaultIntensity[0] = 0.000001; // initial and shocked curve ShiftDefaultIntensity[1]
+            ShiftDefaultIntensity[1] = 0.000001; // initial and shocked curve ShiftDefaultIntensity[1]
             double dShiftDefaultIntensity = 0.000000001; // shock on Default Intensity Shift used to compute the derivatives of a CDS PV
 
             FullDefaultProb[CDSRollDateOffset, 0] = 0; // initial curve
             FullDefaultProb[CDSRollDateOffset, 1] = 0; // shocked curve
 
             // PV of the floating leg of the American CDS
-            CDSFloatingLeg[CDSRollDateOffset, 0] = 0; // initial curve
-            CDSFloatingLeg[CDSRollDateOffset, 1] = 0; // shocked curve
+            cdsFloatingLeg[CDSRollDateOffset, 0] = 0; // initial curve
+            cdsFloatingLeg[CDSRollDateOffset, 1] = 0; // shocked curve
 
             // PV of the Coupon Leg of standard CDS with normalized spread at 100%
             CDSCouponLeg[CDSRollDateOffset, 0] = 0; // initial curve
@@ -627,6 +679,15 @@ namespace ValoLibrary
             // Difference of the PV of the floating leg of the American CDS less the PV of the floating leg of the European CDS
             AmericanLessEuropeanLeg[CDSRollDateOffset, 0] = 0; // initial curve
             AmericanLessEuropeanLeg[CDSRollDateOffset, 1] = 0; // shocked curve
+
+
+            //Console.WriteLine("cdsFloatingLeg = " + cdsFloatingLeg.Length);
+            //Console.WriteLine("CDSCouponLeg = " + CDSCouponLeg.Length);
+            //Console.WriteLine("AmericanLessEuropeanLeg = " + AmericanLessEuropeanLeg.Length);
+            //Console.WriteLine("RiskyZC = " + RiskyZC.Length);
+            //Console.WriteLine("FullDefaultProb = " + FullDefaultProb.Length);
+
+
 
             LossRate = 1 - Convert.ToDouble(RecoveryRate);
 
@@ -637,19 +698,20 @@ namespace ValoLibrary
                 return null;
             }
 
-            PreviousCalcMonth = CDSRollDateOffset;
+            //PreviousCalcMonth = CDSRollDateOffset;
+            PreviousCalcMonth = CDSRollDateOffset + zcCdsDateOffset;
+            Console.WriteLine("PreviousCalcMonth ================================= "+ PreviousCalcMonth);
             ScenarioNumber = 1;
             int SpreadValueCount = 0;
-            if (UtilityDates.MonthPeriod(CurveMaturity[CDSCurvePointNumber], CDSRollDate) > 120)
-
+            if (UtilityDates.MonthPeriod(CurveMaturity[CDSCurvePointNumber-1], CDSRollDate) > 120)
             {
-                    Console.WriteLine("Not possible to calibrate risky ZC on curve with maturity beyond 10Y - Called from");
-             
+                 Console.WriteLine("Not possible to calibrate risky ZC on curve with maturity beyond 10Y - Called from");
             }
 
-            for (CurvePointCounter = 1; CurvePointCounter <= CDSCurvePointNumber; CurvePointCounter++)
+            for (CurvePointCounter = 0; CurvePointCounter < CDSCurvePointNumber; CurvePointCounter++)
             {
                 CDSSpread = CDSCurve[CurvePointCounter];
+                Console.WriteLine("ZZZ CurvePointCounter = " + CurvePointCounter + " CDSSpread = " + CDSSpread);
                 if (CDSSpread != 0)
                 {
                     string NextMaturity = CurveMaturity[CurvePointCounter];
@@ -659,78 +721,105 @@ namespace ValoLibrary
                         return null;
                     }
 
-                    NextCalcMonth = (int)UtilityDates.MonthPeriod(CurveMaturity[CurvePointCounter], CDSRollDate);
-                    
+                    NextCalcMonth = (int) UtilityDates.MonthPeriod(CurveMaturity[CurvePointCounter], CDSRollDate);
+
                     if (UtilityDates.ConvertDate(CDSRollDate, NextCalcMonth + "M") <= ParamDate)
                     {
                         Console.WriteLine("No spread shall be given for duration lower than Parameter Date in CurveMaturity argument nb \" & CurvePointCounter & Chr(13) & \"Spread assumed to be 0\"");
                         return null;
                     }
 
-                    SpreadValueCount ++;
+                    SpreadValueCount++;
+                    //add
+                    Console.WriteLine("CDSSpread = " + CDSSpread + " NextMaturity = " + NextMaturity + " NextCalcMonth = " + NextCalcMonth + " SpreadValueCount = " + SpreadValueCount + " PreviousCalcMonth = " + PreviousCalcMonth);
+
                     if (SpreadValueCount == 1 || intensity != "3M")
                     {
                         double NextRiskyZC;
                         // Newton iteration to solve for the next Risky ZC
-                        for (int Scenario = 0; Scenario < ScenarioNumber; Scenario++)
+                        for (int Scenario = 0; Scenario <= ScenarioNumber; Scenario++)
                         {
+                            
                             if (Scenario == 1)
                             {
                                 double dSpread = UtilityLittleFunctions.MaxOf(SpreadShock * CDSSpread, MinSpreadShock);
                                 CDSSpread += dSpread;
                                 if (UtilityDates.ConvertDate(CDSRollDate, NextCalcMonth + "M") <= ParamDate)
                                 {
-                                    NextRiskyZC = RiskyZC[NextCalcMonth, 0];
+                                    // ok deja
+                                    //NextRiskyZC = RiskyZC[NextCalcMonth, 0];
+                                    NextRiskyZC = RiskyZC[NextCalcMonth - zcCdsDateOffset, 0];
+                                    Console.WriteLine("NextRiskyZCCCC= " + NextRiskyZC); 
                                 }
                                 else
-                                {
-                                    NextRiskyZC = RiskyZC[NextCalcMonth, 0] * Math.Exp(-dSpread / (1 - RecoveryRate) * NextCalcMonth / 12);
+                                {    // res2 faux
+                                    Console.WriteLine("HH CurvePointCounter = " + CurvePointCounter  + " NextCalcMonth = " + NextCalcMonth + " res = " + Math.Exp(-dSpread / (double)(1 - RecoveryRate) * NextCalcMonth / 12.0) + " res2 = " + RiskyZC[NextCalcMonth, 0]);
+                                    //NextRiskyZC = RiskyZC[NextCalcMonth, 0] * Math.Exp(-dSpread / (double) (1 - RecoveryRate) * NextCalcMonth / 12.0);
+                                    NextRiskyZC = RiskyZC[NextCalcMonth - zcCdsDateOffset, 0] * Math.Exp(-dSpread / (double) (1 - RecoveryRate) * NextCalcMonth / 12.0); 
+                                    Console.WriteLine("NextRisky1111111= " + NextRiskyZC);
                                 }
                             }
                             else
                             {
-                                NextRiskyZC = RiskyZC[PreviousCalcMonth, 0] / ZC[PreviousCalcMonth] * ZC[NextCalcMonth];
+                                // ok deja
+                                //NextRiskyZC = RiskyZC[PreviousCalcMonth, 0] / (double) (ZC[PreviousCalcMonth] * ZC[NextCalcMonth]);
+                                NextRiskyZC = RiskyZC[PreviousCalcMonth - zcCdsDateOffset, 0] / (double) ZC[PreviousCalcMonth - zcCdsDateOffset] * ZC[NextCalcMonth-zcCdsDateOffset];
+                                Console.WriteLine("UUU NextRiskyZC = " + NextRiskyZC + " CurvePointCounter " + CurvePointCounter + " PreviousCalcMonth = " + PreviousCalcMonth + " CurvePointCounter = " + CurvePointCounter + " res1 = " + RiskyZC[PreviousCalcMonth - zcCdsDateOffset, 0] + " res2 = " + ZC[PreviousCalcMonth - zcCdsDateOffset] + " NextCalcMonth = " + NextCalcMonth + " ZC[NextCalcMonth] = " + ZC[NextCalcMonth - zcCdsDateOffset]);
+
+                                // Console.WriteLine("NextRisky00000= " + NextRiskyZC);
+                                //add
+                                //Console.WriteLine("NextRiskyZC = " + NextRiskyZC + " CurvePointCounter = " + CurvePointCounter +  " PreviousCalcMonth = " + PreviousCalcMonth +  " NextCalcMonth = " + NextCalcMonth);
+                                //Console.WriteLine("RiskyZC[PreviousCalcMonth, 0] = " + RiskyZC[PreviousCalcMonth, 0] + " ZC[PreviousCalcMonth] = " + ZC[PreviousCalcMonth] + " ZC[NextCalcMonth] = " + ZC[NextCalcMonth]);
                             }
 
+                            //Console.WriteLine("NextRiskyZC= " + NextRiskyZC);
+
+                            int k = 0;
                             double dPV_dRiskyZC;
                             double CDS_PV;
                             do
                             {
-                                RiskyZC[NextCalcMonth, Scenario] = NextRiskyZC;
-                                CDS_PV = GetCDS_PV(ParamDate, CDSRollDate, CDSFloatingLeg, CDSCouponLeg, AmericanLessEuropeanLeg, RiskyZC, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, FullDefaultProb);
-
+                                //RiskyZC[NextCalcMonth, Scenario] = NextRiskyZC;
+                                RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] = NextRiskyZC;
+                                CDS_PV = GetCDS_PV(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, zcCdsDateOffset);
+                                Console.WriteLine("LL CurvePointCounter = " + CurvePointCounter + " CDS_PV = " + CDS_PV + " NextRiskyZC = " + NextRiskyZC + " k = " + k);
+                                k = k + 1;
                                 if (CDS_PV == 0)
                                 {
                                     break;
                                 }
-
-                                RiskyZC[NextCalcMonth, Scenario] = NextRiskyZC + dRiskyZC;
-                                dPV_dRiskyZC = (GetCDS_PV(ParamDate, CDSRollDate, CDSFloatingLeg, CDSCouponLeg, AmericanLessEuropeanLeg, RiskyZC, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, FullDefaultProb) - CDS_PV) / dRiskyZC;
-
+                               
+                                //RiskyZC[NextCalcMonth, Scenario] = NextRiskyZC + dRiskyZC;
+                                RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] = NextRiskyZC + dRiskyZC;
+                                dPV_dRiskyZC = (GetCDS_PV(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, zcCdsDateOffset) - CDS_PV) / (double) dRiskyZC;
+                               
                                 double AdjustRiskyZC;
 
                                 if (CDS_PV == 0)
                                 {
-                                    AdjustRiskyZC = 0;
+                                    AdjustRiskyZC = 0.0;
                                     break;
                                 }
                                 else
                                 {
-                                    AdjustRiskyZC = -CDS_PV / dPV_dRiskyZC;
+                                    
+                                    AdjustRiskyZC =  (-CDS_PV / (double) dPV_dRiskyZC);
                                 }
 
-                                if (Math.Abs(CDS_PV) < 0.00001 * UtilityLittleFunctions.MinOf(1, CDSCouponLeg[NextCalcMonth, Scenario]))
+                                if (Math.Abs(CDS_PV) < 0.00001 * UtilityLittleFunctions.MinOf(1, CDSCouponLeg[NextCalcMonth - zcCdsDateOffset, Scenario])) 
                                 {
+                                   
                                     break;
                                 }
 
                                 NextRiskyZC += AdjustRiskyZC;
                             } while (true);
+                            
+                            RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] = NextRiskyZC; 
+                            CDS_PV = GetCDS_PV(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, zcCdsDateOffset);
 
-                            RiskyZC[NextCalcMonth, Scenario] = NextRiskyZC;
-                            CDS_PV = GetCDS_PV(ParamDate, CDSRollDate, CDSFloatingLeg, CDSCouponLeg, AmericanLessEuropeanLeg, RiskyZC, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, FullDefaultProb);
-
-                            if (NextRiskyZC > (RiskyZC[PreviousCalcMonth, Scenario] / ZC[PreviousCalcMonth + 1] * ZC[NextCalcMonth + 1]))
+                            //if (NextRiskyZC > (RiskyZC[PreviousCalcMonth, Scenario] / (double) (ZC[PreviousCalcMonth + 1] * ZC[NextCalcMonth + 1])))
+                            if (NextRiskyZC > (RiskyZC[PreviousCalcMonth- zcCdsDateOffset, Scenario] / (double) (ZC[PreviousCalcMonth + 1- zcCdsDateOffset] * ZC[NextCalcMonth - zcCdsDateOffset + 1])))
                             {
                                 if (alterMode == true)
                                 {
@@ -743,37 +832,60 @@ namespace ValoLibrary
                     else
                     {
                         // Default intensity constant over 3 months with a constant shift between CDS curve spread values
-                        for (int Scenario = 0; Scenario < ScenarioNumber; Scenario++)
+                        //for (int Scenario = 0; Scenario < ScenarioNumber; Scenario++) 
+                        for (int Scenario = 0; Scenario <= ScenarioNumber; Scenario++) 
                         {
                             if (Scenario == 1)
                             {
+
                                 double dSpread = UtilityLittleFunctions.MaxOf(SpreadShock * CDSSpread, MinSpreadShock);
                                 CDSSpread += dSpread;
                             }
 
+                            //Console.WriteLine("777777777777777777777777777777777777777777777777777");
+
                             double CDS_PV;
                             double dPV_dRiskyZC;
                             double AdjustShiftDefaultIntensity;
-                            do
-                            {
-                                CDS_PV = GetCDS_PV_3m(ParamDate, CDSRollDate, CDSFloatingLeg, CDSCouponLeg, AmericanLessEuropeanLeg, RiskyZC, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, FullDefaultProb);
 
-                                if (Math.Abs(CDS_PV) < 0.00001 * UtilityLittleFunctions.MinOf(1, CDSCouponLeg[NextCalcMonth, Scenario]))
+                            //Console.WriteLine("cdsFloatingLeg = " + cdsFloatingLeg.GetLength(0));
+                            //Console.WriteLine("CDSCouponLeg = " + CDSCouponLeg.GetLength(0));
+                            //Console.WriteLine("AmericanLessEuropeanLeg = " + AmericanLessEuropeanLeg.GetLength(0));
+                            //Console.WriteLine("RiskyZC = " + RiskyZC.GetLength(0));
+                            //Console.WriteLine("ZC = " + ZC.Length);
+                            //Console.WriteLine("PreviousCalcMonth = " + PreviousCalcMonth);
+                            //Console.WriteLine("NextCalcMonth = " + NextCalcMonth);
+                            //Console.WriteLine("LossRate = " + LossRate);
+                            //Console.WriteLine("CDSSpread = " + CDSSpread);
+                            //Console.WriteLine("PreviousDefaultIntensity = " + PreviousDefaultIntensity.Length);
+                            //Console.WriteLine("ShiftDefaultIntensity = " + ShiftDefaultIntensity.Length);
+                            //Console.WriteLine("FullDefaultProb = " + FullDefaultProb.GetLength(0));
+
+                            do
+                            {                   
+                                CDS_PV = GetCDS_PV_3m(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, zcCdsDateOffset);
+
+
+                                if (Math.Abs(CDS_PV) < 0.00001 * UtilityLittleFunctions.MinOf(1, CDSCouponLeg[NextCalcMonth - zcCdsDateOffset, Scenario]))
                                 {
+                                    Console.WriteLine("88");
                                     break;
                                 }
 
                                 ShiftDefaultIntensity[Scenario] += dShiftDefaultIntensity;
-                                dPV_dRiskyZC = (GetCDS_PV_3m(ParamDate, CDSRollDate, CDSFloatingLeg, CDSCouponLeg, AmericanLessEuropeanLeg, RiskyZC, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, FullDefaultProb) - CDS_PV) / dShiftDefaultIntensity;
+                                dPV_dRiskyZC = (GetCDS_PV_3m(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, zcCdsDateOffset) - CDS_PV) / (double) dShiftDefaultIntensity;
 
-                                AdjustShiftDefaultIntensity = -CDS_PV / dPV_dRiskyZC;
+                                AdjustShiftDefaultIntensity = -CDS_PV / (double) dPV_dRiskyZC;
                                 ShiftDefaultIntensity[Scenario] += AdjustShiftDefaultIntensity - dShiftDefaultIntensity;
                             } while (true);
 
-                            CDS_PV = GetCDS_PV_3m(ParamDate, CDSRollDate, CDSFloatingLeg, CDSCouponLeg, AmericanLessEuropeanLeg, RiskyZC, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, FullDefaultProb);
+                            CDS_PV = GetCDS_PV_3m(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, zcCdsDateOffset);
 
-                            if (FullDefaultProb[NextCalcMonth, Scenario] < FullDefaultProb[NextCalcMonth - 1, Scenario])
+                            //Console.WriteLine("882");
+                            //if (FullDefaultProb[NextCalcMonth- zcCdsDateOffset, Scenario] < FullDefaultProb[NextCalcMonth - 1, Scenario]) 
+                            if (FullDefaultProb[NextCalcMonth- zcCdsDateOffset, Scenario] < FullDefaultProb[NextCalcMonth - zcCdsDateOffset - 1, Scenario]) 
                             {
+                                //Console.WriteLine("883");
                                 if (alterMode == true)
                                 {
                                     Console.WriteLine($"Negative Default Probability for CDS Calibration at {NextCalcMonth} - Called from : ");
@@ -787,21 +899,40 @@ namespace ValoLibrary
                 }
             }
 
-            double[] Res = new double[CDSCurvePointNumber * 2];
+            for (int i =0; i < 121 + 3; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    Console.WriteLine("RiskyZC["+i+", "+j+"] = " + RiskyZC[i, j] + " cdsFloatingLeg="+ cdsFloatingLeg[i,j]+ " CDSCouponLeg[i,j]="+ CDSCouponLeg[i,j] + " AmericanLessEuropeanLeg[i,j]= " + AmericanLessEuropeanLeg[i,j]+ " FullDefaultProb= " + FullDefaultProb[i,j]);
+                }
+            }
 
-            for (int Scenario = 0; Scenario < ScenarioNumber; Scenario++)
+          
+        //Console.WriteLine("99999999999999999999999999999999999999999999999");
+
+        double[] Res = new double[CDSCurvePointNumber * 2];
+
+            for (int Scenario = 0; Scenario <= ScenarioNumber; Scenario++)
             {
                 for (CurvePointCounter = 0; CurvePointCounter < CDSCurvePointNumber; CurvePointCounter++)
                 {
+                    Console.WriteLine("CDSCurve[" + CurvePointCounter +"] = " + CDSCurve[CurvePointCounter]);
+
                     CDSSpread = CDSCurve[CurvePointCounter];
                     if (CDSSpread != 0)
                     {
-                        NextCalcMonth = (int)UtilityDates.MonthPeriod(CurveMaturity[CurvePointCounter].ToString() , CDSRollDate);
-                        Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 1 - RiskyZC[NextCalcMonth, Scenario] / ZC[NextCalcMonth];
+
+                       
+                        NextCalcMonth = (int)UtilityDates.MonthPeriod(CurveMaturity[CurvePointCounter], CDSRollDate);
+                     
+                        
+
+                        Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 1.0 - RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] / (double) ZC[NextCalcMonth - zcCdsDateOffset];
+                        //Console.WriteLine("Res = " + Res[CurvePointCounter + CDSCurvePointNumber * Scenario]);
                     }
                     else
                     {
-                        Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 0;
+                        Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 0.0;
                     }
                 }
             }
@@ -816,8 +947,43 @@ namespace ValoLibrary
                 return null;
             }
         }
+        public static DateTime CDSRefDate(DateTime currentDate, bool isSingleNameConvention = true)
+        {
+            int d = currentDate.Day;
+            int m = currentDate.Month + (d >= 20 ? 1 : 0);
+            int y = currentDate.Year;
 
+            int m2, y2;
 
+            if (isSingleNameConvention)
+            {
+                m2 = 3 + 3 * ((m - 1) / 3);
+                y2 = y;
+            }
+            else
+            {
+                switch (m)
+                {
+                    case int n when (n >= 1 && n <= 3) || n == 13:
+                        m2 = 12;
+                        y2 = y - 1;
+                        break;
+                    case int n when n >= 4 && n <= 9:
+                        m2 = 6;
+                        y2 = y;
+                        break;
+                    case int n when n >= 10 && n <= 12:
+                        m2 = 12;
+                        y2 = y;
+                        break;
+                    default:
+                        throw new ArgumentException("Invalid month");
+                }
+            }
+
+            return DateAndTime.DateSerial(y2, m2, 20);
+        }
+        
         public static string GetCDSName(int cdsID)
         {
             int CDS_ID;
@@ -842,7 +1008,6 @@ namespace ValoLibrary
 
             return CreditDefaultSwapCurves.Curves[CDS_ID - 1].CDSName;
         }
-
         public static string GetCDSCurrency(int cdsID)
         {
             int cds_Id;
@@ -870,7 +1035,6 @@ namespace ValoLibrary
 
 
         }
-
 
         public static object[,] GetMonthlyDP(int issuer, int scenario = 0)
         {
@@ -937,7 +1101,6 @@ namespace ValoLibrary
             return GetDefaultProbabilityQuanto(issuer, paramDate, maturityDate, null, scenario, 0, 0, 1, probMultiplier);
         }
 
-
         public static double GetRecoveryRate(int id)
         {
             if (id > CreditDefaultSwapCurves.NumberOfCurves)
@@ -955,42 +1118,7 @@ namespace ValoLibrary
                 return CreditDefaultSwapCurves.Curves[id].Recovery;
             }
         }
-        public static DateTime CDSRefDate(DateTime currentDate, bool isSingleNameConvention = true)
-        {
-            int d = currentDate.Day;
-            int m = currentDate.Month + (d >= 20 ? 1 : 0);
-            int y = currentDate.Year;
-
-            int m2, y2;
-
-            if (isSingleNameConvention)
-            {
-                m2 = 3 + 3 * ((m - 1) / 3);
-                y2 = y;
-            }
-            else
-            {
-                switch (m)
-                {
-                    case int n when (n >= 1 && n <= 3) || n == 13:
-                        m2 = 12;
-                        y2 = y - 1;
-                        break;
-                    case int n when n >= 4 && n <= 9:
-                        m2 = 6;
-                        y2 = y;
-                        break;
-                    case int n when n >= 10 && n <= 12:
-                        m2 = 12;
-                        y2 = y;
-                        break;
-                    default:
-                        throw new ArgumentException("Invalid month");
-                }
-            }
-
-            return new DateTime(y2, m2, 20);
-        }
+       
     }
 
 

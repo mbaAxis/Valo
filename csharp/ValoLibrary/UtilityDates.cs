@@ -98,11 +98,11 @@ namespace ValoLibrary
                 case "M":
                     return DateAndTime.DateSerial(y, m + int.Parse(maturityString.Substring(0, maturityString.Length - 1)), d);
                 default:
-                    if (!Utils.IsNumeric(maturityString))
+                    /*if (!Utils.IsNumeric(maturityString))
                     {
                         Console.WriteLine($"Don't understand Maturity Date ({maturityString}): should be under the format xY or yM or a regular Excel Date");
                         return DateTime.MinValue; // You can change this to handle the error as needed
-                    }
+                    }*/
                     return DateTime.Parse(maturityString);
             }
         }

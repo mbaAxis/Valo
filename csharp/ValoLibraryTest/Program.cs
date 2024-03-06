@@ -98,71 +98,87 @@ DateTime paramDate1 = new(2024, 3, 1);
 
 
 
-string curveName = "EUR";
-DateTime paramDate = new DateTime(2024, 2, 16);
-double[] curve = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };
-double[] curve1 = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
-string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
-int swapPeriod = 12; //6;
-int swapBasis = 4;//3;
-double fxSpot = 1; // 165.5616;
+//string curveName = "EUR";
+//DateTime paramDate = new DateTime(2024, 2, 16);
+//double[] curve = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };
+//double[] curve1 = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
+//string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
+//int swapPeriod = 12; //6;
+//int swapBasis = 4;//3;
+//double fxSpot = 1; // 165.5616;
 
-Console.WriteLine("============================== 1");
+//Console.WriteLine("============================== 1");
 
-double[] result = StrippingIRS.StripZC(paramDate, curveName, curve1, curveMaturity, swapPeriod, swapBasis, fxSpot);
+//double[] result = StrippingIRS.StripZC(paramDate, curveName, curve1, curveMaturity, swapPeriod, swapBasis, fxSpot);
 
 
-if (result != null)
-{
-    // Affichage des résultats
-    Console.WriteLine($"Stripped ZC for curve {curveName}:");
+//if (result != null)
+//{
+//    // Affichage des résultats
+//    Console.WriteLine($"Stripped ZC for curve {curveName}:");
 
-    for (int i = 0; i < result.Length; i++)
-    {
-        Console.WriteLine($"{result[i]}");
-    }
-}
-else
-{
-    Console.WriteLine("Erreur lors du calcul de Stripped ZC.");
-}
+//    for (int i = 0; i < result.Length; i++)
+//    {
+//        Console.WriteLine($"{result[i]}");
+//    }
+//}
+//else
+//{
+//    Console.WriteLine("Erreur lors du calcul de Stripped ZC.");
+//}
 
 //Console.WriteLine("===================End Stripping IRS====================");
 
 
 //Console.WriteLine("===================Test Stripping CDS====================");
 
+string curveName = "EUR";
+DateTime paramDate = new DateTime(2024, 03, 03);
+double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141 };//, 0.04758 };// Exemple de taux de courbe
+string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y" };// "20Y" };  // Exemple de maturités de courbe
+int swapPeriod = 12;
+int swapBasis = 4;
+double fxSpot = 1;
+StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
+
+//strippedZC = InterestRateCurves.Curves[curveId].StrippedZC;
 
 
 
+int cdsID = 1;
+string CDSName = "EUR";
+DateTime ParamDate = new (2024, 03, 03);
+DateTime CDSRollDate = StrippingCDS.CDSRefDate(ParamDate);
+double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
+//bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
 
-//int cdsID = 1;
-//string CDSName = "EUR";
-//DateTime ParamDate = DateTime.Now;
-//DateTime CDSRollDate = StrippingCDS.CDSRefDate(ParamDate);
-//double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0, 0048 };
-//string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
-//string CDSCurrency = "EUR";
-//double RecoveryRate = 0.4; // Par exemple, 40%
-//bool alterMode = false;
-//string intensity = "3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//Console.WriteLine("id vbaMontlyZC = " + vbaMontlyZC);
 
-//// Appel de la fonction à tester
-//double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, ParamDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
 
-//// Vérification du résultat
-//if (result != null)
-//{
-//    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
-//    for (int i = 0; i < result.Length; i++)
-//    {
-//        Console.WriteLine($"Result[{i}] = {result[i]}");
-//    }
-//}
-//else
-//{
-//    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
-//}
+string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+string CDSCurrency = "EUR";
+double RecoveryRate = 0.4; // Par exemple, 40%
+bool alterMode = false;
+string intensity = "3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+
+
+// Appel de la fonction à tester
+double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, ParamDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+
+
+// Vérification du résultat
+if (result != null)
+{
+    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
+    for (int i = 0; i < result.Length; i++)
+    {
+        Console.WriteLine(result[i]);
+    }
+}
+else
+{
+    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
+}
 
 //Console.WriteLine("===================End Stripping CDS====================");
 
