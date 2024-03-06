@@ -267,26 +267,26 @@ namespace ValoLibrary
                 withGreeks, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
         }
 
-        public static object CDS(string issuerId, string maturity, double spread, double recoveryRate,
+        public static object CDS(object issuerId, string maturity, double spread, double recoveryRate,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, bool isAmericanFloatLeg = false, bool isAmericanFixedLeg = false,
-        bool withGreeks = false, string hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
+        bool withGreeks = false, object hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
         {
-            if (!int.TryParse(issuerId, out int _))
+            Console.WriteLine("okkkkkk issuerId = " + issuerId);
+            if (!Utils.IsNumeric(issuerId))
             {
-                _ = StrippingCDS.GetCDSCurveId(issuerId);
+                issuerId = 2 + StrippingCDS.GetCDSCurveId((string)issuerId);
             }
-
+            Console.WriteLine("okkkkkk11 issuerId = " + issuerId);
             if (Convert.ToDouble(issuerId) > CreditDefaultSwapCurves.NumberOfCurves)
             {
                 return $"CDS - Issuer {issuerId} out of range - probability set to 0 - called from {Environment.StackTrace}";
             }
             else if (!CreditDefaultSwapCurves.Curves[Convert.ToInt32(issuerId)].CDSdone)
             {
+
                 return $"CDS - Issuer {issuerId} not defined - probability set to 0 - called from {Environment.StackTrace}";
             }
-
-
 
             if (pricingCurrency == null || string.IsNullOrEmpty(pricingCurrency))
             {
@@ -311,18 +311,21 @@ namespace ValoLibrary
 
             return AmericanSwap(maturity, 1, issuerId, 1, recoveryRate, spread, cpnLastSettle, cpnPeriod, cpnConvention,
                 pricingCurrency, fxCorrel, fxVol, 0.0, 0.0, 0.0, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, 1,
-                integrationPeriod, null, probMultiplier);
+                integrationPeriod,null, probMultiplier);
         }
 
-        public static object AmericanSwap(object maturity, int numberOfIssuer, object issuerId, object nominalIssuer, object recoveryIssuer,
+        public static object AmericanSwap(object maturity, int numberOfIssuer, object IssuerID, object nominalIssuer, object recoveryIssuer,
     double inputSpread, object cpnLastSettle, string cpnPeriod, string cpnConvention,
     string pricingCurrency, double fxCorrel, double fxVol,
     object strikes, object correl, object betaAdder,
     bool isAmericanFloatLeg = false, bool isAmericanFixedLeg = false,
-    bool withGreeks = false, object hedgingCDS = null,
+    bool withGreeks = false, object HedgingCDS = null,
     double lossUnitAmount = 0.0, string integrationPeriod = "1m",
     DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1)
         {
+
+
+            Console.WriteLine("Commencons =========================================================================================");
             int i, j, k;
 
             double LossRate;
@@ -452,6 +455,7 @@ namespace ValoLibrary
             double[,] European;
             double[,] dProb = null;
 
+            Console.WriteLine("11111111111111111111111111111111111111111111111111111111111111111");
 
             if (IsCDO)
             {
@@ -478,18 +482,18 @@ namespace ValoLibrary
                 European = new double[(int)NumberOfIntegrationDates, 1];
             }
 
+
+
+            object[] CDSListID;// = new object[0];
             
 
-            int[] CDSListID = new int[0];
-            int IssuerID = 0 ;
-
-            if (IssuerID == 0)
+            if (IssuerID == null)
             {
-                CDSListID[0] = 1;
+                CDSListID  = new object[] { 1 };
             }
             else
             {
-                CDSListID[0] = IssuerID;
+                CDSListID = (object[])IssuerID;
             }
 
             //'
@@ -573,7 +577,7 @@ namespace ValoLibrary
                     {
                         for (j = 0; j < numberOfIssuer; j++)
                         {
-                            cdsID = CDSListID[j];
+                            cdsID = (int)CDSListID[j];
                             ThisCDS = StrippingCDS.CreditDefaultSwapCurves.Curves[cdsID];
                             IssuerCurrency = ThisCDS.Currency;
                             DefaultProbability[j] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, (string)CurrentDate, pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
@@ -592,11 +596,11 @@ namespace ValoLibrary
                     else
                     {
                         // modif QUANTO
-                        IssuerCurrency = StrippingCDS.CreditDefaultSwapCurves.Curves[CDSListID[0]].Currency;
-                        DefaultProbability[1] = StrippingCDS.GetDefaultProbabilityQuanto(CDSListID[0], ParamDate, (string)CurrentDate, pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
+                        IssuerCurrency = StrippingCDS.CreditDefaultSwapCurves.Curves[(int)CDSListID[0]].Currency;
+                        DefaultProbability[1] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID[0], ParamDate, (string)CurrentDate, pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
                         if (withGreeks)
                         {
-                            dProb[i, 1] = StrippingCDS.GetDefaultProbabilityQuanto(CDSListID[0], ParamDate, (string)CurrentDate, pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[1];
+                            dProb[i, 1] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID[0], ParamDate, (string)CurrentDate, pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[1];
                         }
                     }
 
@@ -628,11 +632,14 @@ namespace ValoLibrary
                     }
                 }
             }
+
+
+            Console.WriteLine("00000000000000000000000000000000000000000");
             // -----------------------------------------------------------------------
             // FLOAT LEG
             // -----------------------------------------------------------------------
             // Compute the First term of the float leg. i.e. the European CDS/CDO at maturity
-          
+
             x[0, 0] = European[(int)NumberOfIntegrationDates, 1];
             if (withGreeks)
             {
@@ -751,9 +758,11 @@ namespace ValoLibrary
                             // For a CDS Only
                             // Coupon is calculated up to Credit Event Date
                             // and is paid on Credit Event Date
+
                             this_bpv = (schedule[i] - schedule[i]).TotalDays / 360.0 * RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
 
                             // reduction of bpv due to Credit Event in case of american fixed leg
+
                             double DefaultDayCountFraction;
                             if (IsAmericanfixedleg)
                             {
@@ -763,8 +772,10 @@ namespace ValoLibrary
                                 {
                                     DateTime Date1 = ScheduleIntegration[k];
                                     DateTime Date2 = ScheduleIntegration[k];
+
                                     // Default is assumed to occur at mid integration period
                                     //DefaultDayCountFraction = (int)((Date2 + Date1).TotalDays / 2 - schedule[i - 1].TotalDays) / 360.0;
+
                                     DefaultDayCountFraction = (int)((Date2 - Date1).TotalDays / 2 + Date1.Subtract(schedule[i]).TotalDays) / 360.0;
 
                                     double NextProbNoDef = (1.0 - European[k, j] / RiskFreeZC[k] / TrancheWidth / LossRate);
@@ -798,7 +809,7 @@ namespace ValoLibrary
             x[0, 0] = (double)x[1, 0] - (double)x[2, 0];
 
             double Leverage = 0;
-            object[] HedgingCDS = null;
+            //object[] HedgingCDS = null;
             if (withGreeks)
             {
                 for (i = 0; i < numberOfIssuer; i++)
@@ -819,26 +830,26 @@ namespace ValoLibrary
 
                     if (HedgingCDS != null)
                     {
-                        j = (IsCDO) ? CDSListID[i] : CDSListID[0];
+                        j = (IsCDO) ? (int)CDSListID[i] : (int)CDSListID[0];
                         ThisCDS = CreditDefaultSwapCurves.Curves[j];
 
                         double[,] hedging_cds;
                         if (IsCDO)
                         {
                             hedging_cds = (double[,])AmericanSwap(maturity, 1, j, 1.0,ThisCDS.Recovery,
-                                                        (double)HedgingCDS[1], cpnLastSettle, cpnPeriod,
+                                                        ((double[])HedgingCDS)[0], cpnLastSettle, cpnPeriod,
                                                         cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
-                                                       betaAdder, (bool)HedgingCDS[2], (bool)HedgingCDS[3], withGreeks, 0.0, lossUnitAmount,
+                                                       betaAdder, ((bool[])HedgingCDS)[1], ((bool[])HedgingCDS)[2], withGreeks, 0.0, lossUnitAmount,
                                                         integrationPeriod, schedule, probMultiplier);
                         }
                         else
                         {
                             hedging_cds = (double[,])AmericanSwap(maturity, 1, j, 1.0, ThisCDS.Recovery,
-                                                        (double)HedgingCDS[1], cpnLastSettle, cpnPeriod,
+                                                        ((double[])HedgingCDS)[0], cpnLastSettle, cpnPeriod,
                                                         cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
-                                                         betaAdder,
-                                                        (bool)HedgingCDS[2], (bool)HedgingCDS[3], withGreeks, 0.0, 1.0,
+                                                         betaAdder, ((bool[])HedgingCDS)[1], ((bool[])HedgingCDS)[2], withGreeks, 0.0, 1.0,
                                                         integrationPeriod, schedule, probMultiplier);
+
                         }
 
                         x[6 + i, 1] = hedging_cds[7, 0];
