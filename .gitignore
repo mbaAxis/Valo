@@ -496,3 +496,6 @@ $RECYCLE.BIN/
 .DS_Store
 
 ###data
+
+# virtual envirroment for t.billa
+.venv/
