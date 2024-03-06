@@ -53,7 +53,7 @@ namespace ValoLibrary
                     price = -expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2);
 
                 }
-                else if(position.ToLower() == "short")
+                else if (position.ToLower() == "short")
                 {
                     price = -(-expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2));
 
@@ -89,7 +89,7 @@ namespace ValoLibrary
                     delta = expQT * (StatisticFormulas.Cfd(d1) - 1);
 
                 }
-                else if(position.ToLower() == "short")
+                else if (position.ToLower() == "short")
                 {
                     delta = -(expQT * (StatisticFormulas.Cfd(d1) - 1));
 
@@ -153,11 +153,11 @@ namespace ValoLibrary
                 }
                 else if (position.ToLower() == "short")
                 {
-                    theta = -( (expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
-               - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)) );
+                    theta = -((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+               - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
 
                 }
-            
+
             }
             else if (optionFlag.ToLower() == "put")
             {
@@ -168,9 +168,9 @@ namespace ValoLibrary
                 }
                 else if (position.ToLower() == "short")
                 {
-                    theta = - ( (expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
-                   + (r * k * StatisticFormulas.Cfd(d2) * expRT) - (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)) );
-                }   
+                    theta = -((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+                   + (r * k * StatisticFormulas.Cfd(d2) * expRT) - (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
+                }
             }
 
             else
@@ -192,11 +192,11 @@ namespace ValoLibrary
             {
                 if (position.ToLower() == "long")
                 {
-                    vega =  expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T);
+                    vega = expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T);
                 }
                 else if (position.ToLower() == "short")
                 {
-                    vega = - (expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T));
+                    vega = -(expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T));
                 }
             }
 
@@ -219,13 +219,13 @@ namespace ValoLibrary
             {
                 if (position.ToLower() == "lonng")
                 {
-                    rho =  k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(d2);
+                    rho = k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(d2);
                 }
-                else if(position.ToLower() == "short")
+                else if (position.ToLower() == "short")
                 {
                     rho = -(k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(d2));
                 }
-                
+
             }
 
             else if (optionFlag.ToLower() == "put")
@@ -239,7 +239,7 @@ namespace ValoLibrary
                 {
                     rho = -(-k * T * Math.Exp(-r * T) * StatisticFormulas.Cfd(-d2));
                 }
-                
+
             }
 
             else
@@ -255,7 +255,7 @@ namespace ValoLibrary
         {
             double[,] sensitivities = new double[5, 1]; // Tableau 2D pour simuler une colonne
 
-            sensitivities[0, 0] = BlackScholes.DeltaBS(optionFlag, position, s, sigma, r, k, T, q) ;
+            sensitivities[0, 0] = BlackScholes.DeltaBS(optionFlag, position, s, sigma, r, k, T, q);
             sensitivities[1, 0] = BlackScholes.GammaBS(optionFlag, position, s, sigma, r, k, T, q);
             sensitivities[2, 0] = BlackScholes.ThetaBS(optionFlag, position, s, sigma, r, k, T, q);
             sensitivities[3, 0] = BlackScholes.VegaBS(optionFlag, position, s, sigma, r, k, T, q);

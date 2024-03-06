@@ -37,37 +37,7 @@ namespace ValoLibrary
         //}
 
 
-        //public static double MCEurOptionPrice(string optionFlag, double s, double sigma, double r, double K, double T, double? q = null)
-        //{
-        //    int numberSimulation = 100000;
-        //    double payOff;
-        //    double spotPrice;
-        //    List<double> samples = new List<double>();
-        //    Random random = new Random();
-
-        //    if (optionFlag.ToLower() == "call")
-        //    {
-
-        //        for (int i = 0; i < numberSimulation; i++)
-        //        {
-        //            spotPrice = s * Math.Exp((r - q.GetValueOrDefault() - sigma * sigma / 2) * T + sigma * Math.Sqrt(T) * random.NextGaussian());
-        //            payOff = Math.Max(spotPrice - K, 0);
-        //            samples.Add(payOff);
-        //        }
-        //    }
-        //    else if (optionFlag.ToLower() == "put")
-        //    {
-        //        for (int i = 0; i < numberSimulation; i++)
-        //        {
-        //            spotPrice = s * Math.Exp((r - q.GetValueOrDefault() - sigma * sigma / 2) * T + sigma * Math.Sqrt(T) * random.NextGaussian());
-        //            payOff = Math.Max(K - spotPrice, 0);
-        //            samples.Add(payOff);
-        //        }
-        //    }
-
-        //    return samples.Average() * Math.Exp(-r * T);
-        //}
-
+        
         public static double MCEurOptionPrice(string optionType, string position, double s, double sigma, double r, double K, double T, double? q = null)
         {
             int numberSimulation = 100000;
@@ -78,7 +48,7 @@ namespace ValoLibrary
             double multiplier;
 
             multiplier = (position.ToLower() == "long") ? 1 : -1;
-            
+
 
             for (int i = 0; i < numberSimulation; i++)
             {

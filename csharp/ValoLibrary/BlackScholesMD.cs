@@ -22,7 +22,7 @@ namespace ValoLibrary
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
-            q =  q ?? Calibration.GetDividend(underlying, T);
+            q = q ?? Calibration.GetDividend(underlying, T);
             double date = GetData.GetTime(underlying);
             double timeToMaturity = (T - date) / 365;
             double price = Calibration.InterpolatePrice(k, T, underlying);
@@ -35,7 +35,7 @@ namespace ValoLibrary
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
-            q = q  ?? Calibration.GetDividend(underlying, T);
+            q = q ?? Calibration.GetDividend(underlying, T);
             double date = GetData.GetTime(underlying);
             double timeToMaturity = (T - date) / 365;
             double price = Calibration.InterpolatePrice(k, T, underlying);
@@ -43,7 +43,7 @@ namespace ValoLibrary
             double sensitivity = BlackScholes.DeltaBS(optionFlag, position, s, vol, r, k, timeToMaturity, q);
             return sensitivity;
         }
-        public static double Gamma(string optionFlag, string position, double k, double T, string underlying, double?q = null)
+        public static double Gamma(string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
@@ -81,7 +81,7 @@ namespace ValoLibrary
             return sensitivity;
         }
 
-        public static double Rho(string optionFlag, string position, double k, double T, string underlying, double? q= null)
+        public static double Rho(string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
@@ -132,11 +132,11 @@ namespace ValoLibrary
             return portfolioPrice;
         }
 
-        
+
 
 
     }
-   
+
 
 
 }

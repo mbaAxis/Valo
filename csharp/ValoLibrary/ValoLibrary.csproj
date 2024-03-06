@@ -52,11 +52,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OptionPortfolioParameters.cs" />
+    <Compile Include="MonteCarlo.cs" />
+    <Compile Include="StatisticFomulas.cs" />
+    <Compile Include="GetData.cs" />
+    <Compile Include="Calibration.cs" />
+    <Compile Include="BlackScholesMD.cs" />
     <Compile Include="CDOModel.cs" />
     <Compile Include="ModelInterface.cs" />
     <Compile Include="StrippingCDS.cs" />
     <Compile Include="StrippingIRS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BlackScholes.cs" />
+    <Compile Include="UDF.cs" />
     <Compile Include="UtilityBiNormal.cs" />
     <Compile Include="UtilityDates.cs" />
     <Compile Include="UtilityFaure.cs" />

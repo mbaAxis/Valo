@@ -310,36 +310,36 @@ Console.WriteLine("===================End Stripping CDS====================");
 //}
 //Console.WriteLine("===================End CDO Model====================");
 
-Console.WriteLine("=================== Start Model Interface ====================");
+//Console.WriteLine("=================== Start Model Interface ====================");
 
-string issuerId = "ABNAMRO_MMR.EUR.SU";
-string maturity = "5Y";
-double spread = 0.01;
-double recoveryRate = 0.4;
-string pricingCurrency = "EUR";
-double fxCorrel = 0.0;
-double fxVol = 0.0;
+//string issuerId = "ABNAMRO_MMR.EUR.SU";
+//string maturity = "5Y";
+//double spread = 0.01;
+//double recoveryRate = 0.4;
+//string pricingCurrency = "EUR";
+//double fxCorrel = 0.0;
+//double fxVol = 0.0;
 
-string cpnPeriod = "3M";
-string cpnConvention = "LongFirst";
-string cpnLastSettle = "";
+//string cpnPeriod = "3M";
+//string cpnConvention = "LongFirst";
+//string cpnLastSettle = "";
 
-bool isAmericanFloatLeg = true;
-bool isAmericanFixedLeg = true;
-bool withGreeks = true;
+//bool isAmericanFloatLeg = true;
+//bool isAmericanFixedLeg = true;
+//bool withGreeks = true;
 
-string integrationPeriod = "1m";
-double probMultiplier = 1;
+//string integrationPeriod = "1m";
+//double probMultiplier = 1;
 
-object[] hedgingCds = { 0.0, true, true };
-
-
-object result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
- fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, integrationPeriod, probMultiplier);
-
-// Affichage du résultat
-Console.WriteLine(result3);
+//object[] hedgingCds = { 0.0, true, true };
 
 
+//object result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
+// fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, integrationPeriod, probMultiplier);
 
-Console.WriteLine("=================== End Model Interface ====================");
+//// Affichage du résultat
+//Console.WriteLine(result3);
+
+
+
+//Console.WriteLine("=================== End Model Interface ====================");

@@ -59,7 +59,7 @@ namespace ValoLibrary
 
             while (System.Convert.ToDouble(maturities.GetValue(i, 1)) < T)
             {
-                i=i+1;
+                i = i + 1;
             }
             int[] Ts = new int[2];
             Ts[0] = i - 1;
