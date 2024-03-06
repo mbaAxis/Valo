@@ -229,8 +229,6 @@ namespace ValoLibrary
                         {
                             return getdefaultprobabilitywithoutquanto* probMultiplier;
                         }
-    
-
                     }
 
                     prevPreviousDate = previousDate;
@@ -260,7 +258,6 @@ namespace ValoLibrary
                 return getdefaultprobabilitywithoutquanto * probMultiplier;
             }
         }
-
 
         public static double GetCDS_PV(DateTime paramDate, DateTime CDSRollDate, double[] ZC, int PreviousCalcMonth, int NextCalcMonth,
             double LossRate, double CDSSpread, int Scenario, int zcCdsDateOffset)
@@ -414,7 +411,6 @@ namespace ValoLibrary
             Console.WriteLine("LossRate = " + LossRate + " cdsFloatingLeg[NextCalcMonth, Scenario] = " + cdsFloatingLeg[NextCalcMonth - zcCdsDateOffset, Scenario] + " CDSSpread = " + CDSSpread + " CDSCouponLeg[NextCouponMonth, Scenario] = " + CDSCouponLeg[NextCouponMonth - zcCdsDateOffset, Scenario] + " RiskyZC[NextCouponMonth, Scenario] = " + RiskyZC[NextCouponMonth - zcCdsDateOffset, Scenario] + " AmericanLessEuropeanLeg[NextCouponMonth, Scenario] = " + AmericanLessEuropeanLeg[NextCouponMonth - zcCdsDateOffset, Scenario]);
             return LossRate * cdsFloatingLeg[NextCalcMonth - zcCdsDateOffset, Scenario] - CDSSpread * CDSCouponLeg[NextCouponMonth - zcCdsDateOffset, Scenario]; 
         }
-
 
         public static double GetCDS_PV_3m(DateTime paramDate, DateTime cdsRollDate, double[] zc, int previousCalcMonth,
                                            int nextCalcMonth, double lossRate, double cdsSpread, int scenario, double[] previousDefaultIntensity,
@@ -848,19 +844,6 @@ namespace ValoLibrary
                             double dPV_dRiskyZC;
                             double AdjustShiftDefaultIntensity;
 
-                            //Console.WriteLine("cdsFloatingLeg = " + cdsFloatingLeg.GetLength(0));
-                            //Console.WriteLine("CDSCouponLeg = " + CDSCouponLeg.GetLength(0));
-                            //Console.WriteLine("AmericanLessEuropeanLeg = " + AmericanLessEuropeanLeg.GetLength(0));
-                            //Console.WriteLine("RiskyZC = " + RiskyZC.GetLength(0));
-                            //Console.WriteLine("ZC = " + ZC.Length);
-                            //Console.WriteLine("PreviousCalcMonth = " + PreviousCalcMonth);
-                            //Console.WriteLine("NextCalcMonth = " + NextCalcMonth);
-                            //Console.WriteLine("LossRate = " + LossRate);
-                            //Console.WriteLine("CDSSpread = " + CDSSpread);
-                            //Console.WriteLine("PreviousDefaultIntensity = " + PreviousDefaultIntensity.Length);
-                            //Console.WriteLine("ShiftDefaultIntensity = " + ShiftDefaultIntensity.Length);
-                            //Console.WriteLine("FullDefaultProb = " + FullDefaultProb.GetLength(0));
-
                             do
                             {                   
                                 CDS_PV = GetCDS_PV_3m(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, zcCdsDateOffset);
@@ -881,11 +864,9 @@ namespace ValoLibrary
 
                             CDS_PV = GetCDS_PV_3m(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, zcCdsDateOffset);
 
-                            //Console.WriteLine("882");
                             //if (FullDefaultProb[NextCalcMonth- zcCdsDateOffset, Scenario] < FullDefaultProb[NextCalcMonth - 1, Scenario]) 
                             if (FullDefaultProb[NextCalcMonth- zcCdsDateOffset, Scenario] < FullDefaultProb[NextCalcMonth - zcCdsDateOffset - 1, Scenario]) 
                             {
-                                //Console.WriteLine("883");
                                 if (alterMode == true)
                                 {
                                     Console.WriteLine($"Negative Default Probability for CDS Calibration at {NextCalcMonth} - Called from : ");
@@ -907,9 +888,6 @@ namespace ValoLibrary
                 }
             }
 
-          
-        //Console.WriteLine("99999999999999999999999999999999999999999999999");
-
         double[] Res = new double[CDSCurvePointNumber * 2];
 
             for (int Scenario = 0; Scenario <= ScenarioNumber; Scenario++)
@@ -924,9 +902,7 @@ namespace ValoLibrary
 
                        
                         NextCalcMonth = (int)UtilityDates.MonthPeriod(CurveMaturity[CurvePointCounter], CDSRollDate);
-                     
-                        
-
+                                           
                         Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 1.0 - RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] / (double) ZC[NextCalcMonth - zcCdsDateOffset];
                         //Console.WriteLine("Res = " + Res[CurvePointCounter + CDSCurvePointNumber * Scenario]);
                     }
