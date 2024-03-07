@@ -505,24 +505,6 @@ namespace ValoLibrary
         }
 
 
-        /*public static double GetYearFraction(DateTime startDate, DateTime endDate, int swapBasis)
-        {
-            // Calculer la différence en jours entre les deux dates
-            int daysDifference = (endDate - startDate).Days;
-
-            switch (swapBasis)
-            {
-                case 0:
-                    // Act/360 : 30E/360
-                    //return daysDifference / 360.5;
-                    return daysDifference / 365.0;
-                case 1:
-                    // Act/365 : 30E/365
-                    return daysDifference / 365.25;
-                default:
-                    throw new ArgumentException("SwapBasis non pris en charge.");
-            }
-        }*/
         public static double GetZC(string maturityDate, string curveName)
         {
             int curveID = GetCurveId(curveName);

@@ -9,6 +9,7 @@ namespace ValoLibrary
 {
     public class Parameters
     {
+        public double quantity;
         public string optionFlag;
         public string position;
         public double strike;
@@ -18,7 +19,7 @@ namespace ValoLibrary
     }
     public class BlackScholesMD
     {
-        public static double OptionPrice(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        public static double OptionPrice(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
@@ -26,12 +27,12 @@ namespace ValoLibrary
             double date = GetData.GetTime(underlying);
             double timeToMaturity = (T - date) / 365;
             double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = BlackScholes.ImpliedVol(optionFlag, position, s, price, r, k, timeToMaturity, q);
-            double P = BlackScholes.BSOptionPrice(optionFlag, position, s, vol, r, k, timeToMaturity, q);
+            double vol = BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q);
+            double P = BlackScholes.BSOptionPrice(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
             return P;
         }
 
-        public static double Delta(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        public static double Delta(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
@@ -39,11 +40,11 @@ namespace ValoLibrary
             double date = GetData.GetTime(underlying);
             double timeToMaturity = (T - date) / 365;
             double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.DeltaBS(optionFlag, position, s, vol, r, k, timeToMaturity, q);
+            double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+            double sensitivity = BlackScholes.DeltaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
             return sensitivity;
         }
-        public static double Gamma(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        public static double Gamma(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
@@ -51,11 +52,11 @@ namespace ValoLibrary
             double date = GetData.GetTime(underlying);
             double timeToMaturity = (T - date) / 365;
             double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.GammaBS(optionFlag, position, s, vol, r, k, timeToMaturity, q);
+            double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+            double sensitivity = BlackScholes.GammaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
             return sensitivity;
         }
-        public static double Theta(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        public static double Theta(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
@@ -63,12 +64,12 @@ namespace ValoLibrary
             double date = GetData.GetTime(underlying);
             double timeToMaturity = (T - date) / 365;
             double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.ThetaBS(optionFlag, position, s, vol, r, k, timeToMaturity, q);
+            double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+            double sensitivity = BlackScholes.ThetaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
             return sensitivity;
         }
 
-        public static double Vega(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        public static double Vega(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
             double s = GetData.GetSpot(underlying);
             double r = Calibration.GetRepo(underlying, T);
@@ -76,35 +77,32 @@ namespace ValoLibrary
             double date = GetData.GetTime(underlying);
             double timeToMaturity = (T - date) / 365;
             double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.VegaBS(optionFlag, position, s, vol, r, k, timeToMaturity, q);
+            double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+            double sensitivity = BlackScholes.VegaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
             return sensitivity;
         }
 
-        public static double Rho(string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        //public static double Rho(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
+        //{
+        //    double s = GetData.GetSpot(underlying);
+        //    double r = Calibration.GetRepo(underlying, T);
+        //    q = q ?? Calibration.GetDividend(underlying, T);
+        //    double date = GetData.GetTime(underlying);
+        //    double timeToMaturity = (T - date) / 365;
+        //    double price = Calibration.InterpolatePrice(k, T, underlying);
+        //    double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+        //    double sensitivity = BlackScholes.RhoBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
+        //    return sensitivity;
+        //}
+
+        public static double[,] SensiOption(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
-            double s = GetData.GetSpot(underlying);
-            double r = Calibration.GetRepo(underlying, T);
-            q = q ?? Calibration.GetDividend(underlying, T);
-            double date = GetData.GetTime(underlying);
-            double timeToMaturity = (T - date) / 365;
-            double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.RhoBS(optionFlag, position, s, vol, r, k, timeToMaturity, q);
-            return sensitivity;
-        }
+            double[,] sensitivities = new double[4, 1]; // Tableau 2D pour simuler une colonne
 
-        public static double[,] SensiOption(string optionFlag, string position, double k, double T, string underlying, double? q = null)
-        {
-            double[,] sensitivities = new double[5, 1]; // Tableau 2D pour simuler une colonne
-
-            sensitivities[0, 0] = Delta(optionFlag, position, k, T, underlying, q);
-            sensitivities[1, 0] = Gamma(optionFlag, position, k, T, underlying, q);
-            sensitivities[2, 0] = Theta(optionFlag, position, k, T, underlying, q);
-            sensitivities[3, 0] = Vega(optionFlag, position, k, T, underlying, q);
-            sensitivities[4, 0] = Rho(optionFlag, position, k, T, underlying, q);
-
-
+            sensitivities[0, 0] = Delta(quantity, optionFlag, position, k, T, underlying, q);
+            sensitivities[1, 0] = Gamma(quantity, optionFlag, position, k, T, underlying, q);
+            sensitivities[2, 0] = Theta(quantity, optionFlag, position, k, T, underlying, q);
+            sensitivities[3, 0] = Vega(quantity, optionFlag, position, k, T, underlying, q);
 
             return sensitivities;
         }
@@ -113,30 +111,37 @@ namespace ValoLibrary
 
         ////// option portfolio
         ///
-        public static double OptionPortfolioPrice(int numberOfOptions, Parameters[] options)
+        public static double OptionPortfolioPrice(Parameters[] options)
         {
-            if (options.Length != numberOfOptions)
+            try
             {
-                throw new ArgumentException("Le nombre d'options ne correspond pas à la valeur spécifiée.");
+
+
+                if (options == null || options.Length < 1)
+                {
+                    throw new ArgumentException("The option portfolio must contain at least one option.");
+                }
+                double portfolioPrice = 0;
+
+                foreach (Parameters option in options)
+                {
+                    double optionPrice = OptionPrice(option.quantity, option.optionFlag, option.position, option.strike, option.maturity, option.underlying, option.dividend);
+
+                    portfolioPrice += optionPrice;
+                }
+
+                return portfolioPrice;
             }
-
-            double portfolioPrice = 0;
-
-            foreach (Parameters option in options)
+            catch (Exception ex)
             {
-                double optionPrice = OptionPrice(option.optionFlag, option.position, option.strike, option.maturity, option.underlying, option.dividend);
 
-                portfolioPrice += optionPrice;
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
             }
-
-            return portfolioPrice;
         }
 
 
 
-
     }
-
-
 
 }
