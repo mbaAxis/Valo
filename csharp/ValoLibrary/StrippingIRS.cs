@@ -61,6 +61,11 @@ namespace ValoLibrary
                 }
             }
 
+            if (InterestRateCurves.Curves != null && InterestRateCurves.Curves.Length > InterestRateCurves.NumberOfCurves)
+            {
+                InterestRateCurves.NumberOfCurves = InterestRateCurves.Curves.Length;
+            }
+
             for (int i = 1; i <= InterestRateCurves.NumberOfCurves; i++)
             {
                 if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName.ToString(), StringComparison.OrdinalIgnoreCase))

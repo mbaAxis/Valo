@@ -259,13 +259,14 @@ namespace ValoLibrary
 
             maturityDate = ConvertDate(paramDate, maturity);
 
-            if (cpnLastSettle == null || cpnLastSettle == DBNull.Value || (cpnLastSettle is DateTime lastSettleDateTime && lastSettleDateTime == DateTime.MinValue))
+
+            if (cpnLastSettle == "" || cpnLastSettle == null || cpnLastSettle == DBNull.Value || (cpnLastSettle is DateTime lastSettleDateTime && lastSettleDateTime == DateTime.MinValue))
             {
                 lastSettle = paramDate;
             }
             else
             {
-                lastSettle = (cpnLastSettle is DateTime) ? (DateTime)cpnLastSettle : paramDate;
+                lastSettle = (cpnLastSettle is DateTime) ? (DateTime) cpnLastSettle : paramDate;
             }
 
             if (isFirst)

@@ -66,6 +66,14 @@ namespace ValoLibrary
                 }
             }
 
+            Console.WriteLine("================================================1 " + CreditDefaultSwapCurves.NumberOfCurves);
+            Console.WriteLine("================================================2 " + CreditDefaultSwapCurves.Curves.Length);
+
+            if (CreditDefaultSwapCurves.Curves != null && CreditDefaultSwapCurves.Curves.Length > CreditDefaultSwapCurves.NumberOfCurves)
+            {
+                CreditDefaultSwapCurves.NumberOfCurves = CreditDefaultSwapCurves.Curves.Length;
+            }
+
             for (i = 0; i < CreditDefaultSwapCurves.NumberOfCurves; i++)
             {
                 if (string.Equals(CreditDefaultSwapCurves.Curves[i].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
@@ -137,16 +145,50 @@ namespace ValoLibrary
                 CreditDefaultSwapCurves.Curves[CurveID].StrippedDPandShocked[NDates + i] = StrippedDP[NDates + i];
             }
 
-            CDSRollDateOffset = MonthlyDP.GetLowerBound(0);
-            CreditDefaultSwapCurves.Curves[CurveID].MonthlyDPandShocked = new double[121, 2];
 
-            for (i = CDSRollDateOffset; i <= 120; i++)
+            CDSRollDateOffset = MonthlyDP.GetLowerBound(0) - 3;
+
+            CreditDefaultSwapCurves.Curves[CurveID].MonthlyDPandShocked = new double[121 - CDSRollDateOffset, 2];
+
+            for (i = 0; i < 120 - CDSRollDateOffset; i++)
             {
                 for (Scenario = 0; Scenario <= 1; Scenario++)
                 {
                     CreditDefaultSwapCurves.Curves[CurveID].MonthlyDPandShocked[i, Scenario] =MonthlyDP[i, Scenario];
                 }
             }
+
+            // add
+            //Console.WriteLine("IccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccNDates=" + NDates);
+            //for (i = 0; i < NDates; i++)
+            //{
+            //    Console.WriteLine("CurveDates[" +i +"] =" + CreditDefaultSwapCurves.Curves[CurveID].CurveDates[i]);          
+            //}
+            //for (i = 0; i < NDates; i++)
+            //{
+            //    Console.WriteLine("CDSSpread[" + i + "] =" + CreditDefaultSwapCurves.Curves[CurveID].CDSSpread[i]);
+            //}
+            //for (i = 0; i < NDates; i++)
+            //{                               
+            //    Console.WriteLine("StrippedDPandShocked[" + i + "] =" + CreditDefaultSwapCurves.Curves[CurveID].StrippedDPandShocked[i]);
+            //}
+
+            //for (i = 0; i < NDates; i++)
+            //{
+            //    Console.WriteLine("StrippedDPandShocked[" + NDates + i + "] =" + CreditDefaultSwapCurves.Curves[CurveID].StrippedDPandShocked[NDates + i]);
+            //}
+
+            //Console.WriteLine("MonthlyDPandShockedlength = " + CreditDefaultSwapCurves.Curves[CurveID].MonthlyDPandShocked.GetLength(0));
+            //for (i = 0; i < 120 - CDSRollDateOffset; i++)
+            //{
+            //    for (Scenario = 0; Scenario <= 1; Scenario++)
+            //    {
+            //        Console.WriteLine( CreditDefaultSwapCurves.Curves[CurveID].MonthlyDPandShocked[i, Scenario] );
+            //    }
+            //}
+
+
+            // end add
 
             CreditDefaultSwapCurves.Curves[CurveID].CDSdone = true;
             return true;
@@ -912,6 +954,9 @@ namespace ValoLibrary
                     }
                 }
             }
+
+            Console.WriteLine("isstoredp? = " + StoreDP(ParamDate, cdsID, CDSName, RecoveryRate, CDSCurrency, CurveMaturity, CDSCurve, Res, CDSRollDate, FullDefaultProb));
+
 
             if (StoreDP(ParamDate, cdsID, CDSName, RecoveryRate, CDSCurrency, CurveMaturity, CDSCurve, Res, CDSRollDate, FullDefaultProb))
             {

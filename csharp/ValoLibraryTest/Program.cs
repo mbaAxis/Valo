@@ -1,5 +1,67 @@
 ﻿using ValoLibrary;
 
+
+////////////////////////////////////: OPtion//////////////////////////////////::::::
+////=========================================================================================================
+double T = 1;
+double T2 = 44989;
+double S = 100;
+double strike = 100;
+double r = 0.05;
+//double r = 0.967197916277398;
+double sigma = 0.2;
+//double sigma = Math.Sqrt(2 * Math.PI / T) * 0.16 / S;
+string underlying = "CAC40";
+UDF exemple = new();
+string position1 = "long";
+//string position2 = "short";
+//double q = 0.306845697901433;
+double q = 0;
+double quantity = 2;
+
+
+
+
+string Flag = "call";
+string Flag1 = "put";
+
+double mc = exemple.GetMCEurOptionPrice(quantity, Flag, position1, S, sigma, r, strike, T);
+double prix11 = exemple.GetBSOptionPrice(quantity, Flag, position1, S, sigma, r, strike, T, q);
+double prix12 = exemple.GetBSOptionPrice(1, Flag, position1, S, sigma, r, strike, T, q);
+
+double delta = exemple.GetDeltaBS(quantity, Flag, position1, S, sigma, r, strike, T, q);
+double[,] sensi = exemple.GetSensiOptionBS(quantity, Flag, position1, S, sigma, r, strike, T, q);
+////double[,] sensi2 = exemple.GetSensiOption(Flag, strike, T2, underlying);
+//double prix5= exemple.GetOptionPrice(Flag, position1, strike, T2, underlying, 0);
+
+Console.WriteLine("mc call =" + mc);
+Console.WriteLine("BS call2 =" + prix11);
+Console.WriteLine("BS call1 =" + prix12);
+Console.WriteLine("BS call12 =" + 2 * prix12);
+Console.WriteLine("delta =" + delta);
+
+//Console.WriteLine("call =" + prix5);
+
+foreach (var kvp in sensi)
+{
+    Console.WriteLine($"sensi cal BS: {kvp}");
+}
+foreach (var sen in sensi)
+{
+    Console.WriteLine($"{sen}");
+}
+
+////===========================================portfolio======================
+
+//BSParameters[] params1 = new BSParameters[1];
+//params1[0] = new BSParameters { quantity = quantity, optionFlag = Flag, position = position1, s = S, sigma = sigma, r = r, k = strike, T = T, q = q };
+
+//double portfolioPrice = exemple.GetBSOptionPortfolioPrice(params1);
+
+//Console.WriteLine("Prix du portefeuille d'options BS : " + portfolioPrice);
+
+//////////////////////////////////////////////////////////:::end Option////////////////////////////////////////////////////////////////////////
+
 //Console.WriteLine("===================Test Utility Matrix====================");
 
 //// Exemple d'utilisation de la fonction Choleski avec une matrice 3x3
@@ -70,7 +132,7 @@
 //================================================================
 
 
-DateTime paramDate1 = new(2024, 3, 1);
+//DateTime paramDate1 = new(2024, 3, 1);
 
 //double[]ZC = { 1.0, 1, 1 }; // Exemple de taux de zéro coupon
 
@@ -132,51 +194,100 @@ DateTime paramDate1 = new(2024, 3, 1);
 
 //Console.WriteLine("===================Test Stripping CDS====================");
 
-string curveName = "EUR";
-DateTime paramDate = new DateTime(2024, 03, 03);
-double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
-string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
-int swapPeriod = 12;
-int swapBasis = 4;
-double fxSpot = 1;
-StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
+//string curveName = "EUR";
+//DateTime paramDate = new DateTime(2024, 03, 03);
+//double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
+//string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
+//int swapPeriod = 12;
+//int swapBasis = 4;
+//double fxSpot = 1;
+//StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
 
-int cdsID = 1;
-string CDSName = "ABNAMRO_MMR.EUR.SU";
-DateTime ParamDate = new(2024, 03, 03);
-DateTime CDSRollDate = StrippingCDS.CDSRefDate(ParamDate);
-double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
-//bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
+//int cdsID = 1;
+//string CDSName = "ABNAMRO_MMR.EUR.SU";
+//DateTime ParamDate = new(2024, 03, 03);
+//DateTime CDSRollDate = StrippingCDS.CDSRefDate(ParamDate);
+//double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
+////bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
 
-//Console.WriteLine("id vbaMontlyZC = " + vbaMontlyZC);
-
-
-string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
-string CDSCurrency = "EUR";
-double RecoveryRate = 0.4; // Par exemple, 40%
-bool alterMode = false;
-string intensity = "3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+////Console.WriteLine("id vbaMontlyZC = " + vbaMontlyZC);
 
 
-// Appel de la fonction à tester
-double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, ParamDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+//string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+//string CDSCurrency = "EUR";
+//double RecoveryRate = 0.4; // Par exemple, 40%
+//bool alterMode = false;
+//string intensity = "3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
 
 
-// Vérification du résultat
-if (result != null)
-{
-    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
-    for (int i = 0; i < result.Length; i++)
-    {
-        Console.WriteLine(result[i]);
-    }
-}
-else
-{
-    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
-}
+//// Appel de la fonction à tester
+//double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, ParamDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
 
-Console.WriteLine("===================End Stripping CDS====================");
+
+//// Vérification du résultat
+//if (result != null)
+//{
+//    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
+//    for (int i = 0; i < result.Length; i++)
+//    {
+//        Console.WriteLine(result[i]);
+//    }
+//}
+//else
+//{
+//    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
+//}
+
+//Console.WriteLine("===================End Stripping CDS====================");
+
+//StoreDP(DateTime paramDate, int cdsID, string CDSName,
+//           double RecoveryRate, string Currency, string[] CurveDates,
+//           double[] CDSCurve, double[] StrippedDP, DateTime CDSRollDate,
+//           double[,] MonthlyDP)
+
+//bool isdoing = StrippingCDS.StoreDP(paramDate, cdsID, CDSName,
+//            RecoveryRate, Currency, CurveDates,
+//           CDSCurve, StrippedDP, CDSRollDate,
+//           MonthlyDP);
+
+//Console.WriteLine(isdoing);
+
+//Console.WriteLine("=================== Start Model Interface ====================");
+
+//string issuerId = "ABNAMRO_MMR.EUR.SU";
+//string maturity = "5Y";
+//double spread = 0.01;
+//double recoveryRate = 0.4;
+//string pricingCurrency = "EUR";
+//double fxCorrel = 0.0;
+//double fxVol = 0.0;
+
+//string cpnPeriod = "3M";
+//string cpnConvention = "LongFirst";
+//string cpnLastSettle = "";
+
+//bool isAmericanFloatLeg = true;
+//bool isAmericanFixedLeg = true;
+//bool withGreeks = true;
+
+//string integrationPeriod = "1m";
+//double probMultiplier = 1;
+
+//object[] hedgingCds = { 0.0, true, true };
+
+
+//object result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
+// fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, integrationPeriod, probMultiplier);
+
+//// Affichage du résultat
+//Console.WriteLine(result3);
+
+
+
+//Console.WriteLine("=================== End Model Interface ====================");
+
+
+
 
 
 //Console.WriteLine("===================Test CDO MOdel====================");
@@ -309,97 +420,3 @@ Console.WriteLine("===================End Stripping CDS====================");
 //   Console.WriteLine("La fonction GetDefaultDistributionLossUnit a renvoyé null. Vérifiez la console pour les détails d'erreur.");
 //}
 //Console.WriteLine("===================End CDO Model====================");
-
-//Console.WriteLine("=================== Start Model Interface ====================");
-
-//string issuerId = "ABNAMRO_MMR.EUR.SU";
-//string maturity = "5Y";
-//double spread = 0.01;
-//double recoveryRate = 0.4;
-//string pricingCurrency = "EUR";
-//double fxCorrel = 0.0;
-//double fxVol = 0.0;
-
-//string cpnPeriod = "3M";
-//string cpnConvention = "LongFirst";
-//string cpnLastSettle = "";
-
-//bool isAmericanFloatLeg = true;
-//bool isAmericanFixedLeg = true;
-//bool withGreeks = true;
-
-//string integrationPeriod = "1m";
-//double probMultiplier = 1;
-
-//object[] hedgingCds = { 0.0, true, true };
-
-
-//object result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
-// fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, integrationPeriod, probMultiplier);
-
-//// Affichage du résultat
-//Console.WriteLine(result3);
-
-
-
-//Console.WriteLine("=================== End Model Interface ====================");
-
-
-//=========================================================================================================
-double T = 1;
-double T2 = 44989;
-double S = 100;
-double strike = 100;
-double r = 0.05;
-//double r = 0.967197916277398;
-double sigma = 0.2;
-//double sigma = Math.Sqrt(2 * Math.PI / T) * 0.16 / S;
-string underlying = "CAC40";
-UDF exemple = new();
-string position1 = "long";
-//string position2 = "short";
-//double q = 0.306845697901433;
-double q = 0;
-double quantity = 2;
-
-
-
-
-string Flag = "call";
-string Flag1 = "put";
-
-double mc = exemple.GetMCEurOptionPrice(quantity,Flag, position1, S, sigma, r, strike, T);
-double prix11 = exemple.GetBSOptionPrice(quantity, Flag, position1, S, sigma, r, strike, T, q);
-double prix12 = exemple.GetBSOptionPrice(1, Flag, position1, S, sigma, r, strike, T, q);
-
-double delta = exemple.GetDeltaBS(quantity, Flag, position1, S, sigma, r, strike, T, q);
-double[,] sensi = exemple.GetSensiOptionBS(quantity, Flag, position1,  S, sigma, r, strike, T, q);
-////double[,] sensi2 = exemple.GetSensiOption(Flag, strike, T2, underlying);
-//double prix5= exemple.GetOptionPrice(Flag, position1, strike, T2, underlying, 0);
-
-Console.WriteLine("mc call =" + mc);
-Console.WriteLine("BS call2 =" + prix11);
-Console.WriteLine("BS call1 =" + prix12);
-Console.WriteLine("BS call12 =" +2* prix12);
-Console.WriteLine("delta =" + delta);
-
-//Console.WriteLine("call =" + prix5);
-
-foreach (var kvp in sensi)
-{
-    Console.WriteLine($"sensi cal BS: {kvp}");
-}
-foreach (var sen in sensi)
-{
-    Console.WriteLine($"{sen}");
-}
-
-//===========================================portfolio======================
-
-BSParameters[] params1 = new BSParameters[1];
-params1[0] = new BSParameters { quantity = quantity, optionFlag = Flag, position = position1, s = S, sigma = sigma, r = r, k = strike, T = T, q = q };
-
-double portfolioPrice = exemple.GetBSOptionPortfolioPrice(params1);
-
-Console.WriteLine("Prix du portefeuille d'options BS : " + portfolioPrice);
-

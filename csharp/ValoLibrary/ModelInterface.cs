@@ -267,16 +267,38 @@ namespace ValoLibrary
                 withGreeks, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
         }
 
-        public static object CDS(object issuerId, string maturity, double spread, double recoveryRate,
+        public static object CDS(object issuerIdParam, string maturity, double spread, double recoveryRate,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, bool isAmericanFloatLeg = false, bool isAmericanFixedLeg = false,
         bool withGreeks = false, object hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
         {
-            Console.WriteLine("okkkkkk issuerId = " + issuerId);
-            if (!Utils.IsNumeric(issuerId))
+            //DateTime paramDate = new DateTime(2024, 03, 03);
+            //DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
+            //int cdsID = 1;
+            //string CDSName = CreditDefaultSwapCurves.Curves[cdsID].CDSName; 
+
+            //string[] CurveDates = CreditDefaultSwapCurves.Curves[cdsID].CurveDates;
+            //double[] CDSCurve = CreditDefaultSwapCurves.Curves[cdsID].CDSSpread;
+            //double[] StrippedDP = CreditDefaultSwapCurves.Curves[cdsID].StrippedDPandShocked;
+            //double [,] MonthlyDP = CreditDefaultSwapCurves.Curves[cdsID].MonthlyDPandShocked;
+
+            //if (StoreDP(paramDate, cdsID,CDSName, recoveryRate,pricingCurrency, CurveDates, CDSCurve, StrippedDP, CDSRollDate, MonthlyDP))
+            //{
+            //    Console.WriteLine("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiitrue");
+            //}
+
+            int issuerId;
+
+            if (!Utils.IsNumeric(issuerIdParam))
             {
-                issuerId = 2 + StrippingCDS.GetCDSCurveId((string)issuerId);
+                issuerId = StrippingCDS.GetCDSCurveId((string) issuerIdParam) - 1;
             }
+            else
+            {
+                issuerId = (int) issuerIdParam - 1;
+            }
+            
+
             Console.WriteLine("okkkkkk11 issuerId = " + issuerId);
             if (Convert.ToDouble(issuerId) > CreditDefaultSwapCurves.NumberOfCurves)
             {
@@ -323,9 +345,7 @@ namespace ValoLibrary
     double lossUnitAmount = 0.0, string integrationPeriod = "1m",
     DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1)
         {
-
-
-            Console.WriteLine("Commencons =========================================================================================");
+            Console.WriteLine("Commencons fffff =========================================================================================");
             int i, j, k;
 
             double LossRate;
@@ -337,7 +357,10 @@ namespace ValoLibrary
             int CurveID;
             DateTime ParamDate, StartTime;
 
+            Console.WriteLine("Commencons HHHHHHHHHH =========================================================================================");
+
             CurveID = StrippingIRS.GetCurveId(pricingCurrency);
+            Console.WriteLine("11111111 ========================================================================================= CurveID = "+ CurveID);
             if (CurveID == -1)
             {
                 if (StrippingIRS.InterestRateCurves.LastError == false)
@@ -347,12 +370,15 @@ namespace ValoLibrary
                 }
                 return null;
             }
+            Console.WriteLine("2222222 ========================================================================================= CurveID = " + CurveID);
 
             double[] ZC;
             string[] ZCDate;
             ParamDate = StrippingIRS.InterestRateCurves.Curves[CurveID].ParamDate;
             ZCDate = StrippingIRS.InterestRateCurves.Curves[CurveID].CurveDates;
             ZC = StrippingIRS.InterestRateCurves.Curves[CurveID].StrippedZC;
+
+            Console.WriteLine("3333333 ========================================================================================= CurveID = " + CurveID);
 
             if (string.IsNullOrEmpty(integrationPeriod))
             {
@@ -367,11 +393,17 @@ namespace ValoLibrary
 
             StartTime = DateTime.Now;
 
+            Console.WriteLine("44444444 ========================================================================================= CurveID = " + CurveID);
+
             // Is this a CDO or a CDS
 
             bool IsCDO;
+            Console.WriteLine("numberOfIssueré" + numberOfIssuer);
+
             if (numberOfIssuer > 1)
             {
+                Console.WriteLine("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+
                 IsCDO = true;
                 LossRate = 1;
             }
@@ -383,24 +415,34 @@ namespace ValoLibrary
                 LossRate = 1 - (double)recoveryIssuer;
             }
 
+            Console.WriteLine("5555555 ========================================================================================= CurveID = " + CurveID);
+
             DateTime CDSRollDate;
             CDSRollDate = StrippingCDS.CreditDefaultSwapCurves.CDSRollDate;
             DateTime[]schedule;
 
             if (cpnSchedule == null)
             {
-               maturity = UtilityDates.ConvertDate(CDSRollDate, (string)maturity);
-                schedule = UtilityDates.SwapSchedule(ParamDate, (string)maturity, (DateTime)cpnLastSettle, cpnPeriod, cpnConvention);
+                maturity = UtilityDates.ConvertDate(CDSRollDate, (string)maturity);
+                if (cpnLastSettle != null && cpnLastSettle != "")
+                {
+                    cpnLastSettle = (DateTime)cpnLastSettle;
+                }
+
+                Console.WriteLine("OOOOOOOOOOOOOOOO ========================================================================================= cpnPeriod = ");
+                schedule = UtilityDates.SwapSchedule(ParamDate, maturity+"", cpnLastSettle, cpnPeriod, cpnConvention);
             }
             else
             {
                 schedule = cpnSchedule;
             }
 
+            Console.WriteLine("+++++++++++ ========================================================================================= cpnPeriod = ");
+
             int NumberOfDates = schedule.Length;
 
             DateTime[] ScheduleIntermed;
-            double CouponDateCounter;
+            int CouponDateCounter;
             DateTime PreviousCouponDate;
             object NextCouponDate;
             double PreviousNumberOfIntegrationDates;
@@ -408,26 +450,26 @@ namespace ValoLibrary
             double NumberOfIntegrationDates = 0;
             double[] NumberofIntegrationDateOnCouponDate = null;
 
-
             DateTime[] ScheduleIntegration = null;
             double IntegrationDateCounter;
            
-
             Array.Resize(ref ScheduleIntegration, (int)NumberOfIntegrationDates + 1);
-            Array.Resize(ref NumberofIntegrationDateOnCouponDate, NumberOfDates +1);
+            Array.Resize(ref NumberofIntegrationDateOnCouponDate, NumberOfDates + 1);
 
             ScheduleIntegration[0] = schedule[0];
             NumberofIntegrationDateOnCouponDate[0] = 0;
 
-            for (CouponDateCounter = 1; CouponDateCounter <= NumberOfDates; CouponDateCounter++)
+            Console.WriteLine("KKKKKKKKKKK ========================================================================================= " );
+
+            for (CouponDateCounter = 1; CouponDateCounter < NumberOfDates; CouponDateCounter++) // <
             {
-                PreviousCouponDate = (DateTime)schedule[(int)CouponDateCounter - 1];
-                NextCouponDate = (DateTime)schedule[(int)CouponDateCounter];
-                ScheduleIntermed = UtilityDates.SwapSchedule(PreviousCouponDate, (string)NextCouponDate, PreviousCouponDate, integrationPeriod, "ShortFirst");
+                PreviousCouponDate = (DateTime)schedule[CouponDateCounter - 1];
+                NextCouponDate = (DateTime)schedule[CouponDateCounter];
+                ScheduleIntermed = UtilityDates.SwapSchedule(PreviousCouponDate, NextCouponDate+"", PreviousCouponDate+"", integrationPeriod, "ShortFirst");
                 PreviousNumberOfIntegrationDates = NumberOfIntegrationDates;
                 NumberOfIntegrationDates = (int)PreviousNumberOfIntegrationDates + ScheduleIntermed.Length;
                 NumberofIntegrationDateOnCouponDate[(int)CouponDateCounter] = NumberOfIntegrationDates;
-                Array.Resize(ref ScheduleIntegration, (int)NumberOfIntegrationDates + 1);
+                Array.Resize(ref ScheduleIntegration, (int) NumberOfIntegrationDates + 1);
                 for (IntegrationDateCounter = 0; IntegrationDateCounter < ScheduleIntermed.Length; IntegrationDateCounter++)
                 {
                     ScheduleIntegration[(int)PreviousNumberOfIntegrationDates + (int)IntegrationDateCounter] = ScheduleIntermed[(int)IntegrationDateCounter];
@@ -435,6 +477,8 @@ namespace ValoLibrary
             }
 
             NumberOfIntegrationDates = ScheduleIntegration.Length;
+
+            Console.WriteLine("NumberOfIntegrationDates ========================================================================================= " + NumberOfIntegrationDates);
 
             //'
             //' Compute the risk free zc at schedule dates
@@ -444,10 +488,10 @@ namespace ValoLibrary
 
             double[] RiskFreeZC = new double[(int)NumberOfIntegrationDates + 1];
             RiskFreeZC[0] = 1;
-            for (i = 1; i <= NumberOfIntegrationDates; i++)
+            for (i = 1; i < NumberOfIntegrationDates; i++) // <=
             {
                 CurrentDate = ScheduleIntegration[i];
-                RiskFreeZC[i] = StrippingIRS.VbaGetRiskFreeZC(ParamDate, (string)CurrentDate, ZC, ZCDate);
+                RiskFreeZC[i] = StrippingIRS.VbaGetRiskFreeZC(ParamDate, CurrentDate+"", ZC, ZCDate);
             }
 
             object[] EuropeanLow = null;
@@ -455,13 +499,14 @@ namespace ValoLibrary
             double[,] European;
             double[,] dProb = null;
 
-            Console.WriteLine("11111111111111111111111111111111111111111111111111111111111111111");
+            Console.WriteLine("IsCDO " + IsCDO);
 
             if (IsCDO)
             {
 
                 EuropeanLow = new object[(int)NumberOfIntegrationDates];
                 EuropeanHigh = new object[(int)NumberOfIntegrationDates];
+                Console.WriteLine("strike =========" + strikes);
                 TrancheWidth = ((double[])strikes)[1] - ((double[])strikes)[0];
             }
             else
@@ -484,17 +529,20 @@ namespace ValoLibrary
 
 
 
-            object[] CDSListID;// = new object[0];
+            object CDSListID;// = new object[0];
             
 
             if (IssuerID == null)
             {
-                CDSListID  = new object[] { 1 };
+                CDSListID  = 1;
             }
             else
             {
-                CDSListID = (object[])IssuerID;
+                //CDSListID = (object[])IssuerID;
+                CDSListID = IssuerID ;
             }
+
+            Console.WriteLine("11111111111111111111111111111111111111111111111111111111111111111===========");
 
             //'
             //' Dimension the ouput array depending on whether greeks are requested or not
@@ -550,37 +598,45 @@ namespace ValoLibrary
             double[] DefaultProbability = new double[numberOfIssuer];
 
 
-
-            for (i = (int)NumberOfIntegrationDates; i >= LastDateWhenEuroCDONeeded; i--)
+            for (int g = (int)NumberOfIntegrationDates; g >= LastDateWhenEuroCDONeeded; g--)
             {
+                i = g - 1;
+                Console.WriteLine("position g = " + i + " NumberOfIntegrationDates = " + NumberOfIntegrationDates);
                 CurrentDate = ScheduleIntegration[i];
                 if ((DateTime)CurrentDate <= ParamDate)
                 {
+                    Console.WriteLine("aaaaaaaaaaaaaaaaaaaaa = " + i);
                     European[i, 0] = 0;
                     if (withGreeks)
                     {
                         for (j = 0; j < numberOfIssuer; j++)
                         {
                             European[i, j + 1] = 0;
-                            European[i, numberOfIssuer + j + 1] = 0;
+                            European[i, numberOfIssuer - 1 + j + 1] = 0; // -1
                         }
                     }
+                    Console.WriteLine("ccccccccccccccccccccc = " + i);
                 }
                 else
                 {
+                    Console.WriteLine("dddddddddddddddddddddd = " + i);
+
                     CurrentZC = RiskFreeZC[i];
+                    Console.WriteLine("eeeeeeeeeeeeeeeeeeeeeeeeeee = " + i);
                     // modif QUANTO
                     CurrentTime = UtilityDates.DurationYear((DateTime)CurrentDate, ParamDate);
+                    Console.WriteLine("fffffffffffffffffffffffffffffffffffff = " + i);
                     string IssuerCurrency;
                     // end
                     if (IsCDO)
                     {
+                        Console.WriteLine("ggggggggggggggggggggggggggggggggggg = " + i);
                         for (j = 0; j < numberOfIssuer; j++)
                         {
-                            cdsID = (int)CDSListID[j];
+                            cdsID = ((int[])CDSListID)[j];
                             ThisCDS = StrippingCDS.CreditDefaultSwapCurves.Curves[cdsID];
                             IssuerCurrency = ThisCDS.Currency;
-                            DefaultProbability[j] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, (string)CurrentDate, pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
+                            DefaultProbability[j] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, CurrentDate+"", pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
 
                             // If DefaultProbability(j) = "Error Def Prob" Then
                             if (!UtilityDates.IsNumeric(DefaultProbability[j]))
@@ -589,20 +645,27 @@ namespace ValoLibrary
                             }
                             if (withGreeks)
                             {
-                                dProb[i,j] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, (string)CurrentDate, pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[j];
+                                dProb[i,j] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, CurrentDate+"", pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[j];
                             }
                         }
                     }
                     else
                     {
+                        Console.WriteLine("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh = " + i);
                         // modif QUANTO
-                        IssuerCurrency = StrippingCDS.CreditDefaultSwapCurves.Curves[(int)CDSListID[0]].Currency;
-                        DefaultProbability[1] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID[0], ParamDate, (string)CurrentDate, pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
+                        IssuerCurrency = StrippingCDS.CreditDefaultSwapCurves.Curves[(int)CDSListID].Currency;
+
+                        DefaultProbability[0] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID, ParamDate, CurrentDate+"", pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
+                        
                         if (withGreeks)
                         {
-                            dProb[i, 1] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID[0], ParamDate, (string)CurrentDate, pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[1];
+                            Console.WriteLine("on entreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee = ");
+
+                            dProb[i, 0] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID, ParamDate, CurrentDate+"", pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[0];
                         }
                     }
+
+                    Console.WriteLine("inexxxxxxxxxxxxxx = ");
 
                     if (IsCDO)
                     {
@@ -619,17 +682,20 @@ namespace ValoLibrary
                             }
                         }
                     }
+
                     else
                     {
                         CurrentZC = RiskFreeZC[i] * LossRate;
-                        European[i, 1] = DefaultProbability[1] * CurrentZC;
+                        European[i, 0] = DefaultProbability[0] * CurrentZC;
                         if (withGreeks)
                         {
                             // compute dCDS
-                            European[i, 2] = European[i, 1] + CurrentZC * dProb[i, 1];
-                            European[i, 3] = 0;
+                            European[i, 1] = European[i, 0] + CurrentZC * dProb[i, 0];
+                            European[i, 2] = 0;
                         }
                     }
+
+                    Console.WriteLine("huhuhuhhuhuhuh = " + i);
                 }
             }
 
@@ -663,7 +729,7 @@ namespace ValoLibrary
                     }
                     else
                     {
-                        double Financing = (1 - RiskFreeZC[i] / RiskFreeZC[i - 1]);
+                        double Financing = (1 - RiskFreeZC[i] / (double) RiskFreeZC[i - 1]);
                         x[1, 0] = (double)x[1, 0] + European[i, 1] * Financing;
                         if (withGreeks)
                         {
@@ -739,13 +805,13 @@ namespace ValoLibrary
                             for (k = (int)NumberofIntegrationDateOnCouponDate[i - 1] + 1; k <= NumberofIntegrationDateOnCouponDate[i]; k++)
                             {
     
-                                this_bpv = (ScheduleIntegration[k] - ScheduleIntegration[k - 1]).TotalDays / 360.0 * RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
+                                this_bpv = (ScheduleIntegration[k] - ScheduleIntegration[k - 1]).TotalDays / 360.0 * (double) RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
 
                                 // Risky Coupon if american leg
                                 if (IsAmericanfixedleg)
                                 {
-                                    double NextProbNoDef = (1.0 - European[k, j] / RiskFreeZC[k] / TrancheWidth / LossRate);
-                                    this_bpv = this_bpv * (NextProbNoDef + 0.5 * PreviousProbNoDef * (1.0 - NextProbNoDef / PreviousProbNoDef));
+                                    double NextProbNoDef = (1.0 - European[k, j] / (double) RiskFreeZC[k] / (double) TrancheWidth / (double) LossRate);
+                                    this_bpv = this_bpv * (NextProbNoDef + 0.5 * PreviousProbNoDef * (1.0 - NextProbNoDef / (double) PreviousProbNoDef));
                                     PreviousProbNoDef = NextProbNoDef;
                                 }
 
@@ -759,14 +825,14 @@ namespace ValoLibrary
                             // Coupon is calculated up to Credit Event Date
                             // and is paid on Credit Event Date
 
-                            this_bpv = (schedule[i] - schedule[i]).TotalDays / 360.0 * RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
+                            this_bpv = (schedule[i] - schedule[i]).TotalDays / 360.0 * (double) RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
 
                             // reduction of bpv due to Credit Event in case of american fixed leg
 
                             double DefaultDayCountFraction;
                             if (IsAmericanfixedleg)
                             {
-                                this_bpv = this_bpv * (1.0 - European[(int)NumberofIntegrationDateOnCouponDate[i], j] / RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]] / TrancheWidth / LossRate);
+                                this_bpv = this_bpv * (1.0 - European[(int)NumberofIntegrationDateOnCouponDate[i], j] / (double) RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]] / (double) TrancheWidth / (double) LossRate);
 
                                 for (k = (int)NumberofIntegrationDateOnCouponDate[i] ; k < NumberofIntegrationDateOnCouponDate[i]; k++)
                                 {
@@ -776,9 +842,9 @@ namespace ValoLibrary
                                     // Default is assumed to occur at mid integration period
                                     //DefaultDayCountFraction = (int)((Date2 + Date1).TotalDays / 2 - schedule[i - 1].TotalDays) / 360.0;
 
-                                    DefaultDayCountFraction = (int)((Date2 - Date1).TotalDays / 2 + Date1.Subtract(schedule[i]).TotalDays) / 360.0;
+                                    DefaultDayCountFraction = (int)((Date2 - Date1).TotalDays / 2 + (double) Date1.Subtract(schedule[i]).TotalDays) / 360.0;
 
-                                    double NextProbNoDef = (1.0 - European[k, j] / RiskFreeZC[k] / TrancheWidth / LossRate);
+                                    double NextProbNoDef = (1.0 - European[k, j] / (double) RiskFreeZC[k] / (double) TrancheWidth / (double) LossRate);
                                     double Accrued_bpv = DefaultDayCountFraction * (-NextProbNoDef + PreviousProbNoDef) * Math.Sqrt(RiskFreeZC[k] * RiskFreeZC[k]);
                                     this_bpv += Accrued_bpv;
                                     PreviousProbNoDef = NextProbNoDef;
@@ -796,7 +862,7 @@ namespace ValoLibrary
             x[4, 0] = bpv[0];
 
             // Compute the ATMSpread
-            x[3, 0] = (double)x[1, 0] / TrancheWidth / (double)x[4, 0];
+            x[3, 0] = (double)x[1, 0] / (double) TrancheWidth / (double)x[4, 0];
             if (double.IsNaN(InputSpread))
             {
                 Spread = (double)x[3, 0];
@@ -830,7 +896,7 @@ namespace ValoLibrary
 
                     if (HedgingCDS != null)
                     {
-                        j = (IsCDO) ? (int)CDSListID[i] : (int)CDSListID[0];
+                        j = (IsCDO) ? ((int[])CDSListID)[i] : ((int[])CDSListID)[0];
                         ThisCDS = CreditDefaultSwapCurves.Curves[j];
 
                         double[,] hedging_cds;
@@ -858,7 +924,7 @@ namespace ValoLibrary
                         x[6 + i, 3] = (double)x[6 + i, 0] / hedging_cds[7, 0];
 
                         // Hedge in CDS currency (delta CDO is in CDO currency unit => it has to be converted)
-                        x[6 + i, 2] = ((double)x[6 + i, 3] / StrippingIRS.GetFXSpot(pricingCurrency)) * StrippingIRS.GetFXSpot(CreditDefaultSwapCurves.Curves[j].Currency);
+                        x[6 + i, 2] = ((double)x[6 + i, 3] / (double) StrippingIRS.GetFXSpot(pricingCurrency)) * StrippingIRS.GetFXSpot(CreditDefaultSwapCurves.Curves[j].Currency);
                         x[6 + i, 5] = CreditDefaultSwapCurves.Curves[j].CDSName;
 
                         if (IsCDO)
@@ -871,7 +937,7 @@ namespace ValoLibrary
 
                 if (IsCDO)
                 {
-                    Leverage /= TrancheWidth;
+                    Leverage /= (double) TrancheWidth;
                     x[5, 3] = Leverage;
                 }
             }
@@ -879,7 +945,7 @@ namespace ValoLibrary
             // Results in percentage of the tranche
             foreach (int ii in new int[] { 0, 1, 2 })
             {
-                x[ii, 1] = (double)x[ii, 0] / TrancheWidth;
+                x[ii, 1] = (double)x[ii, 0] / (double) TrancheWidth;
             }
 
             foreach (int ii in new int[] { 3, 4 })
