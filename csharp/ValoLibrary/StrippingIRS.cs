@@ -125,37 +125,32 @@ namespace ValoLibrary
             double lastZC = 1.0;
             DateTime lastDate = paramDate;
 
-            //Console.WriteLine("ZC.Length = " + ZC.Length + " | ZCDate.Length = " + ZCDate.Length + " | maturityDate = " + maturityDate + " | paramDate = " + paramDate);
-
             int j;
             for (j = 0; j < ZC.Length-1; j = j + 1)
             {
                 int dateCounter = j;
-                //Console.WriteLine("||| maturityDate " + maturityDate + " | = ZCDate[dateCounter] = " + ZCDate[dateCounter] + " | ZC[dateCounter+1] = " + ZC[dateCounter] + " | dateCounter = " + dateCounter);
                 if (ZCDate[dateCounter] != "" && ZCDate[dateCounter] != null && ZC[dateCounter+1] != 0)
                 {
                     DateTime nextDate = UtilityDates.ConvertDate(paramDate, ZCDate[dateCounter]);
-                    //Console.WriteLine("??? nextDate = " + nextDate + " | maturityDateX = " + maturityDateX + " | dateCounter = " + dateCounter);
                     if (nextDate >= maturityDateX)
                     {
-                        //Console.WriteLine("lastZC = " + lastZC + " | ZC[dateCounter] = " + ZC[dateCounter+1]);
                         return lastZC * Math.Pow((ZC[dateCounter+1] / (double) lastZC), (maturityDateX - lastDate).Days / (double) (nextDate - lastDate).Days);
                     }
                     else
                     {
-                        if (maturityDate == "20/03/2039 00:00:00")
-                        {
-                            Console.WriteLine("dateCounter = " + (dateCounter+1) + " |  ZC[dateCounter+1] = " + ZC[dateCounter + 1] + " | maturityDateX = " + maturityDateX + " | nextDate = " + nextDate);
-                        }
+                        //if (maturityDate == "20/03/2039 00:00:00")
+                        //{
+                        //    Console.WriteLine("dateCounter = " + (dateCounter+1) + " |  ZC[dateCounter+1] = " + ZC[dateCounter + 1] + " | maturityDateX = " + maturityDateX + " | nextDate = " + nextDate);
+                        //}
                         lastZC = ZC[dateCounter+1];
                         lastDate = nextDate;
                     }
                 }
             }
-            if (maturityDate == "20/03/2039 00:00:00")
-            {
-                Console.WriteLine("maturityDateX = " + maturityDateX + " | res = " + ((maturityDateX - paramDate).Days / (double) (lastDate - paramDate).Days) + " | lastZC = " + lastZC + " | lastDate = " + lastDate);
-            }
+            //if (maturityDate == "20/03/2039 00:00:00")
+            //{
+            //    Console.WriteLine("maturityDateX = " + maturityDateX + " | res = " + ((maturityDateX - paramDate).Days / (double) (lastDate - paramDate).Days) + " | lastZC = " + lastZC + " | lastDate = " + lastDate);
+            //}
             // Extrapoler à un taux constant
             return Math.Pow((double) lastZC,  ((maturityDateX - paramDate).Days / (double) (lastDate - paramDate).Days));
         }
@@ -307,8 +302,6 @@ namespace ValoLibrary
                 } while (testDate > paramDate);
             }
             months = InterestRateCurves.Curves[curveId].MonthlyZC.Length - 1;
-            //Console.WriteLine("icic");
-            Console.WriteLine("Month = " + months);
 
             Array.Resize(ref InterestRateCurves.Curves[curveId].MonthlyRollZC, months - zcCdsDateOffset + 1);
 
@@ -316,19 +309,6 @@ namespace ValoLibrary
             int cdsRollDateMonth = cdsRollDate.Month;
             int cdsRollDateDay = cdsRollDate.Day;
 
-            /*if (zcCdsDateOffset < 0)
-            {
-                zcCdsDateOffset = 0;
-            }*/
-
-            //Console.WriteLine("paramDate =  " + paramDate);
-            //Console.WriteLine("zcDate = " + zcDate);
-            
-            /*Console.WriteLine("StrippedZCLenght = " + InterestRateCurves.Curves[curveId].StrippedZC.Length);
-            Console.WriteLine("CurvesDates = " + InterestRateCurves.Curves[curveId].CurveDates.Length);
-
-            Console.WriteLine("InterestRateCurves.Curves[curveId].StrippedZC [ = " + 11 + "]" + InterestRateCurves.Curves[curveId].StrippedZC[11]);
-            Console.WriteLine("et InterestRateCurves.Curves[curveId].CurveDates [ = " + 11 + "]" + InterestRateCurves.Curves[curveId].CurveDates[11]);*/
 
             for (int i = zcCdsDateOffset; i < months; i++)
             {
@@ -343,14 +323,8 @@ namespace ValoLibrary
                 else
                 {
                     InterestRateCurves.Curves[curveId].MonthlyRollZC[i - zcCdsDateOffset] = VbaGetRiskFreeZC(paramDate, zcDate + "", InterestRateCurves.Curves[curveId].StrippedZC, InterestRateCurves.Curves[curveId].CurveDates);
-
-                    /*if (i - zcCdsDateOffset >= 181)
-                    {
-                        Console.WriteLine("zcDate = " + zcDate + " | i = " + i + " | InterestRateCurves.Curves[curveId].MonthlyRollZC[i - zcCdsDateOffset] = " + InterestRateCurves.Curves[curveId].MonthlyRollZC[i - zcCdsDateOffset]);
-                    }*/
                 }
             }
-            //Console.WriteLine("InterestRateCurves.Curves[curveId].MonthlyRollZC = " + InterestRateCurves.Curves[curveId].MonthlyRollZC.Length);
 
             InterestRateCurves.Curves[curveId].IsMonthlyRollZCCalculated = true;
             return true;
@@ -493,10 +467,7 @@ namespace ValoLibrary
             {
                 res[j-1] = riskFreeZC[j];
             }
-            Console.WriteLine("curveMaturity = " + curveMaturity.Length);
-            Console.WriteLine("curve = " + curve.Length);
-            Console.WriteLine("riskFreeZC = " + riskFreeZC.Length);
-            //if (VbaStoreZC(paramDate, curveName, swapBasis, swapPeriod, curveMaturity, curve, riskFreeZC, fxSpot))
+
             if (VbaStoreZC(paramDate, curveName, swapBasis, swapPeriod, curveMaturity, curve, riskFreeZC, fxSpot))
             {
                 return res;

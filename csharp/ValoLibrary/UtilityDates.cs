@@ -111,12 +111,14 @@ namespace ValoLibrary
         {
             double numberOfYear = 0;
             DateTime date2;
-
+            Console.WriteLine("111111111111111111");
             do
             {
                 numberOfYear++;
-                date2 = DateAndTime.DateSerial((int)(startDate.Year + numberOfYear) , startDate.Month, startDate.Day);
-            } while (date2 >= endDate);
+                date2 = DateAndTime.DateSerial((int)(startDate.Year + numberOfYear), startDate.Month, startDate.Day);
+                Console.WriteLine("DurationYear startDate.Year=" + startDate.Year + " numberOfYear=" + numberOfYear + " endDate=" + endDate + " date2="+ date2);
+            } while (date2 < endDate);
+            Console.WriteLine("22222222222222222222");
 
             numberOfYear -= (date2 - endDate).Days / 365.0;
 
@@ -126,127 +128,14 @@ namespace ValoLibrary
 
         //' Returns a list of coupon dates according to the maturity date of a swap
         //' and the First/Last Short/Long coupon convention
-        public static DateTime[] GetSwapSchedule(DateTime paramDate, object maturity, object cpnLastSettle, string cpnPeriod, string cpnConvention)
+        public static DateTime[] GetSwapSchedule(DateTime paramDate, String maturity, String cpnLastSettle, string cpnPeriod, string cpnConvention)
         {
   
             return SwapSchedule(paramDate, maturity, cpnLastSettle, cpnPeriod, cpnConvention);
         }
 
-        //public static DateTime[] SwapSchedule(DateTime paramDate, string maturity, DateTime cpnLastSettle, string cpnPeriod, string cpnConvention)
-        //{
 
-        //    double freq, numberOfDates;
-        //    bool isFirst, isShort, continueIf;
-        //    DateTime lastSettle, nextDate, currentDate, maturityDate;
-
-        //    freq = MonthPeriod(cpnPeriod);
-        //    isFirst = (cpnConvention.EndsWith("First"));
-        //    isShort = (cpnConvention.StartsWith("Short"));
-        //    maturityDate = ConvertDate(paramDate, maturity);
-
-        //    if (cpnLastSettle == null || cpnLastSettle == DateTime.MinValue)
-        //    {
-        //        lastSettle = paramDate;
-        //    }
-        //    else
-        //    {
-        //        lastSettle = cpnLastSettle;
-        //    }
-
-        //    if (isFirst)
-        //    {
-        //        freq = -freq;
-        //        currentDate = maturityDate;
-        //    }
-        //    else
-        //    {
-        //        currentDate = lastSettle;
-        //    }
-
-        //    numberOfDates = 0;
-
-        //    do
-        //    {
-        //        numberOfDates++;
-        //        currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
-        //        nextDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
-
-        //        if (isFirst)
-        //        {
-        //            continueIf = isShort ? (currentDate > lastSettle) : (nextDate >= lastSettle);
-        //        }
-        //        else
-        //        {
-        //            continueIf = isShort ? (currentDate < maturityDate) : (nextDate <= maturityDate);
-        //        }
-        //    } while (continueIf);
-
-        //    DateTime[] schedule = new DateTime[(int)numberOfDates + 1];
-
-        //    if (isFirst)
-        //    {
-        //        currentDate = maturityDate;
-        //    }
-        //    else
-        //    {
-        //        currentDate = lastSettle;
-        //    }
-
-        //    for (int i = 1; i <= numberOfDates; i++)
-        //    {
-        //        if (isFirst)
-        //        {
-        //            int j = (int)(numberOfDates - i + 1);
-        //            schedule[j] = currentDate;
-        //            if (isFirst) currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
-        //        }
-        //        else
-        //        {
-        //            int j = i;
-        //            currentDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
-        //            nextDate = DateAndTime.DateSerial(currentDate.Year, currentDate.Month + (int)freq, currentDate.Day);
-
-        //            if (isShort)
-        //            {
-        //                if (currentDate > maturityDate)
-        //                {
-        //                    currentDate = maturityDate;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                if (nextDate > maturityDate)
-        //                {
-        //                    currentDate = maturityDate;
-        //                }
-        //            }
-
-        //            schedule[j] = currentDate;
-        //        }
-        //    }
-
-        //    if (schedule[1] == paramDate)
-        //    {
-        //        Console.WriteLine($"Coupon Settlement Date should be parameter date as time to maturity is a multiple of {cpnPeriod}");
-        //        return null;
-        //    }
-        //    else
-        //    {
-        //        int xxx = isShort ? Math.Abs((int)freq) : Math.Abs((int)freq) * 2;
-        //        DateTime comparisonDate = DateAndTime.DateSerial(schedule[1].Year, schedule[1].Month - xxx, schedule[1].Day);
-
-        //        if (comparisonDate > lastSettle)
-        //        {
-        //            Console.WriteLine($"Coupon Settlement Date should be parameter date as time to maturity is a multiple of {cpnPeriod}");
-        //            return null;
-        //        }
-        //    }
-
-        //    schedule[0] = lastSettle;
-        //    return schedule;
-        //}
-
-        public static DateTime[] SwapSchedule(DateTime paramDate, object maturity, object cpnLastSettle, string cpnPeriod, string cpnConvention)
+        public static DateTime[] SwapSchedule(DateTime paramDate, String maturity, String cpnLastSettle, string cpnPeriod, string cpnConvention)
         {
             double freq;
             bool isFirst, isShort, continueIf;
@@ -255,23 +144,22 @@ namespace ValoLibrary
             freq = MonthPeriod(cpnPeriod);
             isFirst = (cpnConvention.EndsWith("First"));
             isShort = (cpnConvention.StartsWith("Short"));
-            ///maturity = maturity;
 
             maturityDate = ConvertDate(paramDate, maturity);
 
 
-            if (cpnLastSettle == "" || cpnLastSettle == null || cpnLastSettle == DBNull.Value || (cpnLastSettle is DateTime lastSettleDateTime && lastSettleDateTime == DateTime.MinValue))
+            if (cpnLastSettle == null || cpnLastSettle == "" || String.IsNullOrEmpty(cpnLastSettle))
             {
                 lastSettle = paramDate;
             }
             else
             {
-                lastSettle = (cpnLastSettle is DateTime) ? (DateTime) cpnLastSettle : paramDate;
+                lastSettle = DateTime.Parse(cpnLastSettle);
             }
 
             if (isFirst)
             {
-                freq = -freq;   // backward
+                freq = - freq;   // backward
                 currentDate = maturityDate;
             }
             else
@@ -284,8 +172,8 @@ namespace ValoLibrary
             do
             {
                 numberOfDates++;
-                currentDate = currentDate.AddMonths((int)freq);
-                nextDate = currentDate.AddMonths((int)freq);
+                currentDate = DateAndTime.DateSerial(currentDate.Year, (int) (currentDate.Month + freq), currentDate.Day); // currentDate.AddMonths((int)freq);
+                nextDate = DateAndTime.DateSerial(currentDate.Year, (int)(currentDate.Month + freq), currentDate.Day); //currentDate.AddMonths((int)freq);
 
                 if (isFirst)
                 {
@@ -297,7 +185,9 @@ namespace ValoLibrary
                 }
             } while (continueIf);
 
-            DateTime[] schedule = new DateTime[numberOfDates + 1];
+
+            DateTime[] schedule = new DateTime[numberOfDates+1];
+
             int j;
 
             if (isFirst)
@@ -308,18 +198,19 @@ namespace ValoLibrary
             {
                 currentDate = lastSettle;
             }
-
-            for (int i = 1; i <= numberOfDates; i++)
+            int i;
+            for (i = 1; i <= numberOfDates; i++)
             {
                 if (isFirst)
                 {
-                    j = numberOfDates - i+1;
+                    j = numberOfDates - (i - 1) ;
+                    
                 }
                 else
                 {
                     j = i;
-                    currentDate = currentDate.AddMonths((int)freq);
-                    nextDate = currentDate.AddMonths((int)freq);
+                    currentDate = DateAndTime.DateSerial(currentDate.Year, (int)(currentDate.Month + freq), currentDate.Day);// currentDate.AddMonths((int)freq);
+                    nextDate = DateAndTime.DateSerial(currentDate.Year, (int)(currentDate.Month + freq), currentDate.Day); // currentDate.AddMonths((int)freq);
 
                     if (isShort)
                     {
@@ -336,9 +227,10 @@ namespace ValoLibrary
                         }
                     }
                 }
-
+                
                 schedule[j] = currentDate;
-                if (isFirst) currentDate = currentDate.AddMonths((int)freq);                             
+
+                if (isFirst) currentDate = DateAndTime.DateSerial(currentDate.Year, (int)(currentDate.Month + freq), currentDate.Day); // currentDate.AddMonths((int)freq);                             
             }
 
             if (schedule[0] == paramDate)
@@ -349,7 +241,8 @@ namespace ValoLibrary
             else
             {
                 int xxx = isShort ? Math.Abs((int)freq) : Math.Abs((int)freq) * 2;
-                DateTime comparisonDate = schedule[1].AddMonths(-xxx);
+                Console.WriteLine("xxx = " + xxx);
+                DateTime comparisonDate = DateAndTime.DateSerial(schedule[0].Year, schedule[0].Month - xxx, schedule[0].Day);// schedule[0].AddMonths(-xxx);
 
                 if (comparisonDate > lastSettle)
                 {
@@ -357,7 +250,7 @@ namespace ValoLibrary
                     return null;
                 }
             }
-
+            
             schedule[0] = lastSettle;
             return schedule;
         }
