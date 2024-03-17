@@ -217,7 +217,7 @@ string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y"
 string CDSCurrency = "EUR";
 double RecoveryRate = 0.4; // Par exemple, 40%
 bool alterMode = false;
-string intensity = "3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+string intensity = "Curvepoint" ;//"3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
 
 
 // Appel de la fonction à tester
@@ -304,29 +304,42 @@ String[,] result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate,
 if (result3 != null)
 {
     Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
-    int rows = result3.GetLength(0);
+    int rows = result3.GetLength(0) - 1;
     int columns = result3.GetLength(1);
 
     for (int i = 0; i < rows; i++)
     {
+        Console.Write($"{i} | \t\t");
+
         for (int j = 0; j < columns; j++)
         {
-            Console.WriteLine("result3["+i+", "+j+"]= " + result3[i, j]);
+            if (j + 1 == columns)
+            {
+                Console.Write($"{result3[i, j]}\t");
+            }
+            else
+            {
+                if (i == rows - 2)
+                {
+                    Console.Write($"{result3[i, j]}\t\t\t -> \t");
+                }
+                else
+                {
+                    Console.Write($"{result3[i, j]}\t -> \t");
+                }
+                
+            }
+            
         }
+        Console.WriteLine("\n______________________________________________________________________________________________________________________________________________");
     }
 }
 else
 {
     Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
 }
-Console.WriteLine(result3);
-
-
 
 Console.WriteLine("=================== End Model Interface ====================");
-
-
-
 
 
 //Console.WriteLine("===================Test CDO MOdel====================");

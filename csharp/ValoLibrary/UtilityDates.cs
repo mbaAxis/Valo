@@ -111,14 +111,11 @@ namespace ValoLibrary
         {
             double numberOfYear = 0;
             DateTime date2;
-            Console.WriteLine("111111111111111111");
             do
             {
                 numberOfYear++;
                 date2 = DateAndTime.DateSerial((int)(startDate.Year + numberOfYear), startDate.Month, startDate.Day);
-                Console.WriteLine("DurationYear startDate.Year=" + startDate.Year + " numberOfYear=" + numberOfYear + " endDate=" + endDate + " date2="+ date2);
             } while (date2 < endDate);
-            Console.WriteLine("22222222222222222222");
 
             numberOfYear -= (date2 - endDate).Days / 365.0;
 
@@ -241,7 +238,6 @@ namespace ValoLibrary
             else
             {
                 int xxx = isShort ? Math.Abs((int)freq) : Math.Abs((int)freq) * 2;
-                Console.WriteLine("xxx = " + xxx);
                 DateTime comparisonDate = DateAndTime.DateSerial(schedule[0].Year, schedule[0].Month - xxx, schedule[0].Day);// schedule[0].AddMonths(-xxx);
 
                 if (comparisonDate > lastSettle)

@@ -220,9 +220,6 @@ namespace ValoLibrary
                 pricingCurrency = issuerCurrency;
             }
 
-            Console.WriteLine("offset=" + offset + " CreditDefaultSwapCurves.NumberOfCurves=" + CreditDefaultSwapCurves.NumberOfCurves + " CreditDefaultSwapCurves.Curves[issuerId].Currency="+ CreditDefaultSwapCurves.Curves[issuerId].Currency + 
-                " CreditDefaultSwapCurves.CDSRollDate="+ CreditDefaultSwapCurves.CDSRollDate);
-
             for (dateCounter = offset; dateCounter <= 120; dateCounter++)
             {
                 nextDate = UtilityDates.ConvertDate(cdsRollDate, dateCounter + "m");
@@ -233,7 +230,7 @@ namespace ValoLibrary
 
                 prob = defaultProb[dateCounter - offset, scenario]; // offset update
 
-                if (prob != 0 && !double.IsNaN(prob))
+                if (prob != 0) //  && !double.IsNaN(prob)
                 {
                     nextProbNoDef = 1.0 - prob;
 
@@ -241,7 +238,6 @@ namespace ValoLibrary
                     {
                         getdefaultprobabilitywithoutquanto = 1.0 - previousProbNoDef *
                             Math.Pow(nextProbNoDef / (double) previousProbNoDef, (maturityDateX - previousDate).Days / (double) (nextDate - previousDate).Days);
-
 
                         if (getdefaultprobabilitywithoutquanto <= 0)
                         {
@@ -868,7 +864,6 @@ namespace ValoLibrary
                         NextCalcMonth = (int)UtilityDates.MonthPeriod(CurveMaturity[CurvePointCounter], CDSRollDate);
                                            
                         Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 1.0 - RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] / (double) ZC[NextCalcMonth - zcCdsDateOffset];
-                        //Console.WriteLine("Res = " + Res[CurvePointCounter + CDSCurvePointNumber * Scenario]);
                     }
                     else
                     {
@@ -876,9 +871,6 @@ namespace ValoLibrary
                     }
                 }
             }
-
-            Console.WriteLine("isstoredp? = " + StoreDP(ParamDate, cdsID, CDSName, RecoveryRate, CDSCurrency, CurveMaturity, CDSCurve, Res, CDSRollDate, FullDefaultProb));
-
 
             if (StoreDP(ParamDate, cdsID, CDSName, RecoveryRate, CDSCurrency, CurveMaturity, CDSCurve, Res, CDSRollDate, FullDefaultProb))
             {

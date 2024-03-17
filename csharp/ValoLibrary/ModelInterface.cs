@@ -1,4 +1,5 @@
 ﻿using Microsoft.Office.Interop.Excel;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -378,7 +379,6 @@ namespace ValoLibrary
             // Is this a CDO or a CDS
 
             bool IsCDO;
-            Console.WriteLine("numberOfIssuer" + numberOfIssuer);
 
             if (numberOfIssuer > 1)
             {
@@ -429,7 +429,6 @@ namespace ValoLibrary
             ScheduleIntegration[0] = schedule[0];
             NumberofIntegrationDateOnCouponDate[0] = 0;
 
-            Console.WriteLine("NumberOfDates = "+ NumberOfDates);
             int index;
             for (index = 1; index < NumberOfDates; index++) // 
             {
@@ -471,14 +470,11 @@ namespace ValoLibrary
             double[,] European;
             double[,] dProb = null;
 
-            Console.WriteLine("IsCDO " + IsCDO);
-
             if (IsCDO)
             {
 
                 EuropeanLow = new object[(int)NumberOfIntegrationDates];
                 EuropeanHigh = new object[(int)NumberOfIntegrationDates];
-                Console.WriteLine("strike =========" + strikes);
                 TrancheWidth = ((double[])strikes)[1] - ((double[])strikes)[0];
             }
             else
@@ -535,7 +531,7 @@ namespace ValoLibrary
                 x[6, 5] = "Name";
                 for (i = 0; i <= 5; i++)
                 {
-                    for (j = 2; j <= 5; j++)
+                    for (j = 1; j <= 5; j++)
                     {
                         x[i, j] = 0 + "";
                     }
@@ -575,7 +571,6 @@ namespace ValoLibrary
             {
                 //i = g - 1;
                 i = g;
-                Console.WriteLine("position g = " + i + " NumberOfIntegrationDates = " + NumberOfIntegrationDates);
                 CurrentDate = ScheduleIntegration[i];
                 if ((DateTime) CurrentDate <= ParamDate)
                 {
@@ -622,9 +617,6 @@ namespace ValoLibrary
                     {
                         // modif QUANTO
                         IssuerCurrency = StrippingCDS.CreditDefaultSwapCurves.Curves[(int)CDSListID].Currency;
-
-                        Console.WriteLine("i="+i+ "CDSListID=" + CDSListID + " ParamDate="+ ParamDate+ " CurrentDate="+ CurrentDate+ " pricingCurrency="+ pricingCurrency+ " fxCorrel="+ fxCorrel+ " fxVol="+ fxVol + " CurrentTime="+ CurrentTime + " probMultiplier="+ probMultiplier);
-
                         
                         DefaultProbability[1] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID, ParamDate, CurrentDate+"", pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
                         
@@ -654,7 +646,6 @@ namespace ValoLibrary
                     {
                         CurrentZC = RiskFreeZC[i] * LossRate;
                         European[i, 1] = DefaultProbability[1] * CurrentZC;
-                        Console.WriteLine("i=" +i+" RiskFreeZC[i]=" + RiskFreeZC[i] + " LossRate=" + LossRate + " DefaultProbability[1]=" + DefaultProbability[1] + " dProb[i, 1]=" + dProb[i, 1]);
                         if (withGreeks)
                         {
                             // compute dCDS
@@ -663,12 +654,10 @@ namespace ValoLibrary
                         }
                     }
 
-                    Console.WriteLine("huhuhuhhuhuhuh = " + i);
                 }
             }
 
 
-            Console.WriteLine("00000000000000000000000000000000000000000");
             // -----------------------------------------------------------------------
             // FLOAT LEG
             // -----------------------------------------------------------------------
@@ -676,12 +665,6 @@ namespace ValoLibrary
 
             x[1, 0] = European[(int)NumberOfIntegrationDates, 1] + "";
 
-            int l;
-            for (l = 0; l < 10; l++)
-            {
-                Console.WriteLine("European["+l+"]=" + European[l, 1]);
-            }
-            Console.WriteLine("00000000000000000000000000000000000000000 x[0, 0]="+ x[0, 0]); 
             if (withGreeks)
             {
                 for (j = 1; j <= numberOfIssuer; j++)
@@ -727,9 +710,9 @@ namespace ValoLibrary
             // If the Spread is missing in the input, then force it to 100% for now so as to force greeks computation
             //
 
-            double InputSpread = 1.0;
+            double InputSpread = inputSpread;
             double Spread;
-            if (double.IsNaN(InputSpread))
+            if (double.IsNaN(InputSpread) || InputSpread == 0.0)
             {
                 Spread = 1.0;
             }
@@ -740,9 +723,9 @@ namespace ValoLibrary
 
             // Need to compute the change of BPV only if american fixed leg, and if spread <> 0
             int Lastj = 1;
-            bool IsAmericanfixedleg = false;
+            // bool IsAmericanfixedleg = false;
 
-            if (withGreeks && IsAmericanfixedleg && Spread != 0)
+            if (withGreeks && isAmericanFixedLeg && Spread != 0)
             {
                 if (IsCDO)
                 {
@@ -779,11 +762,10 @@ namespace ValoLibrary
                             // and is paid on Coupon Payment Date
                             for (k = (int)NumberofIntegrationDateOnCouponDate[i - 1] + 1; k <= NumberofIntegrationDateOnCouponDate[i]; k++)
                             {
-    
-                                this_bpv = (ScheduleIntegration[k] - ScheduleIntegration[k - 1]).TotalDays / 360.0 * (double) RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
+                                this_bpv = (ScheduleIntegration[k] - ScheduleIntegration[k - 1]).Days / 360.0 * (double) RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
 
                                 // Risky Coupon if american leg
-                                if (IsAmericanfixedleg)
+                                if (isAmericanFixedLeg)
                                 {
                                     double NextProbNoDef = (1.0 - European[k, j] / (double) RiskFreeZC[k] / (double) TrancheWidth / (double) LossRate);
                                     this_bpv = this_bpv * (NextProbNoDef + 0.5 * PreviousProbNoDef * (1.0 - NextProbNoDef / (double) PreviousProbNoDef));
@@ -800,26 +782,26 @@ namespace ValoLibrary
                             // Coupon is calculated up to Credit Event Date
                             // and is paid on Credit Event Date
 
-                            this_bpv = (schedule[i] - schedule[i]).TotalDays / 360.0 * (double) RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
+                            this_bpv = (schedule[i] - schedule[i - 1]).Days / 360.0 * RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]];
 
                             // reduction of bpv due to Credit Event in case of american fixed leg
-
                             double DefaultDayCountFraction;
-                            if (IsAmericanfixedleg)
+                            if (isAmericanFixedLeg)
                             {
                                 this_bpv = this_bpv * (1.0 - European[(int)NumberofIntegrationDateOnCouponDate[i], j] / (double) RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]] / (double) TrancheWidth / (double) LossRate);
 
-                                for (k = (int)NumberofIntegrationDateOnCouponDate[i] ; k < NumberofIntegrationDateOnCouponDate[i]; k++)
+                                for (k = (int)NumberofIntegrationDateOnCouponDate[i-1] + 1 ; k <= NumberofIntegrationDateOnCouponDate[i]; k++)
                                 {
-                                    DateTime Date1 = ScheduleIntegration[k];
+                                    DateTime Date1 = ScheduleIntegration[k-1];
                                     DateTime Date2 = ScheduleIntegration[k];
 
-                                    // Default is assumed to occur at mid integration period
-                                    //DefaultDayCountFraction = (int)((Date2 + Date1).TotalDays / 2 - schedule[i - 1].TotalDays) / 360.0;
 
-                                    DefaultDayCountFraction = (int)((Date2 - Date1).TotalDays / 2 + (double) Date1.Subtract(schedule[i]).TotalDays) / 360.0;
+                                    // Default is assumed to occur at mid integration period
+                                    DateTime dtmp = new DateTime((long) ( (Date2.Ticks + Date1.Ticks) / 2.0) );
+
+                                    DefaultDayCountFraction =  (dtmp-schedule[i - 1]).Days / 360.0;
                                     double NextProbNoDef = (1.0 - European[k, j] / (double) RiskFreeZC[k] / (double) TrancheWidth / (double) LossRate);
-                                    double Accrued_bpv = DefaultDayCountFraction * (-NextProbNoDef + PreviousProbNoDef) * Math.Sqrt(RiskFreeZC[k] * RiskFreeZC[k]);
+                                    double Accrued_bpv = DefaultDayCountFraction * (-NextProbNoDef + PreviousProbNoDef) * Math.Sqrt(RiskFreeZC[k] * RiskFreeZC[k-1]);
                                     this_bpv += Accrued_bpv;
                                     PreviousProbNoDef = NextProbNoDef;
                                 }
@@ -833,11 +815,11 @@ namespace ValoLibrary
             }
 
             // Store the basis point value
-            x[4, 0] = bpv[0] + "";
+            x[4, 0] = bpv[1] + "";
 
             // Compute the ATMSpread
             x[3, 0] = "" + (Double.Parse(x[1, 0]) / (double) TrancheWidth / Double.Parse(x[4, 0]));
-            if (double.IsNaN(InputSpread))
+            if (double.IsNaN(InputSpread) || InputSpread == 0.0)
             {
                 Spread = Double.Parse(x[3, 0]);
             }
@@ -859,12 +841,12 @@ namespace ValoLibrary
                     x[6 + i, 4] = (Double.Parse(x[6 + i, 4]) - Double.Parse(x[1, 0])) + "";
 
                     // Change of fixed leg
-                    if (Spread != 0 && IsAmericanfixedleg)
+                    if (Spread != 0 && isAmericanFixedLeg)
                     {
-                        x[6 + i, 0] = (Double.Parse(x[6 + i, 0]) - Spread * TrancheWidth * (bpv[i] - bpv[0])) + "";
+                        x[6 + i, 0] = (Double.Parse(x[6 + i, 0]) - Spread * TrancheWidth * (bpv[i+1] - bpv[1])) + "";
                         if (IsCDO)
                         {
-                            x[6 + i, 4] = (Double.Parse(x[6 + i, 4]) - Spread * TrancheWidth * (bpv[i + numberOfIssuer] - bpv[0])) + "";
+                            x[6 + i, 4] = (Double.Parse(x[6 + i, 4]) - Spread * TrancheWidth * (bpv[i + numberOfIssuer + 1] - bpv[1])) + "";
                         }
                     }
 
@@ -922,20 +904,8 @@ namespace ValoLibrary
                 }
             }
 
-            // Results in percentage of the tranche
-            foreach (int ii in new int[] { 0, 1, 2 })
-            {
-                x[ii, 1] = "" + ( Double.Parse(x[ii, 0]) / (double) TrancheWidth );
-            }
-
-            foreach (int ii in new int[] { 3, 4 })
-            {
-                x[ii, 1] = x[ii, 0];
-            }
-
             // Computation time
             x[5, 0] = (DateTime.Now - StartTime) + "";
-            x[5, 1] = (DateTime.Now - StartTime) + "";
 
             return x;
         }
