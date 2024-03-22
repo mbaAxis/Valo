@@ -39,6 +39,7 @@ namespace ValoLibrary
         public struct IRCurveList
         {
             public int NumberOfCurves;
+            public int lastId;
             public bool LastError;
             public IRCurve[] Curves;
         }
@@ -66,52 +67,35 @@ namespace ValoLibrary
                 InterestRateCurves.NumberOfCurves = InterestRateCurves.Curves.Length;
             }
 
-            for (int i = 1; i <= InterestRateCurves.NumberOfCurves; i++)
+            int i, j;
+            for (i = 1; i <= InterestRateCurves.NumberOfCurves; i++)
             {
-                if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName.ToString(), StringComparison.OrdinalIgnoreCase))
+                if (InterestRateCurves.Curves != null && i < InterestRateCurves.Curves.Length)
                 {
-                    InterestRateCurves.LastError = false;
-                    return i;
+                    if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        InterestRateCurves.LastError = false;
+                        return i;
+                    }
+                }                  
+            }
+
+            if (InterestRateCurves.Curves != null)
+            {
+                for (j = 0; j < InterestRateCurves.Curves.Length; j++)
+                {
+                    if (curveName != null && InterestRateCurves.Curves[j].CurveName != null && InterestRateCurves.Curves[j].CurveName == curveName.ToString())
+                    {
+                        InterestRateCurves.LastError = false;
+                        return j;
+                    }
                 }
             }
+            
 
             return -1;
         }
 
-        //public static double VbaGetRiskFreeZC(DateTime paramDate, string maturityDate,
-        //    double[] ZC, string[] ZCDate)
-        //{
-        //    DateTime maturityDateX = UtilityDates.ConvertDate(paramDate, maturityDate);
-
-        //    if (maturityDateX < paramDate)
-        //    {
-        //        return 1.0;
-        //    }
-
-        //    double lastZC = 1.0;
-        //    DateTime lastDate = paramDate;
-
-        //    for (int dateCounter = 0; dateCounter < ZC.Length; dateCounter++)
-        //    {
-        //        if (!string.IsNullOrEmpty(ZCDate[dateCounter]) && ZC[dateCounter] != 0)
-        //        {
-        //            DateTime nextDate = UtilityDates.ConvertDate(paramDate, ZCDate[dateCounter]);
-
-        //            if (nextDate >= maturityDateX)
-        //            {
-        //                return lastZC * Math.Pow(ZC[dateCounter] / lastZC, (maturityDateX - lastDate).TotalDays / (nextDate - lastDate).TotalDays);
-        //            }
-        //            else
-        //            {
-        //                lastZC = ZC[dateCounter];
-        //                lastDate = nextDate;
-        //            }
-        //        }
-        //    }
-
-        //    // Extrapolate at flat rate
-        //    return Math.Pow(lastZC, (maturityDateX - paramDate).TotalDays / (lastDate - paramDate).TotalDays);
-        //}
 
         public static double VbaGetRiskFreeZC(DateTime paramDate, string maturityDate, double[] ZC, string[] ZCDate)
         {
@@ -138,19 +122,11 @@ namespace ValoLibrary
                     }
                     else
                     {
-                        //if (maturityDate == "20/03/2039 00:00:00")
-                        //{
-                        //    Console.WriteLine("dateCounter = " + (dateCounter+1) + " |  ZC[dateCounter+1] = " + ZC[dateCounter + 1] + " | maturityDateX = " + maturityDateX + " | nextDate = " + nextDate);
-                        //}
                         lastZC = ZC[dateCounter+1];
                         lastDate = nextDate;
                     }
                 }
             }
-            //if (maturityDate == "20/03/2039 00:00:00")
-            //{
-            //    Console.WriteLine("maturityDateX = " + maturityDateX + " | res = " + ((maturityDateX - paramDate).Days / (double) (lastDate - paramDate).Days) + " | lastZC = " + lastZC + " | lastDate = " + lastDate);
-            //}
             // Extrapoler à un taux constant
             return Math.Pow((double) lastZC,  ((maturityDateX - paramDate).Days / (double) (lastDate - paramDate).Days));
         }
@@ -178,12 +154,14 @@ namespace ValoLibrary
             {
                 // add a new curvee
                 InterestRateCurves.NumberOfCurves++;
-                Array.Resize(ref InterestRateCurves.Curves, InterestRateCurves.NumberOfCurves+1);
-                curveId = InterestRateCurves.NumberOfCurves;
+                Array.Resize(ref InterestRateCurves.Curves, InterestRateCurves.NumberOfCurves + 1);
+                //curveId = InterestRateCurves.NumberOfCurves;
+                curveId = InterestRateCurves.Curves.Length - 1;
             }
 
             // Store the data
-            InterestRateCurves.Curves[curveId].CurveName = curveName?.ToString()?.ToUpper();
+            //InterestRateCurves.Curves[curveId].CurveName = curveName?.ToString()?.ToUpper();
+            InterestRateCurves.Curves[curveId].CurveName = curveName;
             InterestRateCurves.Curves[curveId].ParamDate = paramDate;
             InterestRateCurves.Curves[curveId].SwapBasis = swapBasis;
             InterestRateCurves.Curves[curveId].SwapPeriod = swapPeriod;

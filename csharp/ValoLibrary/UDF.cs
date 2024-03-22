@@ -27,7 +27,7 @@ namespace ValoLibrary
         // using market data
         double GetOptionPrice(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null);
         double[,] GetSensiOption(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null);
-        double GetOptionPortfolioPrice( Parameters[] options);
+        double GetOptionPortfolioPrice(Parameters[] options);
         double GetDelta(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null);
         double GetGamma(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null);
         double GetTheta(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null);
@@ -40,7 +40,7 @@ namespace ValoLibrary
         double GetMCEurOptionPrice(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
         double GetMCEurOptionPortfolioPrice(BSParameters[] options);
 
-        ////===============================================================
+        //===============================================================
         double[] GetStripZC(DateTime paramDate, string curveName, double[] curve, string[] curveMaturity, int swapPeriod, int swapBasis, double fxSpot);
 
 
@@ -48,12 +48,25 @@ namespace ValoLibrary
             DateTime CDSRollDate, double[] CDSCurve, string[] CurveMaturity,
             string CDSCurrency, double RecoveryRate, bool alterMode, string intensity);
 
-        object GetGetDefaultProb(int issuer, string maturityDate, int scenario = 0, double probMultiplier = 1);
+
+        DateTime GetConvertDate(DateTime paramDate, object maturityDate);
+        DateTime GetCDSRefDate(DateTime paramDate, bool isSingleNameConvention = true);
+        string GetGetCDSName(int cdsID);
+        double GetGetDefaultProb(int issuer, string maturityDate, int scenario = 0, double probMultiplier = 1);
 
 
 
+        //////======================================ModelInterface====================================
+
+        string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate,
+       string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
+       double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+       double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1);
 
     }
+
+
+
 
     [ComVisible(true)]
     [ProgId("ValoLibrary.UDF")]
@@ -74,7 +87,7 @@ namespace ValoLibrary
 
         public double[,] GetSensiOptionBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            return BlackScholes.SensiOptionBS(quantity,optionFlag, position, s, sigma, r, k, T, q);
+            return BlackScholes.SensiOptionBS(quantity, optionFlag, position, s, sigma, r, k, T, q);
         }
 
         public double GetDeltaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
@@ -83,12 +96,12 @@ namespace ValoLibrary
         }
         public double GetGammaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            return BlackScholes.GammaBS( quantity, optionFlag, position, s, sigma, r, k, T, q);
+            return BlackScholes.GammaBS(quantity, optionFlag, position, s, sigma, r, k, T, q);
         }
 
         public double GetThetaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            return BlackScholes.ThetaBS( quantity, optionFlag, position, s, sigma, r, k, T, q);
+            return BlackScholes.ThetaBS(quantity, optionFlag, position, s, sigma, r, k, T, q);
         }
         public double GetVegaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
@@ -140,7 +153,7 @@ namespace ValoLibrary
 
         public double GetMCEurOptionPrice(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            return MonteCarlo.MCEurOptionPrice( quantity, optionFlag, position, s, sigma, r, k, T, q);
+            return MonteCarlo.MCEurOptionPrice(quantity, optionFlag, position, s, sigma, r, k, T, q);
         }
 
         public double GetMCEurOptionPortfolioPrice(BSParameters[] options)
@@ -157,7 +170,22 @@ namespace ValoLibrary
             curveMaturity, swapPeriod, swapBasis, fxSpot);
         }
 
-        public  double[] GetStripDefaultProbability(int cdsID, string CDSName, DateTime ParamDate,
+        public DateTime GetConvertDate(DateTime paramDate, object maturityDate)
+        {
+            return UtilityDates.ConvertDate(paramDate, maturityDate);
+        }
+
+        public DateTime GetCDSRefDate(DateTime paramDate, bool isSingleNameConvention = true)
+        {
+            return StrippingCDS.CDSRefDate(paramDate);
+        }
+
+        public string GetGetCDSName(int cdsID)
+        {
+            return StrippingCDS.GetCDSName(cdsID);
+        }
+
+        public double[] GetStripDefaultProbability(int cdsID, string CDSName, DateTime ParamDate,
             DateTime CDSRollDate, double[] CDSCurve, string[] CurveMaturity,
             string CDSCurrency, double RecoveryRate, bool alterMode, string intensity)
         {
@@ -167,13 +195,25 @@ namespace ValoLibrary
         }
 
 
-        public object GetGetDefaultProb(int issuer, string maturityDate, int scenario = 0, double probMultiplier = 1)
+        public double GetGetDefaultProb(int issuer, string maturityDate, int scenario = 0, double probMultiplier = 1)
         {
             return StrippingCDS.GetDefaultProb(issuer, maturityDate, scenario = 0, probMultiplier = 1);
         }
 
+        // ===================================MOdel Interface===========================================================================
 
+
+        public string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate,
+        string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
+        double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
+        {
+            return ModelInterface.CDS(issuerIdParam, maturity, spread, recoveryRate,
+             cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
+             fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg,
+             withGreeks, hedgingCds, integrationPeriod, probMultiplier);
+
+        }
 
     }
-
 }

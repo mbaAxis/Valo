@@ -47,36 +47,6 @@ namespace ValoLibrary
             return result;
         }
 
-        //Convert a date under the format "3Y" or "6m" into a date as per Excel convetion
-        //public static DateTime ConvertDate(DateTime paramDate, string maturityDate)
-        //{
-        //    int y = paramDate.Year;
-        //    int m = paramDate.Month;
-        //    int d = paramDate.Day;
-
-        //    string datePostFix = maturityDate.Substring(maturityDate.Length  -1);
-
-        //    switch (datePostFix.ToUpper())
-        //    {
-        //        case "Y":
-        //            int years = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
-        //            return DateAndTime.DateSerial(y, m, d).AddYears(years);
-        //        case "M":
-        //            int months = int.Parse(maturityDate.Substring(0, maturityDate.Length - 1));
-        //            return DateAndTime.DateSerial(y, m, d).AddMonths(months);
-        //        default:
-        //            if (!double.TryParse(maturityDate, out _))
-        //            {
-        //                Console.WriteLine($"Je ne comprends pas la date de maturité ({maturityDate}) : elle devrait être au format xY ou yM ou une date Excel régulière.");
-        //                return DateTime.MinValue;
-        //            }
-        //            return DateTime.Parse(maturityDate);
-        //    }
-        //}
-
-
-        //MODIF QUANTO
-
         public static DateTime ConvertDate(DateTime paramDate, object maturityDate)
         {
             int y = paramDate.Year;

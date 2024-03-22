@@ -53,10 +53,47 @@ namespace ValoLibrary
         private static double[,] FullDefaultProb;
 
 
+        //public static int GetCurveId(object curveName)
+        //{
+        //    if (Utils.IsNumeric(curveName))
+        //    {
+        //        int curveId = Convert.ToInt32(curveName);
+        //        if (curveId >= 1 && curveId <= InterestRateCurves.NumberOfCurves)
+        //        {
+        //            InterestRateCurves.LastError = false;
+        //            return curveId;
+        //        }
+        //        else
+        //        {
+        //            return -1;
+        //        }
+        //    }
+
+        //    if (InterestRateCurves.Curves != null && InterestRateCurves.Curves.Length > InterestRateCurves.NumberOfCurves)
+        //    {
+        //        InterestRateCurves.NumberOfCurves = InterestRateCurves.Curves.Length;
+        //    }
+
+        //    for (int i = 1; i <= InterestRateCurves.NumberOfCurves; i++)
+        //    {
+        //        if (InterestRateCurves.Curves != null && i < InterestRateCurves.Curves.Length)
+        //        {
+        //            if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName.ToString(), StringComparison.OrdinalIgnoreCase))
+        //            {
+        //                InterestRateCurves.LastError = false;
+        //                return i;
+        //            }
+        //        }
+        //    }
+
+        //    return -1;
+        //}
+
+
         public static int GetCDSCurveId(string CDSName)
         {
 
-            int i;
+
             if (LastCDSCurveID >= 1 && LastCDSCurveID <= CreditDefaultSwapCurves.NumberOfCurves)
             {
                 // Testez si CDSName est égal à la dernière recherche
@@ -72,17 +109,51 @@ namespace ValoLibrary
                 CreditDefaultSwapCurves.NumberOfCurves = CreditDefaultSwapCurves.Curves.Length;
             }
 
-            for (i = 0; i < CreditDefaultSwapCurves.NumberOfCurves; i++)
+
+            for (int i = 0; i < CreditDefaultSwapCurves.NumberOfCurves; i++)
             {
-                if (string.Equals(CreditDefaultSwapCurves.Curves[i].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
+                if (CreditDefaultSwapCurves.Curves != null && i<CreditDefaultSwapCurves.Curves.Length)
                 {
-                    LastCDSCurveID = i+1;
-                    CreditDefaultSwapCurves.LastError = false;
-                    return LastCDSCurveID;
+                    if (string.Equals(CreditDefaultSwapCurves.Curves[i].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        LastCDSCurveID = i+1;
+                        CreditDefaultSwapCurves.LastError = false;
+                        return LastCDSCurveID;
+                    }
                 }
             }
             return -1;
         }
+        //public static int GetCDSCurveId(string CDSName)
+        //{
+
+            
+        //    if (LastCDSCurveID >= 1 && LastCDSCurveID <= CreditDefaultSwapCurves.NumberOfCurves)
+        //    {
+        //        // Testez si CDSName est égal à la dernière recherche
+        //        if (string.Equals(CreditDefaultSwapCurves.Curves[LastCDSCurveID - 1].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
+        //        {
+        //            CreditDefaultSwapCurves.LastError = false;
+        //            return LastCDSCurveID;
+        //        }
+        //    }
+
+        //    if (CreditDefaultSwapCurves.Curves != null && CreditDefaultSwapCurves.Curves.Length > CreditDefaultSwapCurves.NumberOfCurves)
+        //    {
+        //        CreditDefaultSwapCurves.NumberOfCurves = CreditDefaultSwapCurves.Curves.Length;
+        //    }
+
+        //    for (int i = 0; i < CreditDefaultSwapCurves.NumberOfCurves; i++)
+        //    {
+        //        if (string.Equals(CreditDefaultSwapCurves.Curves[i].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
+        //        {
+        //            LastCDSCurveID = i+1;
+        //            CreditDefaultSwapCurves.LastError = false;
+        //            return LastCDSCurveID;
+        //        }
+        //    }
+        //    return -1;
+        //}
 
         public static bool StoreDP(DateTime paramDate, int cdsID, string CDSName,
             double RecoveryRate, string Currency, string[] CurveDates,
@@ -123,6 +194,14 @@ namespace ValoLibrary
                 CreditDefaultSwapCurves.NumberOfCurves = CurveID;
                 Array.Resize(ref CreditDefaultSwapCurves.Curves, CreditDefaultSwapCurves.NumberOfCurves + 1);
             }
+
+            //add
+
+            //CreditDefaultSwapCurves.NumberOfCurves++;   
+            //CurveID = CreditDefaultSwapCurves.Curves.Length - 1;
+
+            // end add
+
 
             //Store the data
             CreditDefaultSwapCurves.CDSRollDate = CDSRollDate;
@@ -598,7 +677,8 @@ namespace ValoLibrary
                     Console.WriteLine($"Curve {CDSCurrency} was not stripped - Called from : ");
                     StrippingIRS.InterestRateCurves.LastError = true;
                 }
-                return null;
+                //return null;
+                return new double[] { CurveID + 100  };
             }
 
             // Compute ZC for Risky Curve if not done yet
@@ -611,7 +691,8 @@ namespace ValoLibrary
                         Console.WriteLine($"Monthly ZC for curve {CDSCurrency} was not computed - called from : ");
                         StrippingIRS.InterestRateCurves.LastError = true;
                     }
-                    return null;
+                    //return null;
+                    return new double[] { CurveID + 1000 };
                 }
             }
 
@@ -922,26 +1003,28 @@ namespace ValoLibrary
         public static string GetCDSName(int cdsID)
         {
             int CDS_ID;
-            if (!int.TryParse(cdsID.ToString(), out CDS_ID))
+            if (!UtilityDates.IsNumeric(cdsID))
             {
-                CDS_ID = GetCDSCurveId(cdsID.ToString());
+                CDS_ID = GetCDSCurveId(cdsID.ToString())-1; // update
             }
             else
             {
-                CDS_ID = cdsID;
+                CDS_ID =(int)cdsID;
             }
+
+            Console.WriteLine("CDS_ID =" + CDS_ID);
 
             if (CDS_ID < 0 || CDS_ID > CreditDefaultSwapCurves.NumberOfCurves)
             {
                 return $"CDS Name - Issuer {cdsID} out of range - called from {Environment.StackTrace}";
             }
 
-            if (!CreditDefaultSwapCurves.Curves[CDS_ID - 1].CDSdone)
+            if (!CreditDefaultSwapCurves.Curves[CDS_ID].CDSdone)
             {
                 return $"CDS Name - Issuer {cdsID} not defined - called from {Environment.StackTrace}";
             }
 
-            return CreditDefaultSwapCurves.Curves[CDS_ID - 1].CDSName;
+            return CreditDefaultSwapCurves.Curves[CDS_ID].CDSName;
         }
         public static string GetCDSCurrency(int cdsID)
         {
@@ -1015,25 +1098,36 @@ namespace ValoLibrary
             return res;
         }
 
-        public static object GetDefaultProb(int issuer, string maturityDate, int scenario = 0, double probMultiplier = 1)
+        public static double GetDefaultProb(int issuer, string maturityDate, int scenario = 0, double probMultiplier = 1)
         {
             DateTime paramDate;
-            if (!int.TryParse(issuer.ToString(), out int issuerInt))
+            if (!UtilityDates.IsNumeric(issuer))
             {
-                issuerInt = GetCDSCurveId(issuer.ToString());
+                issuer = GetCDSCurveId(issuer.ToString()) - 1; // update
             }
 
-            if (issuer > CreditDefaultSwapCurves.NumberOfCurves)
+
+            if ((int)issuer > CreditDefaultSwapCurves.NumberOfCurves)
             {
-                return $"Default Probability - Issuer {issuer} out of range - probability set to 0 - called from ";
-            }
-            else if (!CreditDefaultSwapCurves.Curves[issuer].CDSdone)
-            {
-                return $"Default Probability - Issuer {issuer} not defined - probability set to 0 - called from ";
+
+                Console.WriteLine( $"Default Probability - Issuer {issuer} out of range - probability set to 0 - called from ");
+                return 0;
+
             }
 
-            paramDate = StrippingIRS.InterestRateCurves.Curves[StrippingIRS.InterestRateCurves.NumberOfCurves].ParamDate;
-            return GetDefaultProbabilityQuanto(issuer, paramDate, maturityDate, null, scenario, 0, 0, 1, probMultiplier);
+           
+            else if (!CreditDefaultSwapCurves.Curves[(int)issuer].CDSdone)
+            {
+                Console.WriteLine($"Default Probability - Issuer {issuer} out of range - probability set to 0 - called from ");
+                return 0;
+            }
+
+            //Console.WriteLine("paramDate avant = " + paramDate);
+
+            paramDate = StrippingIRS.InterestRateCurves.Curves[StrippingIRS.InterestRateCurves.NumberOfCurves-1].ParamDate;
+
+            Console.WriteLine("paramDate avant = " + paramDate);
+            return GetDefaultProbabilityQuanto((int)issuer, paramDate, maturityDate, null, scenario, 0, 0, 1, probMultiplier);
         }
 
         public static double GetRecoveryRate(int id)

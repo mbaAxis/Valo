@@ -153,11 +153,11 @@ namespace ValoLibrary
             return LossUnit(numberOfIssuer, nominalIssuer, recoveryRate, 0.0001);
         }
 
-        public static object CDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+        public static  object CDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, bool isAmericanFloatLeg = false, bool isAmericanFixedLeg = false,
-    bool withGreeks = false, double[] hedgingCDS=null, double? lossUnitAmount = null,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    double withGreeks = 0, double[] hedgingCDS=null, double? lossUnitAmount = null,
     string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             int i;
@@ -270,10 +270,10 @@ namespace ValoLibrary
                 withGreeks, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
         }
 
-        public static string[,] CDS(object issuerIdParam, string maturity, double spread, double recoveryRate,
+        public static string[,] CDS(string issuerIdParam, string maturity, double spread, double recoveryRate,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
-        double fxCorrel = 0, double fxVol = 0, bool isAmericanFloatLeg = false, bool isAmericanFixedLeg = false,
-        bool withGreeks = false, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
+        double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
         {
 
             int issuerId;
@@ -284,7 +284,7 @@ namespace ValoLibrary
             }
             else
             {
-                issuerId = (int) issuerIdParam - 1;
+                issuerId = (int) Double.Parse(issuerIdParam); // update
             }
             
             if (Convert.ToDouble(issuerId) > CreditDefaultSwapCurves.NumberOfCurves)
@@ -329,17 +329,37 @@ namespace ValoLibrary
     double inputSpread, object cpnLastSettle, string cpnPeriod, string cpnConvention,
     string pricingCurrency, double fxCorrel, double fxVol,
     object strikes, object correl, object betaAdder,
-    bool isAmericanFloatLeg = false, bool isAmericanFixedLeg = false,
-    bool withGreeks = false, double[] HedgingCDS = null, double lossUnitAmount = 0.0, string integrationPeriod = "1m",
+    double isAmericanFloatLegVal, double isAmericanFixedLegVal,
+       double withGreeksVal, double[] HedgingCDS, double lossUnitAmount = 0.0, string integrationPeriod = "1m",
     DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1)
         {
+
             int i, j, k;
 
             double LossRate;
             double TrancheWidth;
             // MODIF QUANTO
             double CurrentTime;
-           
+
+            bool isAmericanFloatLeg = false;
+            bool isAmericanFixedLeg = false;
+            bool withGreeks = false;
+
+            if (isAmericanFloatLegVal != 0)
+            {
+                isAmericanFloatLeg = true;
+            }
+
+            if (isAmericanFixedLegVal != 0)
+            {
+                isAmericanFixedLeg = true;
+            }
+
+            if (withGreeksVal != 0)
+            {
+                withGreeks = true;
+            }
+
 
             int CurveID;
             DateTime ParamDate, StartTime;
@@ -797,9 +817,9 @@ namespace ValoLibrary
 
 
                                     // Default is assumed to occur at mid integration period
-                                    DateTime dtmp = new DateTime((long) ( (Date2.Ticks + Date1.Ticks) / 2.0) );
+                                    DateTime dTmp = new DateTime((long) ( (Date2.Ticks + Date1.Ticks) / 2.0) );
 
-                                    DefaultDayCountFraction =  (dtmp-schedule[i - 1]).Days / 360.0;
+                                    DefaultDayCountFraction =  (dTmp-schedule[i - 1]).Days / 360.0;
                                     double NextProbNoDef = (1.0 - European[k, j] / (double) RiskFreeZC[k] / (double) TrancheWidth / (double) LossRate);
                                     double Accrued_bpv = DefaultDayCountFraction * (-NextProbNoDef + PreviousProbNoDef) * Math.Sqrt(RiskFreeZC[k] * RiskFreeZC[k-1]);
                                     this_bpv += Accrued_bpv;
@@ -857,15 +877,15 @@ namespace ValoLibrary
 
                         string[,] hedging_cds;
                         double val1 = HedgingCDS[0];
-                        bool val2 = HedgingCDS[1] == 1.0 ? true : false;
-                        bool val3 = HedgingCDS[2] == 1.0 ? true : false;
+                        double val2 = HedgingCDS[1];
+                        double val3 = HedgingCDS[2];
 
                         if (IsCDO)
                         {
                             hedging_cds = AmericanSwap(maturity, 1, j, 1.0,ThisCDS.Recovery,
                                                         val1, cpnLastSettle, cpnPeriod,
                                                         cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
-                                                       betaAdder, val2, val3, withGreeks, null, lossUnitAmount,
+                                                       betaAdder, val2, val3, withGreeksVal, null, lossUnitAmount,
                                                         integrationPeriod, schedule, probMultiplier);
                         }
                         else
@@ -874,7 +894,7 @@ namespace ValoLibrary
                             hedging_cds = AmericanSwap(maturity, 1, j, 1.0, ThisCDS.Recovery,
                                                         val1, cpnLastSettle, cpnPeriod,
                                                         cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
-                                                         betaAdder, val2, val3, withGreeks, null, 1.0,
+                                                         betaAdder, val2, val3, withGreeksVal, null, 1.0,
                                                         integrationPeriod, schedule, probMultiplier);
 
                         }
@@ -892,11 +912,8 @@ namespace ValoLibrary
                         {
                             Leverage += Double.Parse(x[6 + i, 3]); 
                         }
-                    }
-                    
+                    }  
                 }
-
-
                 if (IsCDO)
                 {
                     Leverage /= (double) TrancheWidth;
