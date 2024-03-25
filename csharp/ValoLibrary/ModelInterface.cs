@@ -880,6 +880,25 @@ namespace ValoLibrary
                         double val2 = HedgingCDS[1];
                         double val3 = HedgingCDS[2];
 
+
+                        // add
+
+                        //double val1 = HedgingCDS[0];
+                        //bool val2 = false;
+                        //bool val3 = false;
+
+                        //if (HedgingCDS[1] != 0)
+                        //{
+                        //    val2 = true;
+                        //}
+
+                        //if (HedgingCDS[2] != 0)
+                        //{
+                        //    val3 = true;
+                        //}
+
+                        //end add
+
                         if (IsCDO)
                         {
                             hedging_cds = AmericanSwap(maturity, 1, j, 1.0,ThisCDS.Recovery,

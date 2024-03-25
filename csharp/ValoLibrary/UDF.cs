@@ -11,7 +11,8 @@ namespace ValoLibrary
     public interface IUDF
     {
         // using user data
-        double GetBSOptionPrice(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
+        double GetBSOptionPrice(double quantity, string optionFlag, string position, double s, double sigma,
+            double r, double k, double T, double? q = null);
         double[,] GetSensiOptionBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
         double GetBSOptionPortfolioPrice(BSParameters[] options);
         double GetDeltaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null);
