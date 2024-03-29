@@ -8,10 +8,7 @@ using System.Collections.Specialized;
 
 namespace ValoLibrary
 {
-    //[ComVisible(true)]
-    //[ProgId("ValoLibrary.BSParameters")]
-    //[Guid("14041acd-3ec6-4ba1-922b-87858755d6e7")]
-    //[ClassInterface(ClassInterfaceType.None)]
+
     public class BSParameters
     {
         public double quantity;
@@ -29,170 +26,265 @@ namespace ValoLibrary
 
         public static double BSOptionPrice(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            double price = 0;
-            double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
-            double d2 = d1 - sigma * Math.Sqrt(T);
-
-            double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
-            double expRT = Math.Exp(-r * T);
-
-            if (optionFlag.ToLower() == "call")
+            try
             {
-                if (position.ToLower() == "long")
+                if (k < 0 || T < 0)
                 {
-                    price = quantity * (expQT * s * StatisticFormulas.Cfd(d1) - k * expRT * StatisticFormulas.Cfd(d2));
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
                 }
-                else if (position.ToLower() == "short")
+                if (T == 0)
                 {
-                    price = -quantity * (expQT * s * StatisticFormulas.Cfd(d1) - k * expRT * StatisticFormulas.Cfd(d2));
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
                 }
-            }
-            else if (optionFlag.ToLower() == "put")
-            {
-                if (position.ToLower() == "long")
+
+                double price = 0;
+                double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
+                double d2 = d1 - sigma * Math.Sqrt(T);
+
+                double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
+                double expRT = Math.Exp(-r * T);
+
+
+                if (optionFlag.ToLower() == "call")
                 {
-                    price = quantity * (-expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2));
+                    if (position.ToLower() == "long")
+                    {
+                        price = quantity * (expQT * s * StatisticFormulas.Cfd(d1) - k * expRT * StatisticFormulas.Cfd(d2));
+                    }
+                    else if (position.ToLower() == "short")
+                    {
+                        price = -quantity * (expQT * s * StatisticFormulas.Cfd(d1) - k * expRT * StatisticFormulas.Cfd(d2));
+                    }
                 }
-                else if (position.ToLower() == "short")
+                else if (optionFlag.ToLower() == "put")
                 {
-                    price = -quantity * (-expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2));
+                    if (position.ToLower() == "long")
+                    {
+                        price = quantity * (-expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2));
+                    }
+                    else if (position.ToLower() == "short")
+                    {
+                        price = -quantity * (-expQT * s * StatisticFormulas.Cfd(-d1) + k * expRT * StatisticFormulas.Cfd(-d2));
+                    }
                 }
+
+                return price;
             }
 
-            return price;
+
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
 
         public static double DeltaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            double delta = 0.0;
-            double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
-            double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
+            try
+            {
+                if (k < 0 || T < 0)
+                {
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
+                }
+                if (T == 0)
+                {
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
+                }
 
-            if (optionFlag.ToLower() == "call")
-            {
-                if (position.ToLower() == "long")
-                {
-                    delta = quantity * expQT * StatisticFormulas.Cfd(d1);
-                }
-                else if (position.ToLower() == "short")
-                {
-                    delta = -quantity * expQT * StatisticFormulas.Cfd(d1);
-                }
-            }
-            else if (optionFlag.ToLower() == "put")
-            {
-                if (position.ToLower() == "long")
-                {
-                    delta = quantity * expQT * (StatisticFormulas.Cfd(d1) - 1);
-                }
-                else if (position.ToLower() == "short")
-                {
-                    delta = -quantity * expQT * (StatisticFormulas.Cfd(d1) - 1);
-                }
-            }
-            else
-            {
-                Console.WriteLine("ERROR: Check call/put flag!");
-                return 0;
-            }
 
-            return delta;
+
+                double delta = 0.0;
+                double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
+                double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
+
+                if (optionFlag.ToLower() == "call")
+                {
+                    if (position.ToLower() == "long")
+                    {
+                        delta = quantity * expQT * StatisticFormulas.Cfd(d1);
+                    }
+                    else if (position.ToLower() == "short")
+                    {
+                        delta = -quantity * expQT * StatisticFormulas.Cfd(d1);
+                    }
+                }
+                else if (optionFlag.ToLower() == "put")
+                {
+                    if (position.ToLower() == "long")
+                    {
+                        delta = quantity * expQT * (StatisticFormulas.Cfd(d1) - 1);
+                    }
+                    else if (position.ToLower() == "short")
+                    {
+                        delta = -quantity * expQT * (StatisticFormulas.Cfd(d1) - 1);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: Check call/put flag!");
+                    return 0;
+                }
+
+                return delta;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }   
         }
 
         public static double GammaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            double gamma = 0.0;
-            double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
-            double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
-
-            if (optionFlag.ToLower() == "call" || optionFlag.ToLower() == "put")
+            try
             {
-                if (position.ToLower() == "long")
+                if (k < 0 || T < 0)
                 {
-                    gamma = quantity * expQT * StatisticFormulas.NormalDensity(d1, 0, 1) / (s * sigma * Math.Sqrt(T));
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
                 }
-                else if (position.ToLower() == "short")
+                if (T == 0)
                 {
-                    gamma = -quantity * expQT * StatisticFormulas.NormalDensity(d1, 0, 1) / (s * sigma * Math.Sqrt(T));
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
                 }
-            }
-            else
-            {
-                Console.WriteLine("ERROR: Check call/put flag!");
-                return 0;
-            }
 
-            return gamma;
+                double gamma = 0.0;
+                double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
+                double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
+
+                if (optionFlag.ToLower() == "call" || optionFlag.ToLower() == "put")
+                {
+                    if (position.ToLower() == "long")
+                    {
+                        gamma = quantity * expQT * StatisticFormulas.NormalDensity(d1, 0, 1) / (s * sigma * Math.Sqrt(T));
+                    }
+                    else if (position.ToLower() == "short")
+                    {
+                        gamma = -quantity * expQT * StatisticFormulas.NormalDensity(d1, 0, 1) / (s * sigma * Math.Sqrt(T));
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: Check call/put flag!");
+                    return 0;
+                }
+
+                return gamma;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
 
         public static double ThetaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            double theta = 0.0;
-            double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
-            double d2 = d1 - sigma * Math.Sqrt(T);
-
-            double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
-            double expRT = Math.Exp(-r * T);
-
-            if (optionFlag.ToLower() == "call")
+            try
             {
-                if (position.ToLower() == "long")
+                if (k < 0 || T < 0)
                 {
-                    theta = quantity * ((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
-                          - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
                 }
-                else if (position.ToLower() == "short")
+                if (T == 0)
                 {
-                    theta = -quantity * ((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
-                       - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
                 }
-            }
-            else if (optionFlag.ToLower() == "put")
-            {
-                if (position.ToLower() == "long")
+
+                double theta = 0.0;
+                double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
+                double d2 = d1 - sigma * Math.Sqrt(T);
+
+                double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
+                double expRT = Math.Exp(-r * T);
+
+                if (optionFlag.ToLower() == "call")
                 {
-                    theta = quantity * ((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+                    if (position.ToLower() == "long")
+                    {
+                        theta = quantity * ((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+                              - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
+                    }
+                    else if (position.ToLower() == "short")
+                    {
+                        theta = -quantity * ((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+                           - (r * k * StatisticFormulas.Cfd(d2) * expRT) + (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
+                    }
+                }
+                else if (optionFlag.ToLower() == "put")
+                {
+                    if (position.ToLower() == "long")
+                    {
+                        theta = quantity * ((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
+                               + (r * k * StatisticFormulas.Cfd(d2) * expRT) - (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
+                    }
+                    else if (position.ToLower() == "short")
+                    {
+                        theta = -quantity * ((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
                            + (r * k * StatisticFormulas.Cfd(d2) * expRT) - (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
+                    }
                 }
-                else if (position.ToLower() == "short")
+                else
                 {
-                    theta = -quantity * ((expQT * s * StatisticFormulas.NormalDensity(d1, 0, 1) * sigma) / (2 * Math.Sqrt(T))
-                       + (r * k * StatisticFormulas.Cfd(d2) * expRT) - (q.GetValueOrDefault() * expQT * s * StatisticFormulas.Cfd(d2)));
+                    Console.WriteLine("ERROR: Check call/put flag!");
+                    return 0;
                 }
-            }
-            else
-            {
-                Console.WriteLine("ERROR: Check call/put flag!");
-                return 0;
-            }
 
-            return theta;
+                return theta;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
 
         public static double VegaBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
-            double vega = 0.0;
-            double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
-            double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
-
-            if (optionFlag.ToLower() == "call" || optionFlag.ToLower() == "put")
+            try
             {
-                if (position.ToLower() == "long")
+                if (k < 0 || T < 0)
                 {
-                    vega = quantity * expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T);
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
                 }
-                else if (position.ToLower() == "short")
+                if (T == 0)
                 {
-                    vega = -quantity * expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T);
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
                 }
-            }
-            else
-            {
-                Console.WriteLine("ERROR: Check call/put flag!");
-                return 0;
-            }
 
-            return vega;
+                double vega = 0.0;
+                double d1 = (Math.Log(s / k) + (r + (Math.Pow(sigma, 2) / 2)) * T) / (sigma * Math.Sqrt(T));
+                double expQT = q.HasValue ? Math.Exp((double)(-q * T)) : 1.0;
+
+                if (optionFlag.ToLower() == "call" || optionFlag.ToLower() == "put")
+                {
+                    if (position.ToLower() == "long")
+                    {
+                        vega = quantity * expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T);
+                    }
+                    else if (position.ToLower() == "short")
+                    {
+                        vega = -quantity * expQT * StatisticFormulas.NormalDensity(d1, 0, 1) * s * Math.Sqrt(T);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: Check call/put flag!");
+                    return 0;
+                }
+
+                return vega;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
 
         //public static double RhoBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
@@ -236,6 +328,7 @@ namespace ValoLibrary
 
         public static double[,] SensiOptionBS(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {
+
             double[,] sensitivities = new double[4, 1]; // Tableau 2D pour simuler une colonne
 
             sensitivities[0, 0] = BlackScholes.DeltaBS(quantity, optionFlag, position, s, sigma, r, k, T, q);

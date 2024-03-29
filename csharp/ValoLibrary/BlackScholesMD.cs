@@ -21,65 +21,151 @@ namespace ValoLibrary
     {
         public static double OptionPrice(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
-            double s = GetData.GetSpot(underlying);
-            double r = Calibration.GetRepo(underlying, T);
-            q = q ?? Calibration.GetDividend(underlying, T);
-            double date = GetData.GetTime(underlying);
-            double timeToMaturity = (T - date) / 365;
-            double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q);
-            double P = BlackScholes.BSOptionPrice(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
-            return P;
+            try
+            {
+                if (k < 0 || T < 0)
+                {
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
+                }
+                if (T == 0)
+                {
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
+                }
+                double s = GetData.GetSpot(underlying);
+                double r = Calibration.GetRepo(underlying, T);
+                q = q ?? Calibration.GetDividend(underlying, T);
+                double date = GetData.GetTime(underlying);
+                double timeToMaturity = (T - date) / 365;
+                double price = Calibration.InterpolatePrice(k, T, underlying);
+                double vol = BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q);
+                double P = BlackScholes.BSOptionPrice(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
+                return P;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
 
         public static double Delta(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
-            double s = GetData.GetSpot(underlying);
-            double r = Calibration.GetRepo(underlying, T);
-            q = q ?? Calibration.GetDividend(underlying, T);
-            double date = GetData.GetTime(underlying);
-            double timeToMaturity = (T - date) / 365;
-            double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.DeltaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
-            return sensitivity;
+            try
+            {
+                if (k < 0 || T < 0)
+                {
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
+                }
+                if (T == 0)
+                {
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
+                }
+                double s = GetData.GetSpot(underlying);
+                double r = Calibration.GetRepo(underlying, T);
+                q = q ?? Calibration.GetDividend(underlying, T);
+                double date = GetData.GetTime(underlying);
+                double timeToMaturity = (T - date) / 365;
+                double price = Calibration.InterpolatePrice(k, T, underlying);
+                double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+                double sensitivity = BlackScholes.DeltaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
+                return sensitivity;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
         public static double Gamma(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
-            double s = GetData.GetSpot(underlying);
-            double r = Calibration.GetRepo(underlying, T);
-            q = q ?? Calibration.GetDividend(underlying, T);
-            double date = GetData.GetTime(underlying);
-            double timeToMaturity = (T - date) / 365;
-            double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.GammaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
-            return sensitivity;
+            try
+            {
+                if (k < 0 || T < 0)
+                {
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
+                }
+                if (T == 0)
+                {
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
+                }
+                double s = GetData.GetSpot(underlying);
+                double r = Calibration.GetRepo(underlying, T);
+                q = q ?? Calibration.GetDividend(underlying, T);
+                double date = GetData.GetTime(underlying);
+                double timeToMaturity = (T - date) / 365;
+                double price = Calibration.InterpolatePrice(k, T, underlying);
+                double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+                double sensitivity = BlackScholes.GammaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
+                return sensitivity;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
         public static double Theta(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
-            double s = GetData.GetSpot(underlying);
-            double r = Calibration.GetRepo(underlying, T);
-            q = q ?? Calibration.GetDividend(underlying, T);
-            double date = GetData.GetTime(underlying);
-            double timeToMaturity = (T - date) / 365;
-            double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.ThetaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
-            return sensitivity;
+            try
+            {
+                if (k < 0 || T < 0)
+                {
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
+                }
+                if (T == 0)
+                {
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
+                }
+                double s = GetData.GetSpot(underlying);
+                double r = Calibration.GetRepo(underlying, T);
+                q = q ?? Calibration.GetDividend(underlying, T);
+                double date = GetData.GetTime(underlying);
+                double timeToMaturity = (T - date) / 365;
+                double price = Calibration.InterpolatePrice(k, T, underlying);
+                double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+                double sensitivity = BlackScholes.ThetaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
+                return sensitivity;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
 
         public static double Vega(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)
         {
-            double s = GetData.GetSpot(underlying);
-            double r = Calibration.GetRepo(underlying, T);
-            q = q ?? Calibration.GetDividend(underlying, T);
-            double date = GetData.GetTime(underlying);
-            double timeToMaturity = (T - date) / 365;
-            double price = Calibration.InterpolatePrice(k, T, underlying);
-            double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
-            double sensitivity = BlackScholes.VegaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
-            return sensitivity;
+            try
+            {
+                if (k < 0 || T < 0)
+                {
+                    throw new ArgumentException("The strike or maturity cannot be negative.");
+                }
+                if (T == 0)
+                {
+                    Console.WriteLine("Exception: You should put a positive Maturity");
+                    return 0.0;
+                }
+
+                double s = GetData.GetSpot(underlying);
+                double r = Calibration.GetRepo(underlying, T);
+                q = q ?? Calibration.GetDividend(underlying, T);
+                double date = GetData.GetTime(underlying);
+                double timeToMaturity = (T - date) / 365;
+                double price = Calibration.InterpolatePrice(k, T, underlying);
+                double vol = Math.Abs(BlackScholes.ImpliedVol(quantity, optionFlag, position, s, price, r, k, timeToMaturity, q));
+                double sensitivity = BlackScholes.VegaBS(quantity, optionFlag, position, s, vol, r, k, timeToMaturity, q);
+                return sensitivity;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return 0.0; // You can choose an appropriate value to return in case of an error
+            }
         }
 
         //public static double Rho(double quantity, string optionFlag, string position, double k, double T, string underlying, double? q = null)

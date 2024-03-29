@@ -7,7 +7,7 @@ using ValoLibrary;
 double T = 1;
 double T2 = 44989;
 double S = 100;
-double strike = 100;
+double strike = -100;
 double r = 0.05;
 //double r = 0.967197916277398;
 double sigma = 0.2;
@@ -17,6 +17,8 @@ UDF exemple = new();
 string position1 = "long";
 //string position2 = "short";
 //double q = 0.306845697901433;
+
+
 double q = 0;
 double quantity = 2;
 
@@ -28,39 +30,39 @@ string Flag1 = "put";
 double mc = exemple.GetMCEurOptionPrice(quantity, Flag, position1, S, sigma, r, strike, T);
 double mc2 = exemple.GetMCEurOptionPrice(quantity, Flag1, position1, S, sigma, r, strike, T);
 double prix11 = exemple.GetBSOptionPrice(quantity, Flag, position1, S, sigma, r, strike, T, q);
-double prix12 = exemple.GetBSOptionPrice(quantity, Flag1, position1, S, sigma, r, strike, T, q);
+//double prix12 = exemple.GetBSOptionPrice(quantity, Flag1, position1, S, sigma, r, strike, T, q);
 //double prix12 = exemple.GetBSOptionPrice(1, Flag, position1, S, sigma, r, strike, T, q);
 
-double delta = exemple.GetDeltaBS(quantity, Flag, position1, S, sigma, r, strike, T, q);
+//double delta = exemple.GetDeltaBS(quantity, Flag, position1, S, sigma, r, strike, T, q);
 double[,] sensi = exemple.GetSensiOptionBS(quantity, Flag, position1, S, sigma, r, strike, T, q);
-////double[,] sensi2 = exemple.GetSensiOption(Flag, strike, T2, underlying);
+double[,] sensi2 = exemple.GetSensiOption(quantity, Flag, position1, strike, T2, underlying);
 //double prix5= exemple.GetOptionPrice(Flag, position1, strike, T2, underlying, 0);
 
 Console.WriteLine("mc call =" + mc);
-Console.WriteLine("mc put =" + mc2);
+//Console.WriteLine("mc put =" + mc2);
 Console.WriteLine("BS call2 =" + prix11);
-Console.WriteLine("BS put2 =" + prix12);
+//Console.WriteLine("BS put2 =" + prix12);
 //Console.WriteLine("BS call1 =" + prix12);
 //Console.WriteLine("BS call12 =" + 2 * prix12);
 //Console.WriteLine("delta =" + delta);
 
 ////Console.WriteLine("call =" + prix5);
 
-//foreach (var kvp in sensi)
-//{
-//    Console.WriteLine($"sensi cal BS: {kvp}");
-//}
-//foreach (var sen in sensi)
-//{
-//    Console.WriteLine($"{sen}");
-//}
+foreach (var kvp in sensi)
+{
+    Console.WriteLine($"sensi cal BS: {kvp}");
+}
+foreach (var sen in sensi2)
+{
+    Console.WriteLine($"{sen}");
+}
 
-////===========================================portfolio======================
+//===========================================portfolio======================
+double strike2 = 100;
+BSParameters[] params1 = [
 
-BSParameters[] params1 = [ 
-
-new BSParameters { quantity = quantity, optionFlag = Flag, position = position1, s = S, sigma = sigma, r = r, k = strike, T = T, q = q },
-new BSParameters { quantity = quantity, optionFlag = Flag, position = position1, s = S, sigma = sigma, r = r, k = strike, T = T, q = q },
+new BSParameters { quantity = quantity, optionFlag = Flag, position = position1, s = S, sigma = sigma, r = r, k = strike2, T = T, q = q },
+    new BSParameters { quantity = quantity, optionFlag = Flag, position = position1, s = S, sigma = sigma, r = r, k = strike2, T = T, q = q },
 
 ];
 
