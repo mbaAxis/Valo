@@ -64,6 +64,13 @@ namespace ValoLibrary
        double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1);
 
+        string[,] GetCDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+        int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+        string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+        double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+        double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+
     }
 
 
@@ -214,6 +221,21 @@ namespace ValoLibrary
              fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg,
              withGreeks, hedgingCds, integrationPeriod, probMultiplier);
 
+        }
+
+        public string[,] GetCDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+   int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+   string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+   double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+   double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+   string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            return ModelInterface.CDO(maturity, strikes, correl, pricingCurrency,
+     numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
+    cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder,
+     recoveryIssuer = null, isAmericanFloatLeg = 0, isAmericanFixedLeg = 0,
+     withGreeks = 0,  hedgingCDS = null, lossUnitAmount = null,
+     integrationPeriod = "1m", probMultiplier = 1, dBeta = 0.1);
         }
 
     }

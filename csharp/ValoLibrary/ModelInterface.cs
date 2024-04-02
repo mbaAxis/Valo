@@ -153,7 +153,7 @@ namespace ValoLibrary
             return LossUnit(numberOfIssuer, nominalIssuer, recoveryRate, 0.0001);
         }
 
-        public static  object CDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+        public static  string[,] CDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -181,11 +181,13 @@ namespace ValoLibrary
 
             if (numberOfIssuer > issuerList.Length)
             {
-                return $"CDO Pricing: Not enough Issuers specified compared to the indicated number of issuer - Called from: {Environment.StackTrace}";
+                Console.WriteLine($"CDO Pricing: Not enough Issuers specified compared to the indicated number of issuer - Called from: {Environment.StackTrace}");
+                return null;
             }
             else if (issuerList == null)
             {
-                return $"CDO Pricing: No Issuers specified - Called from: {Environment.StackTrace}";
+                Console.WriteLine($"CDO Pricing: No Issuers specified - Called from: {Environment.StackTrace}");
+                return null ;
             }
             else
             {
@@ -193,7 +195,8 @@ namespace ValoLibrary
                 {
                     if (issuerList.Length <= i)
                     {
-                        return $"CDO Pricing: No Issuers specified in position {i} - Called from: {Environment.StackTrace}";
+                        Console.WriteLine($"CDO Pricing: No Issuers specified in position {i} - Called from: {Environment.StackTrace}");
+                        return null ;
                     }
                     else
                     {
@@ -208,16 +211,20 @@ namespace ValoLibrary
 
                         if (((double[])vbaIssuerList)[i] == -1)
                         {
-                            return $"CDO Pricing: Position {i}: IssuerID {issuerList[i]} not recognized - Called from: {Environment.StackTrace}";
+                            Console.WriteLine($"CDO Pricing: Position {i}: IssuerID {issuerList[i]} not recognized - Called from: {Environment.StackTrace}");
+                            return null ;
+
                         }
 
                         if (((int[])vbaIssuerList)[i] > StrippingCDS.CreditDefaultSwapCurves.NumberOfCurves)
                         {
-                            return $"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) exceeds range of defined issuer - Called from: {Environment.StackTrace}";
+                            Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) exceeds range of defined issuer - Called from: {Environment.StackTrace}");
+                            return null;
                         }
                         else if (!StrippingCDS.CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].CDSdone)
                         {
-                            return $"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) CDS curve not stripped - Called from: {Environment.StackTrace}";
+                            Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) CDS curve not stripped - Called from: {Environment.StackTrace}");
+                            return null;
                         }
                     }
                 }
