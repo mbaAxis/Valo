@@ -481,7 +481,7 @@ namespace ValoLibrary
         }
         public static string GetCurveName(int curveId)
         {
-            if (curveId >= 1 || curveId <= InterestRateCurves.NumberOfCurves)
+            if (curveId >= 1 && curveId <= InterestRateCurves.NumberOfCurves)
             {
                 InterestRateCurves.LastError = false;
                 return InterestRateCurves.Curves[curveId - 1].CurveName;

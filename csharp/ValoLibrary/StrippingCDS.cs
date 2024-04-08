@@ -678,7 +678,7 @@ namespace ValoLibrary
                     StrippingIRS.InterestRateCurves.LastError = true;
                 }
                 //return null;
-                return new double[] { CurveID + 100  };
+                return new double[] { CurveID + 1000000  };
             }
 
             // Compute ZC for Risky Curve if not done yet
