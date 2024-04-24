@@ -110,19 +110,26 @@ namespace ValoLibrary
             DateTime lastDate = paramDate;
 
             int j;
-            for (j = 0; j < ZC.Length-1; j = j + 1)
+            // en commentaire le decalage
+            //for (j = 0; j < ZC.Length-1; j = j + 1)
+            for (j = 0; j < ZC.Length; j += 1)
             {
                 int dateCounter = j;
-                if (ZCDate[dateCounter] != "" && ZCDate[dateCounter] != null && ZC[dateCounter+1] != 0)
+                //if (ZCDate[dateCounter] != "" && ZCDate[dateCounter] != null && ZC[dateCounter+1] != 0)
+                if (ZCDate[dateCounter] != "" && ZCDate[dateCounter] != null && ZC[dateCounter] != 0)
                 {
                     DateTime nextDate = UtilityDates.ConvertDate(paramDate, ZCDate[dateCounter]);
                     if (nextDate >= maturityDateX)
                     {
-                        return lastZC * Math.Pow((ZC[dateCounter+1] / (double) lastZC), (maturityDateX - lastDate).Days / (double) (nextDate - lastDate).Days);
+                        return lastZC * Math.Pow((ZC[dateCounter] / (double)lastZC), (maturityDateX - lastDate).Days / (double)(nextDate - lastDate).Days);
+
+                        //return lastZC * Math.Pow((ZC[dateCounter+1] / (double) lastZC), (maturityDateX - lastDate).Days / (double) (nextDate - lastDate).Days);
                     }
                     else
                     {
-                        lastZC = ZC[dateCounter+1];
+                        lastZC = ZC[dateCounter];
+
+                        //lastZC = ZC[dateCounter+1];
                         lastDate = nextDate;
                     }
                 }
@@ -131,6 +138,50 @@ namespace ValoLibrary
             return Math.Pow((double) lastZC,  ((maturityDateX - paramDate).Days / (double) (lastDate - paramDate).Days));
         }
 
+        public static double VbaGetRiskFreeZCV2(DateTime paramDate, string maturityDate, double[] ZC, string[] ZCDate)
+        {
+            DateTime maturityDateX = UtilityDates.ConvertDate(paramDate, maturityDate);
+
+            if (maturityDateX < paramDate)
+            {
+                return 1.0;
+            }
+
+            double lastZC = 1.0;
+            DateTime lastDate = paramDate;
+
+            int j;
+            for (j = 0; j < ZC.Length; j = j + 1)
+            {
+                int dateCounter = j;
+                if (ZCDate[dateCounter] != "" && ZCDate[dateCounter] != null)
+                {
+                    DateTime nextDate = UtilityDates.ConvertDate(paramDate, ZCDate[dateCounter]);
+                    if (nextDate >= maturityDateX && j == 0)
+                    {
+                        return Math.Pow((double)ZC[j], ((maturityDateX - paramDate).Days / (double)(nextDate - paramDate).Days));
+                    }
+                    if (nextDate >= maturityDateX)
+                    {
+                        double t1 = UtilityDates.DurationYear(lastDate, paramDate);
+                        double t2 = UtilityDates.DurationYear(nextDate, paramDate);
+                        double ti = UtilityDates.DurationYear(maturityDateX, paramDate);
+                        double r1 = -Math.Log(lastZC) / t1;
+                        double r2 = -Math.Log(ZC[dateCounter]) / t2;
+                        double ri = (r2 - r1) * (ti - t1) / (t2 - t1) + r1;
+                        return Math.Exp(-ri * ti);
+                       
+                    }
+                    else
+                    {
+                        lastZC = ZC[dateCounter];
+                        lastDate = nextDate;
+                    }
+                }
+            }
+            // Extrapoler à un taux constant
+            return Math.Pow((double)lastZC, ((maturityDateX - paramDate).Days / (double)(lastDate - paramDate).Days));
+        }
 
         public static bool VbaStoreZC(DateTime paramDate, string curveName,
             int swapBasis, int swapPeriod, string[] curveDates, double[] swapRates,

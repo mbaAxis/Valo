@@ -170,19 +170,26 @@ using ValoLibrary;
 
 
 
-//string curveName = "EUR";
-//DateTime paramDate = new (2024, 3, 21); // DateTime(2024, 2, 16);
-//double[] curve = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };
-//double[] curve1 = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
-//string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
-//int swapPeriod = 12; //6;
-//int swapBasis = 4;//3;
-//double fxSpot = 1; // 165.5616;
+string curveName = "JPY";// "EUR";
+DateTime paramDate = new(2024, 4, 19); // DateTime(2024, 2, 16);
+double[] curve = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };
+double[] curve1 = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };
+// Exemple de taux de courbe
+double[] curve2 = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };
+string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
+int swapPeriod = 6;//12; //6;
+int swapBasis = 3;//4;//3;
+double fxSpot = 165.5616;//1; // 165.5616;
 
-////Console.WriteLine("============================== 1");
+//Console.WriteLine("============================== 1");
 
-//double[] result = StrippingIRS.StripZC(paramDate, curveName, curve1, curveMaturity, swapPeriod, swapBasis, fxSpot);
+double[] result = StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
 
+for (int i = 0; i < result.Length; i++)
+{
+    Console.WriteLine("Pour la maturité " + curveMaturity[i] + " le prix est " + result[i]);
+    //Console.WriteLine("L'interpolation elle, est pour la même maturité =" + StrippingIRS.VbaGetRiskFreeZC(paramDate, curveMaturity[i], result, curveMaturity));
+}
 
 //if (result != null)
 //{
@@ -207,132 +214,132 @@ using ValoLibrary;
 //Console.WriteLine("===================End Stripping IRS====================");
 
 
-Console.WriteLine("===================Test Stripping CDS====================");
+//Console.WriteLine("===================Test Stripping CDS====================");
 
 
-string curveName = "EUR";
-DateTime paramDate = new(2024, 03, 1) ;
-double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
-string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
-int swapPeriod = 12;
-int swapBasis = 4;
-double fxSpot = 1;
-StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
+//string curveName = "EUR";
+//DateTime paramDate = new(2024, 03, 1) ;
+//double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
+//string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
+//int swapPeriod = 12;
+//int swapBasis = 4;
+//double fxSpot = 1;
+//StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
 
-int cdsID = 1;
-string CDSName = "ABNAMRO_MMR.EUR.SU";
-//DateTime ParamDate = new(2024, 03, 03);
-DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
-double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
-//bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
+//int cdsID = 1;
+//string CDSName = "ABNAMRO_MMR.EUR.SU";
+////DateTime ParamDate = new(2024, 03, 03);
+//DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
+//double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
+////bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
 
-//Console.WriteLine("id vbaMontlyZC = " + vbaMontlyZC);
-
-
-string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
-string CDSCurrency = "EUR";
-double RecoveryRate = 0.4; // Par exemple, 40%
-bool alterMode = false;
-string intensity = "Curvepoint" ;//"3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+////Console.WriteLine("id vbaMontlyZC = " + vbaMontlyZC);
 
 
-// Appel de la fonction à tester
-double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, paramDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+//string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+//string CDSCurrency = "EUR";
+//double RecoveryRate = 0.4; // Par exemple, 40%
+//bool alterMode = false;
+//string intensity = "Curvepoint" ;//"3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
 
 
-// Vérification du résultat
-if (result != null)
-{
-    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
-    for (int i = 0; i < result.Length; i++)
-    {
-        Console.WriteLine(result[i]);
-    }
-}
-else
-{
-    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
-}
-string getname = StrippingCDS.GetCDSName(cdsID);
-//string getname2 = StrippingCDS.GetCDSName(CDSName);
-
-Console.WriteLine("getname = " + getname);
-//Console.WriteLine("getname = " + getname2);
-Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
-//Console.WriteLine("GETDPRO2 = " + StrippingCDS.GetDefaultProb(getname, "1M"));
-
-Console.WriteLine("===================End Stripping CDS====================");
+//// Appel de la fonction à tester
+//double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, paramDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
 
 
+//// Vérification du résultat
+//if (result != null)
+//{
+//    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
+//    for (int i = 0; i < result.Length; i++)
+//    {
+//        Console.WriteLine(result[i]);
+//    }
+//}
+//else
+//{
+//    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
+//}
+//string getname = StrippingCDS.GetCDSName(cdsID);
+////string getname2 = StrippingCDS.GetCDSName(CDSName);
 
-Console.WriteLine("=================== Start Model Interface ====================");
+//Console.WriteLine("getname = " + getname);
+////Console.WriteLine("getname = " + getname2);
+//Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
+////Console.WriteLine("GETDPRO2 = " + StrippingCDS.GetDefaultProb(getname, "1M"));
 
-string issuerId = "ABNAMRO_MMR.EUR.SU";
-string maturity = "5Y";
-double spread = 0.01;
-double recoveryRate = 0.4;
-string pricingCurrency = "EUR";
-double fxCorrel = 0.0;
-double fxVol = 0.0;
-
-string cpnPeriod = "3M";
-string cpnConvention = "LongFirst";
-string cpnLastSettle = "";
-
-double isAmericanFloatLeg = 1; // 1 = true;
-double isAmericanFixedLeg = 1; // 1 = true;
-double withGreeks = 1; // 1 = true;
-
-string integrationPeriod = "1m";
-double probMultiplier = 1;
-
-double[] hedgingCds = {0 , 1, 1 }; // 1 = true
-
-
-String[,] result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
- fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, integrationPeriod, probMultiplier);
+//Console.WriteLine("===================End Stripping CDS====================");
 
 
 
-// Affichage du résultat
-if (result3 != null)
-{
-    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
-    int rows = result3.GetLength(0) - 1;
-    int columns = result3.GetLength(1);
+//Console.WriteLine("=================== Start Model Interface ====================");
 
-    for (int i = 0; i < rows; i++)
-    {
-        Console.Write($"{i} | \t\t");
+//string issuerId = "ABNAMRO_MMR.EUR.SU";
+//string maturity = "5Y";
+//double spread = 0.01;
+//double recoveryRate = 0.4;
+//string pricingCurrency = "EUR";
+//double fxCorrel = 0.0;
+//double fxVol = 0.0;
 
-        for (int j = 0; j < columns; j++)
-        {
-            if (j + 1 == columns)
-            {
-                Console.Write($"{result3[i, j]}\t");
-            }
-            else
-            {
-                if (i == rows - 2)
-                {
-                    Console.Write($"{result3[i, j]}\t\t\t -> \t");
-                }
-                else
-                {
-                    Console.Write($"{result3[i, j]}\t -> \t");
-                }                
-            }
-            
-        }
-        Console.WriteLine("\n______________________________________________________________________________________________________________________________________________");
-    }
-}
-else
-{
-    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
-}
+//string cpnPeriod = "3M";
+//string cpnConvention = "LongFirst";
+//string cpnLastSettle = "";
 
-Console.WriteLine("=================== End Model Interface ====================");
+//double isAmericanFloatLeg = 1; // 1 = true;
+//double isAmericanFixedLeg = 1; // 1 = true;
+//double withGreeks = 1; // 1 = true;
+
+//string integrationPeriod = "1m";
+//double probMultiplier = 1;
+
+//double[] hedgingCds = {0 , 1, 1 }; // 1 = true
+
+
+//String[,] result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
+// fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, integrationPeriod, probMultiplier);
+
+
+
+//// Affichage du résultat
+//if (result3 != null)
+//{
+//    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
+//    int rows = result3.GetLength(0) - 1;
+//    int columns = result3.GetLength(1);
+
+//    for (int i = 0; i < rows; i++)
+//    {
+//        Console.Write($"{i} | \t\t");
+
+//        for (int j = 0; j < columns; j++)
+//        {
+//            if (j + 1 == columns)
+//            {
+//                Console.Write($"{result3[i, j]}\t");
+//            }
+//            else
+//            {
+//                if (i == rows - 2)
+//                {
+//                    Console.Write($"{result3[i, j]}\t\t\t -> \t");
+//                }
+//                else
+//                {
+//                    Console.Write($"{result3[i, j]}\t -> \t");
+//                }                
+//            }
+
+//        }
+//        Console.WriteLine("\n______________________________________________________________________________________________________________________________________________");
+//    }
+//}
+//else
+//{
+//    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
+//}
+
+//Console.WriteLine("=================== End Model Interface ====================");
 
 
 //Console.WriteLine("===================Test CDO MOdel====================");
