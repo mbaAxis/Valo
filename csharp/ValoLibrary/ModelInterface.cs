@@ -277,7 +277,7 @@ namespace ValoLibrary
                 withGreeks, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
         }
 
-        public static string[,] CDS(string issuerIdParam, string maturity, double spread, double recoveryRate,
+        public static string[,] CDS(string issuerIdParam, string maturity, double spread, double recoveryRate, double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
         double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
@@ -327,7 +327,7 @@ namespace ValoLibrary
                 recoveryRate = StrippingCDS.CreditDefaultSwapCurves.Curves[Convert.ToInt32(issuerId)].Recovery;
             }
 
-            return AmericanSwap(maturity, 1, issuerId, 1, recoveryRate, spread, cpnLastSettle , cpnPeriod, cpnConvention,
+            return AmericanSwap(maturity, 1, issuerId, notional, recoveryRate, spread, cpnLastSettle , cpnPeriod, cpnConvention,
                 pricingCurrency, fxCorrel, fxVol, 0.0, 0.0, 0.0, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, 1,
                 integrationPeriod,null, probMultiplier);
         }
@@ -690,7 +690,7 @@ namespace ValoLibrary
             // -----------------------------------------------------------------------
             // Compute the First term of the float leg. i.e. the European CDS/CDO at maturity
 
-            x[1, 0] = European[(int)NumberOfIntegrationDates, 1] + "";
+            x[1, 0] =  European[(int)NumberOfIntegrationDates, 1] + "";
 
             if (withGreeks)
             {
@@ -715,7 +715,7 @@ namespace ValoLibrary
                     else
                     {
                         double Financing = (1 - RiskFreeZC[i] / (double) RiskFreeZC[i - 1]);
-                        x[1, 0] = (Double.Parse(x[1, 0]) + European[i, 1] * Financing) + "";
+                        x[1, 0] =  (Double.Parse(x[1, 0]) + European[i, 1] * Financing) + "";
                         if (withGreeks)
                         {
                             for (j = 1; j <= numberOfIssuer; j++)
@@ -728,6 +728,12 @@ namespace ValoLibrary
                     }
                 }
             }
+
+            // add
+            // Store the NPV of the floated leg
+            x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));
+
+
             // -----------------------------------------------------------------------
             // FIXED LEG
             //
@@ -852,10 +858,12 @@ namespace ValoLibrary
             }
 
             // Store the NPV of the fixed leg
-            x[2, 0] = "" + (Double.Parse(x[4, 0]) * TrancheWidth * Spread);
+            x[2, 0] = "" + (Double)nominalIssuer * Double.Parse(x[4, 0]) * TrancheWidth * Spread;
+
+
 
             // Store the NPV of the CDS/CDO (dirty, i.e. inclusive of next coupon)
-            x[0, 0] = "" + (Double.Parse(x[1, 0]) - Double.Parse(x[2, 0]));
+            x[0, 0] = "" +  (Double.Parse(x[1, 0]) - Double.Parse(x[2, 0]));
 
             double Leverage = 0;
             //object[] HedgingCDS = null;
@@ -864,6 +872,7 @@ namespace ValoLibrary
                 for (i = 1; i <= numberOfIssuer; i++)
                 {
                     // Change of float leg
+                   
                     x[6 + i, 0] = (Double.Parse(x[6 + i, 0]) - Double.Parse(x[1, 0])) + "";
                     x[6 + i, 4] = (Double.Parse(x[6 + i, 4]) - Double.Parse(x[1, 0])) + "";
 
@@ -877,6 +886,8 @@ namespace ValoLibrary
                         }
                     }
 
+
+
                     if (HedgingCDS != null)
                     {
                         j = (IsCDO) ? ((int[])CDSListID)[i] : (int)CDSListID;
@@ -886,25 +897,6 @@ namespace ValoLibrary
                         double val1 = HedgingCDS[0];
                         double val2 = HedgingCDS[1];
                         double val3 = HedgingCDS[2];
-
-
-                        // add
-
-                        //double val1 = HedgingCDS[0];
-                        //bool val2 = false;
-                        //bool val3 = false;
-
-                        //if (HedgingCDS[1] != 0)
-                        //{
-                        //    val2 = true;
-                        //}
-
-                        //if (HedgingCDS[2] != 0)
-                        //{
-                        //    val3 = true;
-                        //}
-
-                        //end add
 
                         if (IsCDO)
                         {
@@ -916,22 +908,38 @@ namespace ValoLibrary
                         }
                         else
                         {
-
                             hedging_cds = AmericanSwap(maturity, 1, j, 1.0, ThisCDS.Recovery,
-                                                        val1, cpnLastSettle, cpnPeriod,
-                                                        cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
-                                                         betaAdder, val2, val3, withGreeksVal, null, 1.0,
-                                                        integrationPeriod, schedule, probMultiplier);
+                                           val1, cpnLastSettle, cpnPeriod,
+                                           cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
+                                            betaAdder, val2, val3, withGreeksVal, null, 1.0,
+                                           integrationPeriod, schedule, probMultiplier);
 
                         }
+                       
+                        
                         x[6 + i, 1] = hedging_cds[7, 0];
 
-                        // Hedge in CD0 currency (delta CDO is in CDO currency unit)
+                        // Hedge in CD0 currency (delta CDO is in CDO currency unit) 
                         x[6 + i, 3] = "" + (Double.Parse(x[6 + i, 0]) / Double.Parse(hedging_cds[7, 0]));
 
                         // Hedge in CDS currency (delta CDO is in CDO currency unit => it has to be converted)
-                        x[6 + i, 2] = "" + ( (Double.Parse(x[6 + i, 3]) / (double) StrippingIRS.GetFXSpot(pricingCurrency)) * StrippingIRS.GetFXSpot(CreditDefaultSwapCurves.Curves[j].Currency) );
+                       
+                        x[6 + i, 2] = "" + ((Double.Parse(x[6 + i, 3]) / (double) StrippingIRS.GetFXSpot(pricingCurrency)) * StrippingIRS.GetFXSpot(CreditDefaultSwapCurves.Curves[j].Currency) );
                         x[6 + i, 5] = CreditDefaultSwapCurves.Curves[j].CDSName;
+
+                        ///////////////////::::addd
+                        x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + "";
+
+                        for (i = 1; i <= numberOfIssuer; i++)
+                        {
+                            x[6 + i, 0] = (double)nominalIssuer * Double.Parse(x[6 + i, 0]) + "";
+                            x[6 + i, 1] = (double)nominalIssuer * Double.Parse(x[6 + i, 1]) + "";
+                            x[6 + i, 2] = (double)nominalIssuer * Double.Parse(x[6 + i, 2]) + "";
+                            x[6 + i, 3] = (double)nominalIssuer * Double.Parse(x[6 + i, 3]) + "";
+                            x[6 + i, 4] = (double)nominalIssuer * Double.Parse(x[6 + i, 4]) + "";
+                            x[6 + i, 5] = x[6 + i, 5];
+
+                        }
 
 
                         if (IsCDO)

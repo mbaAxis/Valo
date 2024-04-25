@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices.ComTypes;
 using System.Diagnostics.Eventing.Reader;
 using System.Xml.Linq;
+using Microsoft.Office.Core;
 
 namespace ValoLibrary
 {

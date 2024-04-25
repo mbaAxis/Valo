@@ -59,7 +59,7 @@ namespace ValoLibrary
 
         //////======================================ModelInterface====================================
 
-        string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate,
+        string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate, double notional,
        string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
        double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1);
@@ -211,12 +211,12 @@ namespace ValoLibrary
         // ===================================MOdel Interface===========================================================================
 
 
-        public string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate,
+        public string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate, double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
         double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
         {
-            return ModelInterface.CDS(issuerIdParam, maturity, spread, recoveryRate,
+            return ModelInterface.CDS(issuerIdParam, maturity, spread, recoveryRate, notional,
              cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
              fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg,
              withGreeks, hedgingCds, integrationPeriod, probMultiplier);
