@@ -116,7 +116,7 @@ namespace ValoLibrary
                 {
                     if (string.Equals(CreditDefaultSwapCurves.Curves[i].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
                     {
-                        LastCDSCurveID = i+1;
+                        LastCDSCurveID = i;//i+1 initialement sinon incrément d'un en trop
                         CreditDefaultSwapCurves.LastError = false;
                         return LastCDSCurveID;
                     }
@@ -239,7 +239,6 @@ namespace ValoLibrary
             CreditDefaultSwapCurves.Curves[CurveID].CDSdone = true;
             return true;
         }
-
 
         public static double GetDefaultProbabilityQuanto(int issuerId,
             DateTime paramDate, string maturityDate, 

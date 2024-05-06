@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Runtime.InteropServices;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ValoLibrary
 {
@@ -10,6 +11,8 @@ namespace ValoLibrary
     [InterfaceType(ComInterfaceType.InterfaceIsDual)]
     public interface IUDF
     {
+        // function test 
+        string GetWelcome();
         // using user data
         double GetBSOptionPrice(double quantity, string optionFlag, string position, double s, double sigma,
             double r, double k, double T, double? q = null);
@@ -71,6 +74,9 @@ namespace ValoLibrary
         double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
 
+        double[] testFR(double[] a);
+        double[] GetCDOtest(string maturity, double[] strikes);
+
     }
 
 
@@ -82,6 +88,20 @@ namespace ValoLibrary
     [ClassInterface(ClassInterfaceType.None)]
     public class UDF : IUDF
     {
+        // test function 
+        public double[] GetCDOtest(string maturity, double[] strikes)
+        {
+            return ModelInterface.CDOtest(maturity, strikes);  
+        }
+        public double[] testFR(double[] a)
+        {
+            return a;
+        }
+        public string GetWelcome()
+        {
+            return "Welcome JorOIJGREZdan";
+        }  
+
         // using user data
         public double GetBSOptionPrice(double quantity, string optionFlag, string position, double s, double sigma, double r, double k, double T, double? q = null)
         {

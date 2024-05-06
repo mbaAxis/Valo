@@ -67,14 +67,16 @@ namespace ValoLibrary
             }
             else
             {
-                double T = 1 / (1 + 0.2316419 * x);
                 double result = 0.2316419;
+                //double T = 1 / (1 + result * Math.Abs(x));
+                result = 1 / (1 + result * Math.Abs(x));
+                double c=0;
                 for (int i = 0; i < a.Length; i++)
                 {
-                    result += a[i] * Math.Pow(T, i + 1);
+                    c += a[i] * Math.Pow(result, i + 1);
                 }
-                result = 1 / (1 + result);
-                result = 1 - NormalDensityFunction(x) * result;
+                //result = 1 / (1 + result);
+                result = 1 - NormalDensityFunction(x) *c;
                 return (x <= 0) ? 1 - result : result;
             }
         }
