@@ -566,12 +566,12 @@ namespace ValoLibrary
                 }
 
                 remainingWeights = 0.0;
-                for (factorCounter = factorStartIndex; factorCounter <= factorEndIndex; factorCounter += factorStep)
+                for (factorCounter = factorStartIndex; factorCounter != factorEndIndex + Math.Sign(factorEndIndex - factorStartIndex); factorCounter += factorStep)
                 {
                     remainingWeights += gaussHermiteWeight[factorCounter];
                 }
 
-                for (factorCounter = factorStartIndex; factorCounter <= factorEndIndex; factorCounter += factorStep)
+                for (factorCounter = factorStartIndex; factorCounter != factorEndIndex+Math.Sign(factorEndIndex-factorStartIndex); factorCounter += factorStep)
                 {
                     factor = gaussHermiteAbscissa[factorCounter];
                     factorWeight = gaussHermiteWeight[factorCounter];
