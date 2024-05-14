@@ -391,78 +391,78 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 //}
 
 /////============================================================================================
-int numberOfIssuer = 1;
+//int numberOfIssuer = 3;// 1;
 
-double[] defaultProbability = { 0.1, 0.2, 0.3, 0 }; // Exemple de probabilités par défaut
-int[] lossUnitIssuer = { 1, 2, 3 }; // Exemple de pertes unitaires par émetteur
-int[] cumulLossUnitIssuer = { 1, 3, 6, 0 }; // Exemple de cumul des pertes unitaires par émetteur
-double[] betaVector = { 0.1, 0.2, 0.3, 0 }; // Exemple de vecteur bêta
-int? maxRequest = 2; // Vous pouvez ajuster cette valeur en fonction de vos besoins
-double[] inputThreshold = null; // Exemple de seuils d'entrée
-int? factorIndex = null; // Vous pouvez ajuster cette valeur en fonction de vos besoins
-bool withGreeks = false; // Vous pouvez ajuster cette valeur en fonction de vos besoins
-double dBeta = 0.1; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//double[] defaultProbability = { 0.01, 0.02, 0.03}; //{ 0.1, 0.2, 0.3, 0}; // Exemple de probabilités par défaut
+//int[] lossUnitIssuer = { 0, 60, 105,160 };//{ 1, 2, 3 }; // Exemple de pertes unitaires par émetteur
+//int[] cumulLossUnitIssuer = { 0, 60, 165, 325 };//{ 1, 3, 6, 0 }; // Exemple de cumul des pertes unitaires par émetteur
+//double[] betaVector = { 0.170710678118655, 0.270710678118655, 0.370710678118655 };//{ 0.1, 0.2, 0.3, 0 }; // Exemple de vecteur bêta
+//int? maxRequest = 1;//2; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//double[] inputThreshold = null; // Exemple de seuils d'entrée
+//int? factorIndex = null; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//bool withGreeks = false; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//double dBeta = 0.1; // Vous pouvez ajuster cette valeur en fonction de vos besoins
 
 
-// Appel de la fonction à tester
-double[,] results = CDOModel.GetDefaultDistributionLossUnit(numberOfIssuer, defaultProbability, lossUnitIssuer, cumulLossUnitIssuer,
-    betaVector, maxRequest, inputThreshold, factorIndex, withGreeks, dBeta);
-Console.WriteLine("résultat cdf :" + UtilityBiNormal.NormalCumulativeDistribution(1));
-// Vérification du résultat
-if (result != null)
-{
-    Console.WriteLine("Résultat de la fonction GetDefaultDistributionLossUnit : ");
-    for (int i = 0; i < results.GetLength(0); i++)
-    {
-        for (int j = 0; j < results.GetLength(1); j++)
-        {
-            Console.Write($"resultat + {results[i, j]} ");
-        }
-        Console.WriteLine();
-    }
-}
-else
-{
-    Console.WriteLine("La fonction GetDefaultDistributionLossUnit a renvoyé null. Vérifiez la console pour les détails d'erreur.");
-}
-
-////////////================================================================================================
-
-//int numberOfIssuer2 = 3;
-//double lossUnitAmount = 100;
-//double[] strikes = { 0.1, 0.4, 0.6 };
-//double[] defaultProbability2 = { 0.01, 0.02, 0.03 };
-//double correl = 0.005;
-//double[] betaAdder = { 0.1, 0.2, 0.3 };
-//double zC = 1;
-//double[] nominalIssuer = { 10000, 15000, 20000.0 };
-//double[] recoveryIssuer = { 0.4, 0.3, 0.2 };
-//bool withGreeks2 = false;
-//double dBeta2 = 0.1;
-
-//// Appeler la fonction
-//var result2 = CDOModel.EuropeanCDOLossUnit(numberOfIssuer2, lossUnitAmount, strikes, defaultProbability2, correl,
-//    betaAdder, zC, nominalIssuer, recoveryIssuer, withGreeks2, dBeta2);
-
-//// Afficher les résultats
-//Console.WriteLine("Results:");
-
-//if (result2 != null)
+//// Appel de la fonction à tester
+//double[,] results = CDOModel.GetDefaultDistributionLossUnit(numberOfIssuer, defaultProbability, lossUnitIssuer, cumulLossUnitIssuer,
+//    betaVector, maxRequest, inputThreshold, factorIndex, withGreeks, dBeta);
+//Console.WriteLine("résultat cdf :" + UtilityBiNormal.NormalCumulativeDistribution(1));
+//// Vérification du résultat
+//if (result != null)
 //{
-//    for (int i = 0; i < result2.GetLength(0); i++)
+//    Console.WriteLine("Résultat de la fonction GetDefaultDistributionLossUnit : ");
+//    for (int i = 0; i < results.GetLength(0); i++)
 //    {
-//        for (int j = 0; j < result2.GetLength(1); j++)
+//        for (int j = 0; j < results.GetLength(1); j++)
 //        {
-//            Console.Write(result2[i, j] + "\t");
+//            Console.Write($"resultat + {results[i, j]} ");
 //        }
 //        Console.WriteLine();
 //    }
-
 //}
 //else
 //{
 //    Console.WriteLine("La fonction GetDefaultDistributionLossUnit a renvoyé null. Vérifiez la console pour les détails d'erreur.");
 //}
+
+////////////================================================================================================
+
+int numberOfIssuer2 = 3;
+double lossUnitAmount = 100;
+double[] strikes = { 0.0, 3.0 };
+double[] defaultProbability2 = { 0.01, 0.02, 0.03 };
+double correl = 0.005;
+double[] betaAdder = { 0.1, 0.2, 0.3 };
+double zC = 1;
+double[] nominalIssuer = { 10000, 15000, 20000.0 };
+double[] recoveryIssuer = { 0.4, 0.3, 0.2 };
+bool withGreeks2 = false;
+double dBeta2 = 0.1;
+
+// Appeler la fonction
+var result2 = CDOModel.EuropeanCDOLossUnit(numberOfIssuer2, lossUnitAmount, strikes, defaultProbability2, correl,
+    betaAdder, zC, nominalIssuer, recoveryIssuer, withGreeks2, dBeta2);
+
+// Afficher les résultats
+Console.WriteLine("Results:");
+
+if (result2 != null)
+{
+    for (int i = 0; i < result2.GetLength(0); i++)
+    {
+        for (int j = 0; j < result2.GetLength(1); j++)
+        {
+            Console.Write(result2[i, j] + "\t");
+        }
+        Console.WriteLine();
+    }
+
+}
+else
+{
+    Console.WriteLine("La fonction GetDefaultDistributionLossUnit a renvoyé null. Vérifiez la console pour les détails d'erreur.");
+}
 //Console.WriteLine("===================End CDO Model====================");
 
 
