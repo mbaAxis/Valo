@@ -234,7 +234,7 @@ namespace ValoLibrary
                     months =(int) UtilityDates.MonthPeriod(curveDates[i]);
                 }
                 InterestRateCurves.Curves[curveId].SwapRates[i] = swapRates[i];
-                InterestRateCurves.Curves[curveId].StrippedZC[i] = strippedZC[i];
+                InterestRateCurves.Curves[curveId].StrippedZC[i] = strippedZC[i+1];//MODIF ORIGINAL InterestRateCurves.Curves[curveId].StrippedZC[i] = strippedZC[i];
             }
             Array.Resize(ref InterestRateCurves.Curves[curveId].MonthlyZC, months + 1);
 

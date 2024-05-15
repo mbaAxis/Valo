@@ -280,129 +280,129 @@ namespace ValoLibrary
         {
             return strikes;
         }
-        public static string[,] CDOTEST(string maturity, double[] strikes, double[] correl, string pricingCurrency,
-    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
-        {
-            int i;
-            double[] recoveryRate;
+    //    public static string[,] CDOTEST(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+    //int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    //string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    //double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    //double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    //string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+    //    {
+    //        int i;
+    //        double[] recoveryRate;
 
-            int curveId;
-            object vbaIssuerList;
+    //        int curveId;
+    //        object vbaIssuerList;
 
-            curveId = StrippingIRS.GetCurveId(pricingCurrency);
-            vbaIssuerList = new string[issuerList.Length];
+    //        curveId = StrippingIRS.GetCurveId(pricingCurrency);
+    //        vbaIssuerList = new string[issuerList.Length];
 
-            if (curveId == -1)
-            {
-                if (!StrippingIRS.InterestRateCurves.LastError)
-                {
-                    Console.WriteLine($"CDO Pricing: Curve {pricingCurrency} was not stripped - Called from : {Environment.StackTrace}");
-                    StrippingIRS.InterestRateCurves.LastError = true;
-                }
-                return null;
-            }
+    //        if (curveId == -1)
+    //        {
+    //            if (!StrippingIRS.InterestRateCurves.LastError)
+    //            {
+    //                Console.WriteLine($"CDO Pricing: Curve {pricingCurrency} was not stripped - Called from : {Environment.StackTrace}");
+    //                StrippingIRS.InterestRateCurves.LastError = true;
+    //            }
+    //            return null;
+    //        }
 
-            if (numberOfIssuer > issuerList.Length)
-            {
-                Console.WriteLine($"CDO Pricing: Not enough Issuers specified compared to the indicated number of issuer - Called from: {Environment.StackTrace}");
-                return null;
-            }
-            else if (issuerList == null)
-            {
-                Console.WriteLine($"CDO Pricing: No Issuers specified - Called from: {Environment.StackTrace}");
-                return null;
-            }
-            else
-            {
-                for (i = 0; i < numberOfIssuer; i++)
-                {
-                    if (issuerList.Length <= i)
-                    {
-                        Console.WriteLine($"CDO Pricing: No Issuers specified in position {i} - Called from: {Environment.StackTrace}");
-                        return null;
-                    }
-                    else
-                    {
-                        if (!UtilityDates.IsNumeric(issuerList[i].ToString()))
-                        {
-                            ((int[])vbaIssuerList)[i] = StrippingCDS.GetCDSCurveId(issuerList[i].ToString());
-                        }
-                        else
-                        {
-                            ((string[])vbaIssuerList)[i] = issuerList[i];
-                        }
+    //        if (numberOfIssuer > issuerList.Length)
+    //        {
+    //            Console.WriteLine($"CDO Pricing: Not enough Issuers specified compared to the indicated number of issuer - Called from: {Environment.StackTrace}");
+    //            return null;
+    //        }
+    //        else if (issuerList == null)
+    //        {
+    //            Console.WriteLine($"CDO Pricing: No Issuers specified - Called from: {Environment.StackTrace}");
+    //            return null;
+    //        }
+    //        else
+    //        {
+    //            for (i = 0; i < numberOfIssuer; i++)
+    //            {
+    //                if (issuerList.Length <= i)
+    //                {
+    //                    Console.WriteLine($"CDO Pricing: No Issuers specified in position {i} - Called from: {Environment.StackTrace}");
+    //                    return null;
+    //                }
+    //                else
+    //                {
+    //                    if (!UtilityDates.IsNumeric(issuerList[i].ToString()))
+    //                    {
+    //                        ((int[])vbaIssuerList)[i] = StrippingCDS.GetCDSCurveId(issuerList[i].ToString());
+    //                    }
+    //                    else
+    //                    {
+    //                        ((string[])vbaIssuerList)[i] = issuerList[i];
+    //                    }
 
-                        if (((double[])vbaIssuerList)[i] == -1)
-                        {
-                            Console.WriteLine($"CDO Pricing: Position {i}: IssuerID {issuerList[i]} not recognized - Called from: {Environment.StackTrace}");
-                            return null;
+    //                    if (((double[])vbaIssuerList)[i] == -1)
+    //                    {
+    //                        Console.WriteLine($"CDO Pricing: Position {i}: IssuerID {issuerList[i]} not recognized - Called from: {Environment.StackTrace}");
+    //                        return null;
 
-                        }
+    //                    }
 
-                        if (((int[])vbaIssuerList)[i] > StrippingCDS.CreditDefaultSwapCurves.NumberOfCurves)
-                        {
-                            Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) exceeds range of defined issuer - Called from: {Environment.StackTrace}");
-                            return null;
-                        }
-                        else if (!StrippingCDS.CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].CDSdone)
-                        {
-                            Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) CDS curve not stripped - Called from: {Environment.StackTrace}");
-                            return null;
-                        }
-                    }
-                }
-            }
+    //                    if (((int[])vbaIssuerList)[i] > StrippingCDS.CreditDefaultSwapCurves.NumberOfCurves)
+    //                    {
+    //                        Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) exceeds range of defined issuer - Called from: {Environment.StackTrace}");
+    //                        return null;
+    //                    }
+    //                    else if (!StrippingCDS.CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].CDSdone)
+    //                    {
+    //                        Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) CDS curve not stripped - Called from: {Environment.StackTrace}");
+    //                        return null;
+    //                    }
+    //                }
+    //            }
+    //        }
 
-            if (recoveryIssuer == null || recoveryIssuer.Length == 0)
-            {
-                recoveryRate = new double[(int)numberOfIssuer];
-                for (i = 0; i < numberOfIssuer; i++)
-                {
-                    recoveryRate[i] = CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].Recovery;
-                }
-            }
-            else
-            {
-                recoveryRate = new double[numberOfIssuer];
-                for (i = 0; i < numberOfIssuer; i++)
-                {
-                    if (recoveryIssuer == null || recoveryIssuer.Length == 0)
-                    {
-                        recoveryRate[i] = CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].Recovery;
-                    }
-                    else
-                    {
-                        recoveryRate[i] = recoveryIssuer[i];
-                    }
-                }
-            }
+    //        if (recoveryIssuer == null || recoveryIssuer.Length == 0)
+    //        {
+    //            recoveryRate = new double[(int)numberOfIssuer];
+    //            for (i = 0; i < numberOfIssuer; i++)
+    //            {
+    //                recoveryRate[i] = CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].Recovery;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            recoveryRate = new double[numberOfIssuer];
+    //            for (i = 0; i < numberOfIssuer; i++)
+    //            {
+    //                if (recoveryIssuer == null || recoveryIssuer.Length == 0)
+    //                {
+    //                    recoveryRate[i] = CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].Recovery;
+    //                }
+    //                else
+    //                {
+    //                    recoveryRate[i] = recoveryIssuer[i];
+    //                }
+    //            }
+    //        }
 
-            if (!lossUnitAmount.HasValue || lossUnitAmount == null)
-            {
-                lossUnitAmount = LossUnit(numberOfIssuer, nominalIssuer, recoveryRate, 0.0001);
-            }
+    //        if (!lossUnitAmount.HasValue || lossUnitAmount == null)
+    //        {
+    //            lossUnitAmount = LossUnit(numberOfIssuer, nominalIssuer, recoveryRate, 0.0001);
+    //        }
 
-            if (betaAdder == null || betaAdder.Length == 0)
-            {
-                betaAdder = new double[(int)numberOfIssuer];
-                for (i = 0; i < numberOfIssuer; i++)
-                {
-                    betaAdder[i] = 0;
-                }
-            }
+    //        if (betaAdder == null || betaAdder.Length == 0)
+    //        {
+    //            betaAdder = new double[(int)numberOfIssuer];
+    //            for (i = 0; i < numberOfIssuer; i++)
+    //            {
+    //                betaAdder[i] = 0;
+    //            }
+    //        }
 
-            return AmericanSwap(maturity,
-                numberOfIssuer, vbaIssuerList, nominalIssuer, recoveryRate,
-                spread, cpnLastSettle, cpnPeriod, cpnConvention,
-                pricingCurrency, fxCorrel, fxVol,
-                strikes, correl, betaAdder,
-                isAmericanFloatLeg, isAmericanFixedLeg,
-                withGreeks, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
-        }
+    //        return AmericanSwap(maturity,
+    //            numberOfIssuer, vbaIssuerList, nominalIssuer, recoveryRate,
+    //            spread, cpnLastSettle, cpnPeriod, cpnConvention,
+    //            pricingCurrency, fxCorrel, fxVol,
+    //            strikes, correl, betaAdder,
+    //            isAmericanFloatLeg, isAmericanFixedLeg,
+    //            withGreeks, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
+    //    }
         public static string[,] CDS(string issuerIdParam, string maturity, double spread, double recoveryRate,double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -561,7 +561,7 @@ namespace ValoLibrary
             }
 
 
-            int NumberOfDates = schedule.Length;
+            int NumberOfDates = schedule.Length-1;
 
             DateTime[] ScheduleIntermed;
             int CouponDateCounter;
@@ -582,7 +582,7 @@ namespace ValoLibrary
             NumberofIntegrationDateOnCouponDate[0] = 0;
 
             int index;
-            for (index = 1; index < NumberOfDates; index++) // 
+            for (index = 1; index <= NumberOfDates; index++) // 
             {
                 CouponDateCounter = index;
                 PreviousCouponDate = schedule[CouponDateCounter - 1];
@@ -600,7 +600,7 @@ namespace ValoLibrary
                 }
             }
 
-            NumberOfIntegrationDates = ScheduleIntegration.Length;
+            NumberOfIntegrationDates = ScheduleIntegration.Length-1;
 
 
             //'
@@ -611,7 +611,7 @@ namespace ValoLibrary
 
             double[] RiskFreeZC = new double[(int)NumberOfIntegrationDates + 1];
             RiskFreeZC[0] = 1;
-            for (i = 1; i < NumberOfIntegrationDates; i++) // <=
+            for (i = 1; i <= NumberOfIntegrationDates; i++) // <=
             {
                 CurrentDate = ScheduleIntegration[i];
                 RiskFreeZC[i] = StrippingIRS.VbaGetRiskFreeZC(ParamDate, CurrentDate + "", ZC, ZCDate);
@@ -639,12 +639,12 @@ namespace ValoLibrary
 
             if (withGreeks)
             {
-                European = new double[(int)NumberOfIntegrationDates, 2 * numberOfIssuer + 1 + 1]; // 1
-                dProb = new double[(int)NumberOfIntegrationDates, numberOfIssuer + 1]; // 1
+                European = new double[(int)NumberOfIntegrationDates, 2 * numberOfIssuer + 1 ]; // 1 //European = new double[(int)NumberOfIntegrationDates, 2 * numberOfIssuer + 1 + 1];
+                dProb = new double[(int)NumberOfIntegrationDates, numberOfIssuer]; // 1 //dProb = new double[(int)NumberOfIntegrationDates, numberOfIssuer + 1];
             }
             else
             {
-                European = new double[(int)NumberOfIntegrationDates, 1 + 1]; // 1
+                European = new double[(int)NumberOfIntegrationDates, 1 ]; // 1 //European = new double[(int)NumberOfIntegrationDates, 1 + 1];
             }
 
 
@@ -674,7 +674,7 @@ namespace ValoLibrary
             }
             else
             {
-                x = new string[6 + numberOfIssuer + 2, 6];
+                x = new string[6 + numberOfIssuer + 1, 6];
                 x[6, 0] = "dPV"; // dPV/dCDS_PV
                 x[6, 1] = "dHedge";
                 x[6, 2] = "delta not. (Hedge Crncy)";
@@ -683,7 +683,7 @@ namespace ValoLibrary
                 x[6, 5] = "Name";
                 for (i = 0; i <= 5; i++)
                 {
-                    for (j = 1; j <= 5; j++)
+                    for (j = 2; j <= 5; j++)
                     {
                         x[i, j] = 0 + "";
                     }
@@ -700,7 +700,7 @@ namespace ValoLibrary
             //' Only at maturity if both leg are not American.
             //' For each date of the schedule otherwise
 
-            NumberOfIntegrationDates -= 1; // add new
+            //NumberOfIntegrationDates -= 1; // add new // MODIF, ORIGINAL : la ligne est active
 
 
             double LastDateWhenEuroCDONeeded;
@@ -717,7 +717,7 @@ namespace ValoLibrary
             CDSCurve ThisCDS;
 
             double CurrentZC;
-            double[] DefaultProbability = new double[numberOfIssuer + 1]; // +1
+            double[] DefaultProbability = new double[numberOfIssuer ]; // +1// MODIF, ORIGINAL double[] DefaultProbability = new double[numberOfIssuer + 1];
 
             for (int g = (int)NumberOfIntegrationDates; g >= LastDateWhenEuroCDONeeded; g--) //NumberOfIntegrationDates
             {
@@ -731,8 +731,8 @@ namespace ValoLibrary
                     {
                         for (j = 1; j <= numberOfIssuer; j++)
                         {
-                            European[i, j + 1] = 0;
-                            European[i, numberOfIssuer + j + 1] = 0; // -1
+                            European[i-1, j] = 0;//MODIF, ORIGINAL European[i, j + 1] = 0;
+                            European[i-1, numberOfIssuer + j] = 0; // -1 // MODIF, ORIGINAL,European[i, numberOfIssuer + j+1] = 0;
                         }
                     }
                 }
@@ -749,38 +749,38 @@ namespace ValoLibrary
                     {
                         for (j = 1; j <= numberOfIssuer; j++)
                         {
-                            cdsID = ((int[])CDSListID)[j];
+                            cdsID = ((int[])CDSListID)[j-1];//MODIF, ORIGINAL cdsID = ((int[])CDSListID)[j];
                             ThisCDS = StrippingCDS.CreditDefaultSwapCurves.Curves[cdsID];
                             IssuerCurrency = ThisCDS.Currency;
-                            DefaultProbability[j] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, CurrentDate + "", pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
+                            DefaultProbability[j-1] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, CurrentDate + "", pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);//MODIF, original en j
 
                             // If DefaultProbability(j) = "Error Def Prob" Then
-                            if (!UtilityDates.IsNumeric(DefaultProbability[j]))
+                            if (!UtilityDates.IsNumeric(DefaultProbability[j-1]))//MODIF, original en j
                             {
                                 return null;
                             }
                             if (withGreeks)
                             {
-                                dProb[i, j] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, CurrentDate + "", pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[j];
+                                dProb[i-1, j-1] = StrippingCDS.GetDefaultProbabilityQuanto(cdsID, ParamDate, CurrentDate + "", pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[j-1];//MODIF, original dProb[i, j]=.. defaultprobability[j]
                             }
                         }
                     }
                     else
                     {
-                        // modif QUANTO
+                        // modif QUANTO c
                         IssuerCurrency = StrippingCDS.CreditDefaultSwapCurves.Curves[(int)CDSListID].Currency;
 
-                        DefaultProbability[1] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID, ParamDate, CurrentDate + "", pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);
+                        DefaultProbability[0] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID, ParamDate, CurrentDate + "", pricingCurrency, 0, fxCorrel, fxVol, CurrentTime, probMultiplier);//MODIF original DefaultProbability[1]
 
                         if (withGreeks)
                         {
-                            dProb[i, 1] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID, ParamDate, CurrentDate + "", pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[1]; // 0
+                            dProb[i-1, 0] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID, ParamDate, CurrentDate + "", pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[0]; // 0 // MODIF original dProb[i, 1] = StrippingCDS.GetDefaultProbabilityQuanto((int)CDSListID, ParamDate, CurrentDate + "", pricingCurrency, 1, fxCorrel, fxVol, CurrentTime, probMultiplier) - DefaultProbability[1];
                         }
                     }
 
                     if (IsCDO)
                     {
-                        EuropeanLow[i] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, (double[])strikes, DefaultProbability, ((double[])correl)[0], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);
+                        EuropeanLow[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, (double[])strikes, DefaultProbability, ((double[])correl)[0], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);//MODIF, ORGINAL EuropeanLow[i]
                         EuropeanHigh[i] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, (double[])strikes, DefaultProbability, ((double[])correl)[1], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);
                         European[i, 0] = ((double[,])EuropeanHigh[i])[0, 0] - ((double[,])EuropeanLow[i])[0, 0];
 

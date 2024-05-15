@@ -211,14 +211,13 @@ Console.WriteLine("===================Test Stripping CDS====================");
 
 
 string curveName = "EUR";
-DateTime paramDate = new(2024, 04, 25);
+DateTime paramDate = new(2024, 05, 6);
 double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
 string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
 int swapPeriod = 12;
 int swapBasis = 4;
 double fxSpot = 1;
 StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
-
 int cdsID = 1;
 string CDSName = "ABNAMRO_MMR.EUR.SU";
 //DateTime ParamDate = new(2024, 03, 03);
@@ -339,7 +338,7 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 //int numberOfIssuer = 5;
 //double[] defaultProbKnowingFactor = { 0.1, 0.2, 0.3, 0.4, 0.5 }; // Exemple de probabilités par défaut
 //int? maxRequest = 3; // Vous pouvez ajuster cette valeur en fonction de vos besoins
-//bool withGreeks = false; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//bool withGreeks = true; // Vous pouvez ajuster cette valeur en fonction de vos besoins
 
 //// Appel de la fonction à tester
 //double[,] result2 = CDOModel.Recursion(numberOfIssuer, defaultProbKnowingFactor, maxRequest, withGreeks);
@@ -365,7 +364,7 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 //int numberOfIssuer = 2;
 //double[] defaultProbKnowingfFactor = { 0.1, 0.2, 0.3 }; // Exemple de probabilités par défaut
 //int? maxRequest = 2; // Vous pouvez ajuster cette valeur en fonction de vos besoins
-//bool withGreeks = false; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//bool withGreeks = true; // Vous pouvez ajuster cette valeur en fonction de vos besoins
 //double[] lossUnitIssuer = { 1, 2, 3 };
 //int[] cumulLossUnitIssuer = { 1, 2, 3 };
 
@@ -373,7 +372,7 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 //double[,] result3 = CDOModel.RecursionLossUnit(numberOfIssuer, defaultProbKnowingfFactor, lossUnitIssuer, cumulLossUnitIssuer, maxRequest, withGreeks);
 
 //// Vérification du résultat
-//if (result3 != null)
+//    if (result3 != null)
 //{
 //    Console.WriteLine("Résultat de la fonction GetDefaultDistribution : ");
 //    for (int i = 0; i < result3.GetLength(0); i++)
@@ -428,41 +427,41 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 
 ////////////================================================================================================
 
-int numberOfIssuer2 = 3;
-double lossUnitAmount = 100;
-double[] strikes = { 0.0, 3.0 };
-double[] defaultProbability2 = { 0.01, 0.02, 0.03 };
-double correl = 0.005;
-double[] betaAdder = { 0.1, 0.2, 0.3 };
-double zC = 1;
-double[] nominalIssuer = { 10000, 15000, 20000.0 };
-double[] recoveryIssuer = { 0.4, 0.3, 0.2 };
-bool withGreeks2 = false;
-double dBeta2 = 0.1;
+//int numberOfIssuer2 = 3;
+//double lossUnitAmount = 100;
+//double[] strikes = { 0.0, 3.0 };
+//double[] defaultProbability2 = { 0.01, 0.02, 0.03 };
+//double correl = 0.005;
+//double[] betaAdder = { 0.1, 0.2, 0.3 };
+//double zC = 1;
+//double[] nominalIssuer = { 10000, 15000, 20000.0 };
+//double[] recoveryIssuer = { 0.4, 0.3, 0.2 };
+//bool withGreeks2 = true;
+//double dBeta2 = 0.1;
 
-// Appeler la fonction
-var result2 = CDOModel.EuropeanCDOLossUnit(numberOfIssuer2, lossUnitAmount, strikes, defaultProbability2, correl,
-    betaAdder, zC, nominalIssuer, recoveryIssuer, withGreeks2, dBeta2);
+//// Appeler la fonction
+//var result2 = CDOModel.EuropeanCDOLossUnit(numberOfIssuer2, lossUnitAmount, strikes, defaultProbability2, correl,
+//    betaAdder, zC, nominalIssuer, recoveryIssuer, withGreeks2, dBeta2);
 
-// Afficher les résultats
-Console.WriteLine("Results:");
+//// Afficher les résultats
+//Console.WriteLine("Results:");
 
-if (result2 != null)
-{
-    for (int i = 0; i < result2.GetLength(0); i++)
-    {
-        for (int j = 0; j < result2.GetLength(1); j++)
-        {
-            Console.Write(result2[i, j] + "\t");
-        }
-        Console.WriteLine();
-    }
+//if (result2 != null)
+//{
+//    for (int i = 0; i < result2.GetLength(0); i++)
+//    {
+//        for (int j = 0; j < result2.GetLength(1); j++)
+//        {
+//            Console.Write(result2[i, j] + "\t");
+//        }
+//        Console.WriteLine();
+//    }
 
-}
-else
-{
-    Console.WriteLine("La fonction GetDefaultDistributionLossUnit a renvoyé null. Vérifiez la console pour les détails d'erreur.");
-}
+//}
+//else
+//{
+//    Console.WriteLine("La fonction GetDefaultDistributionLossUnit a renvoyé null. Vérifiez la console pour les détails d'erreur.");
+//}
 //Console.WriteLine("===================End CDO Model====================");
 
 
@@ -508,45 +507,43 @@ else
 
 
 
-//DateTime parameterDate = new DateTime(2024, 4, 25);
-//DateTime cdsRollDate = new DateTime(2024, 6, 20);
-//int[] issuer = { 1, 2, 3 };
-//string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
-//double[,] CDScurve = {{ 0, 0.13, 0.20, 0.26, 0.32, 0, 0.400, 0.44, 0.48 },{ 0, 0.08, 0.11, 0.16, 0.23, 0, 0.36, 0.43, 0.53 },{ 0, 0.06, 0.10, 0.18, 0.27, 0, 0.40, 0.51, 0.62 } };
-//double[] c1 = { 0.0, 0.00133, 0.0020, 0.0026 , 0.00316   ,0.0 , 0.004,   0.0044,  0.0048};
-//double[] c2 = { 0.0, 0.0008, 0.0011, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
-//double[] c3 = { 0.0, 0.0006, 0.0010, 0.0018, 0.0027, 0.0, 0.0040, 0.0051, 0.0062 };
+DateTime parameterDate = new DateTime(2024, 5, 6);
+DateTime cdsRollDate = new DateTime(2024, 6, 20);
+int[] issuer = { 1, 2, 3 };
+string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+double[] c1 = { 0.0, 0.00133, 0.0020, 0.0026, 0.00316, 0.0, 0.004, 0.0044, 0.0048 };
+double[] c2 = { 0.0, 0.0008, 0.0011, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
+double[] c3 = { 0.0, 0.0006, 0.0010, 0.0018, 0.0027, 0.0, 0.0040, 0.0051, 0.0062 };
 
-//string maturity = "5Y";
-//double[] strikes = { 0.0, 3.0 };
-//double[] correl = { 0.4, 0.5 };
-//string pricingCurrency = "EUR";
-//int numberOfIssuer = 3;
-//string[] issuerList = { "ABNAMRO_MMR.EUR.SU","Accor_MMR.EUR.SU","Adecco_MMR.EUR.SU"};
-//double[] nominalIssuer = { 1.0, 1.0, 1.0};
-//double spread = 0.05;
-//string cpnPeriod = "3m";
-//string cpnConvention = "LongFirst";
-//string cpnLastSettle = "";
-//double fxCorrel = -0.05;
-//double fxVol = 0.1;
-//double[] betaAdder = {0.0,0.0,0.0 };
-//double[] recoveryIssuer = { 0.4, 0.4, 0.4 };
-//double isAmericanFloatLeg = -1;
-//double isAmericanFixedLeg = -1;
-//double withGreeks = -1;
-//double[] hedgingCDS = {0.0,-1.0,-1.0};
-//double lossUnitAmount = 0.0;
-//string integrationPeriod = "1m";
-//double dBeta = 0.01;
+string maturity = "5Y";
+double[] strikes = { 0.0, 3.0 };
+double[] correl = { 0.4, 0.5 };
+string pricingCurrency = "EUR";
+int numberOfIssuer = 3;
+string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU", "Adecco_MMR.EUR.SU" };
+double[] nominalIssuer = { 1.0, 1.0, 1.0 };
+double spread = 0.05;
+string cpnPeriod = "3m";
+string cpnConvention = "LongFirst";
+string cpnLastSettle = "";
+double fxCorrel = -0.05;
+double fxVol = 0.1;
+double[] betaAdder = { 0.0, 0.0, 0.0 };
+double[] recoveryIssuer = { 0.4, 0.4, 0.4 };
+double isAmericanFloatLeg = -1;
+double isAmericanFixedLeg = -1;
+double withGreeks = -1;
+double[] hedgingCDS = { 0.0, -1.0, -1.0 };
+double lossUnitAmount = 0.0;
+string integrationPeriod = "1m";
+double dBeta = 0.01;
 
-////double[] test = StrippingCDS.StripDefaultProbability(1, issuerList[0], parameterDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4,false,"Curve points");
-//double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], parameterDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
-//double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], parameterDate, cdsRollDate, c3, CurveMaturity, pricingCurrency, 0.4, false, intensity);
-
-//int u = StrippingIRS.GetCurveId(pricingCurrency);
-//Console.WriteLine(u);
-//Console.WriteLine(StrippingCDS.GetCDSCurveId(issuerList[0]));
-//string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, 3, issuerList, nominalIssuer,
-//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-//    isAmericanFixedLeg, withGreeks, hedgingCDS, lossUnitAmount, integrationPeriod, 1, dBeta);
+//double[] test = StrippingCDS.StripDefaultProbability(1, issuerList[0], parameterDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4,false,"Curve points");
+double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], parameterDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
+double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], parameterDate, cdsRollDate, c3, CurveMaturity, pricingCurrency, 0.4, false, intensity);
+int u = StrippingIRS.GetCurveId(pricingCurrency);
+Console.WriteLine(u);
+Console.WriteLine(StrippingCDS.GetCDSCurveId(issuerList[0]));
+string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, 3, issuerList, nominalIssuer,
+    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+    isAmericanFixedLeg, withGreeks, hedgingCDS, lossUnitAmount, integrationPeriod, 1, dBeta);

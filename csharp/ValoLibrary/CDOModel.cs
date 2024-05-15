@@ -292,11 +292,11 @@ namespace ValoLibrary
 
             if (!maxRequest.HasValue)
             {
-                forcedMaxRequest = cumulLossUnitIssuer[numberOfIssuer] - 1;
+                forcedMaxRequest = cumulLossUnitIssuer[numberOfIssuer-1] - 1;
             }
             else
             {
-                forcedMaxRequest = Math.Min(maxRequest.Value, cumulLossUnitIssuer[numberOfIssuer] - 1);
+                forcedMaxRequest = Math.Min(maxRequest.Value, cumulLossUnitIssuer[numberOfIssuer-1] - 1);
             }
 
             if (withGreeks)
@@ -317,33 +317,33 @@ namespace ValoLibrary
 
             for (int issuerCounter = 1; issuerCounter <= numberOfIssuer; issuerCounter++)
             {
-                if (lossUnitIssuer[issuerCounter ] > 0)
+                if (lossUnitIssuer[issuerCounter -1] > 0)
                 {
-                    if (cumulLossUnitIssuer[issuerCounter ] > forcedMaxRequest + 1)
+                    if (cumulLossUnitIssuer[issuerCounter -1] > forcedMaxRequest + 1)
                     {
                         jstart = forcedMaxRequest + 1;
                     }
                     else
                     {
-                        jstart = cumulLossUnitIssuer[issuerCounter ];
+                        jstart = cumulLossUnitIssuer[issuerCounter-1 ];
                     }
 
                     p = defaultProbKnowingfFactor[issuerCounter - 1];
                     omp = 1 - p;
 
-                    for (int j = jstart; j >= lossUnitIssuer[issuerCounter ]; j--)
+                    for (int j = jstart; j >= lossUnitIssuer[issuerCounter-1 ]; j--)
                     {
-                        distrib[j, 0] = distrib[j, 0] * omp + distrib[j - (int) lossUnitIssuer[issuerCounter ], 0] * p;
+                        distrib[j, 0] = distrib[j, 0] * omp + distrib[j - (int) lossUnitIssuer[issuerCounter - 1], 0] * p;
                     }
 
                     int k;
-                    if (lossUnitIssuer[issuerCounter ] >= jstart)
+                    if (lossUnitIssuer[issuerCounter - 1] >= jstart)
                     {
                         k = jstart - 1;
                     }
                     else
                     {
-                        k = (int)lossUnitIssuer[issuerCounter ] - 1;
+                        k = (int)lossUnitIssuer[issuerCounter - 1] - 1;
                     }
 
                     for (int j = k; j >= 0; j--)
@@ -357,12 +357,12 @@ namespace ValoLibrary
             {
                 for (int i = 1; i <= numberOfIssuer; i++)
                 {
-                    if (lossUnitIssuer[i ] > 0)
+                    if (lossUnitIssuer[i - 1] > 0)
                     {
                         p = defaultProbKnowingfFactor[i - 1];
                         omp = 1 - p;
 
-                        if (lossUnitIssuer[i ] - 1 >= forcedMaxRequest)
+                        if (lossUnitIssuer[i - 1] - 1 >= forcedMaxRequest)
                         {
                             int k = forcedMaxRequest;
 
@@ -373,32 +373,32 @@ namespace ValoLibrary
                         }
 
                         int kLossUnitIssuer;
-                        if (lossUnitIssuer[i ] - 1 >= forcedMaxRequest)
+                        if (lossUnitIssuer[i - 1] - 1 >= forcedMaxRequest)
                         {
                             kLossUnitIssuer = forcedMaxRequest;
                         }
                         else
                         {
-                            kLossUnitIssuer = (int) lossUnitIssuer[i ] - 1;
+                            kLossUnitIssuer = (int) lossUnitIssuer[i - 1] - 1;
                         }
 
-                        for (int j = (int) lossUnitIssuer[i ]; j <= forcedMaxRequest; j++)
+                        for (int j = (int) lossUnitIssuer[i - 1]; j <= forcedMaxRequest; j++)
                         {
-                            distrib[j, i] = (distrib[j, 0] - distrib[j - (int) lossUnitIssuer[i ], i] * p) / omp;
+                            distrib[j, i] = (distrib[j, 0] - distrib[j - (int) lossUnitIssuer[i - 1], i] * p) / omp;
 
                             if (distrib[j, i] < 0)
                             {
-                                distrib[j, i] = distrib[j + (int)lossUnitIssuer[i ], 0];
-                                distrib[j - (int)lossUnitIssuer[i], i] = (distrib[j, 0] - omp * distrib[j, i]) / p;
+                                distrib[j, i] = distrib[j + (int)lossUnitIssuer[i - 1], 0];
+                                distrib[j - (int)lossUnitIssuer[i - 1], i] = (distrib[j, 0] - omp * distrib[j, i]) / p;
                             }
                         }
 
-                        for (int j = forcedMaxRequest; j >= lossUnitIssuer[i ]; j--)
+                        for (int j = forcedMaxRequest; j >= lossUnitIssuer[i - 1]; j--)
                         {
-                            distrib[j, i] = distrib[j - (int)lossUnitIssuer[i], i] - distrib[j, i];
+                            distrib[j, i] = distrib[j - (int)lossUnitIssuer[i - 1], i] - distrib[j, i];
                         }
 
-                        if (lossUnitIssuer[i] - 1 >= forcedMaxRequest)
+                        if (lossUnitIssuer[i - 1] - 1 >= forcedMaxRequest)
                         {
                             int k = forcedMaxRequest;
 
