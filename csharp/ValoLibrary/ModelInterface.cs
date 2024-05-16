@@ -780,9 +780,11 @@ namespace ValoLibrary
 
                     if (IsCDO)
                     {
-                        EuropeanLow[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, (double[])strikes, DefaultProbability, ((double[])correl)[0], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);//MODIF, ORGINAL EuropeanLow[i]
-                        EuropeanHigh[i] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, (double[])strikes, DefaultProbability, ((double[])correl)[1], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);
-                        European[i, 0] = ((double[,])EuropeanHigh[i])[0, 0] - ((double[,])EuropeanLow[i])[0, 0];
+                        double[] test0 = { ((double[])strikes)[0] };
+                        double[] test1 = { ((double[])strikes)[1] };
+                        EuropeanLow[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, test0, DefaultProbability, ((double[])correl)[0], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);//MODIF, ORGINAL EuropeanLow[i]
+                        EuropeanHigh[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, test1, DefaultProbability, ((double[])correl)[1], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);
+                        European[i-1, 0] = ((double[,])EuropeanHigh[i-1])[0, 0] - ((double[,])EuropeanLow[i-1])[0, 0];
 
                         if (withGreeks)
                         {

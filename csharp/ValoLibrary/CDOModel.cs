@@ -317,33 +317,33 @@ namespace ValoLibrary
 
             for (int issuerCounter = 1; issuerCounter <= numberOfIssuer; issuerCounter++)
             {
-                if (lossUnitIssuer[issuerCounter -1] > 0)
+                if (lossUnitIssuer[issuerCounter ] > 0)
                 {
-                    if (cumulLossUnitIssuer[issuerCounter -1] > forcedMaxRequest + 1)
+                    if (cumulLossUnitIssuer[issuerCounter ] > forcedMaxRequest + 1)
                     {
                         jstart = forcedMaxRequest + 1;
                     }
                     else
                     {
-                        jstart = cumulLossUnitIssuer[issuerCounter-1 ];
+                        jstart = cumulLossUnitIssuer[issuerCounter ];
                     }
 
-                    p = defaultProbKnowingfFactor[issuerCounter - 1];
+                    p = defaultProbKnowingfFactor[issuerCounter ];
                     omp = 1 - p;
 
-                    for (int j = jstart; j >= lossUnitIssuer[issuerCounter-1 ]; j--)
+                    for (int j = jstart; j >= lossUnitIssuer[issuerCounter ]; j--)
                     {
-                        distrib[j, 0] = distrib[j, 0] * omp + distrib[j - (int) lossUnitIssuer[issuerCounter - 1], 0] * p;
+                        distrib[j, 0] = distrib[j, 0] * omp + distrib[j - (int) lossUnitIssuer[issuerCounter ], 0] * p;
                     }
 
                     int k;
-                    if (lossUnitIssuer[issuerCounter - 1] >= jstart)
+                    if (lossUnitIssuer[issuerCounter] >= jstart)
                     {
                         k = jstart - 1;
                     }
                     else
                     {
-                        k = (int)lossUnitIssuer[issuerCounter - 1] - 1;
+                        k = (int)lossUnitIssuer[issuerCounter] - 1;
                     }
 
                     for (int j = k; j >= 0; j--)
@@ -357,55 +357,51 @@ namespace ValoLibrary
             {
                 for (int i = 1; i <= numberOfIssuer; i++)
                 {
-                    if (lossUnitIssuer[i - 1] > 0)
+                    if (lossUnitIssuer[i ] > 0)
                     {
-                        p = defaultProbKnowingfFactor[i - 1];
+                        p = defaultProbKnowingfFactor[i ];
                         omp = 1 - p;
-
-                        if (lossUnitIssuer[i - 1] - 1 >= forcedMaxRequest)
+                        double k;
+                        if (lossUnitIssuer[i ] - 1 >= forcedMaxRequest)
                         {
-                            int k = forcedMaxRequest;
-
-                            for (int j = 0; j <= k; j++)
-                            {
-                                distrib[j, i] = distrib[j, 0] / omp;
-                            }
-                        }
-
-                        int kLossUnitIssuer;
-                        if (lossUnitIssuer[i - 1] - 1 >= forcedMaxRequest)
-                        {
-                            kLossUnitIssuer = forcedMaxRequest;
+                            k = forcedMaxRequest;
                         }
                         else
                         {
-                            kLossUnitIssuer = (int) lossUnitIssuer[i - 1] - 1;
+                            k = lossUnitIssuer[i]-1;
+                        }
+                        for (int j = 0; j <= k; j++)
+                        {
+                            distrib[j, i] = distrib[j, 0] / omp;
                         }
 
-                        for (int j = (int) lossUnitIssuer[i - 1]; j <= forcedMaxRequest; j++)
+                        for (int j = (int) lossUnitIssuer[i ]; j <= forcedMaxRequest; j++)
                         {
-                            distrib[j, i] = (distrib[j, 0] - distrib[j - (int) lossUnitIssuer[i - 1], i] * p) / omp;
+                            distrib[j, i] = (distrib[j, 0] - distrib[j - (int) lossUnitIssuer[i], i] * p) / omp;
 
                             if (distrib[j, i] < 0)
                             {
-                                distrib[j, i] = distrib[j + (int)lossUnitIssuer[i - 1], 0];
-                                distrib[j - (int)lossUnitIssuer[i - 1], i] = (distrib[j, 0] - omp * distrib[j, i]) / p;
+                                distrib[j, i] = distrib[j + (int)lossUnitIssuer[i], 0];
+                                distrib[j - (int)lossUnitIssuer[i], i] = (distrib[j, 0] - omp * distrib[j, i]) / p;
                             }
                         }
 
-                        for (int j = forcedMaxRequest; j >= lossUnitIssuer[i - 1]; j--)
+                        for (int j = forcedMaxRequest; j >= lossUnitIssuer[i ]; j--)
                         {
-                            distrib[j, i] = distrib[j - (int)lossUnitIssuer[i - 1], i] - distrib[j, i];
+                            distrib[j, i] = distrib[j - (int)lossUnitIssuer[i ], i] - distrib[j, i];
                         }
 
-                        if (lossUnitIssuer[i - 1] - 1 >= forcedMaxRequest)
+                        if (lossUnitIssuer[i ] - 1 >= forcedMaxRequest)
                         {
-                            int k = forcedMaxRequest;
-
-                            for (int j = k; j >= 0; j--)
-                            {
-                                distrib[j, i] = -distrib[j, i];
-                            }
+                            k = forcedMaxRequest;         
+                        }
+                        else
+                        {
+                            k = lossUnitIssuer[i] - 1;
+                        }
+                        for (int j = (int)k; j >= 0; j--)
+                        {
+                            distrib[j, i] = -distrib[j, i];
                         }
                     }
                 }
@@ -552,7 +548,7 @@ namespace ValoLibrary
             double[,] defaultDistribKnowingFactor;
             double[] defaultDistrib;
             double[] defaultThreshold = new double[numberOfIssuer];
-            double[] defaultProbKnowingFactor = new double[numberOfIssuer];
+            double[] defaultProbKnowingFactor = new double[numberOfIssuer+1];//MODIF original new double[numberOfIssuer];
             double[] dp_dProb = new double[numberOfIssuer];
             double[] dp_dBeta = new double[numberOfIssuer];
             double[] dDefaultThreshold = new double[numberOfIssuer];
@@ -614,7 +610,7 @@ namespace ValoLibrary
                 {
                     for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
                     {
-                        if (defaultProbability[issuerCounter] * 1.0 >= 1.0)
+                        if (defaultProbability[issuerCounter] * ShockMultiplier >= 1.0)//MODIF, original pas de shockmultiplier ?
                         {
                             Console.WriteLine($"Can't shock default probability of issuer # {issuerCounter + 1}!");
                             Console.WriteLine("Delta will be wrong");
@@ -628,7 +624,7 @@ namespace ValoLibrary
                             }
                             else
                             {
-                                dDefaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, defaultProbability[issuerCounter] * 1.0);
+                                dDefaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, defaultProbability[issuerCounter] *ShockMultiplier);//MODIF, original pas de shockmultiplier ?
                             }
                         }
                     }
@@ -710,7 +706,7 @@ namespace ValoLibrary
                     for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
                     {
                         double beta = betaVector[issuerCounter];
-                        defaultProbKnowingFactor[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta));
+                        defaultProbKnowingFactor[issuerCounter+1] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta));//MODIF original defaultProbKnowingFactor[issuerCounter]
                     }
 
                     if (withGreeks)
@@ -718,9 +714,9 @@ namespace ValoLibrary
                         for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
                         {
                             double beta = betaVector[issuerCounter];
-                            dp_dProb[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((dDefaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter];
+                            dp_dProb[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((dDefaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter+1];//Modif IDEM
                             beta += dBeta;
-                            dp_dBeta[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter];
+                            dp_dBeta[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter+1];// Modif IDEM
                         }
                     }
 
@@ -1003,23 +999,23 @@ namespace ValoLibrary
             {
                 for (int j = 1; j <= strikes.Length; j++)
                 {
-                    res[1, j] = 0.0;
+                    res[0, j] = 0.0;//MODIF original : res[1, j] = 0.0;
                 }
 
-                for (int i = 1; i < numberOfIssuer * 2; i++)
+                for (int i = 1; i <= numberOfIssuer * 2; i++)
                 {
                     if (i <= numberOfIssuer)
                     {
-                        res[i+1, 0] = "dpv prob " + i;
+                        res[i, 0] = "dpv prob " + i;//MODIF original : res[i,0]
                     }
                     else
                     {
-                        res[i+1, 0] = "dpv beta " + (i - numberOfIssuer);
+                        res[i, 0] = "dpv beta " + (i - numberOfIssuer);//MODIF original : res[i,0]
                     }
 
                     for (int j = 1; j <= strikes.Length; j++)
                     {
-                        res[i+1 , j] = 0.0;
+                        res[i , j] = 0.0; //MODIF original : res[i,0]
 
                     }
                 }
