@@ -292,11 +292,11 @@ namespace ValoLibrary
 
             if (!maxRequest.HasValue)
             {
-                forcedMaxRequest = cumulLossUnitIssuer[numberOfIssuer-1] - 1;
+                forcedMaxRequest = cumulLossUnitIssuer[numberOfIssuer] - 1;
             }
             else
             {
-                forcedMaxRequest = Math.Min(maxRequest.Value, cumulLossUnitIssuer[numberOfIssuer-1] - 1);
+                forcedMaxRequest = Math.Min(maxRequest.Value, cumulLossUnitIssuer[numberOfIssuer] - 1);
             }
 
             if (withGreeks)
@@ -739,8 +739,8 @@ namespace ValoLibrary
                         {
                             for (int j = 0; j < numberOfIssuer; j++)
                             {
-                                defaultDistribArray[lossUnitCounter, j + 1] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, j] * dp_dProb[j];
-                                defaultDistribArray[lossUnitCounter, j + numberOfIssuer + 1] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, j] * dp_dBeta[j];
+                                defaultDistribArray[lossUnitCounter, j+1] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, j+1] * dp_dProb[j];
+                                defaultDistribArray[lossUnitCounter, j + numberOfIssuer+1] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, j+1] * dp_dBeta[j];
                             }
                         }
                     }
@@ -1113,31 +1113,31 @@ namespace ValoLibrary
                     for (int i = 0; i < numberOfIssuer; i++)
                     {
                         calcPV = 0.0;
-                        residualProb = 0.0 - defaultDistribution[0, i];
+                        residualProb = 0.0 - defaultDistribution[0, i+1];//MODIF, original : defaultDistribution[0, i]
 
-                        for (int lossUnitCounter = 0; lossUnitCounter < maxNumLossUnitToReachStrikes; lossUnitCounter++)
+                        for (int lossUnitCounter = 1; lossUnitCounter <= maxNumLossUnitToReachStrikes; lossUnitCounter++)
                         {
-                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i];
-                            residualProb -= defaultDistribution[lossUnitCounter, i];
+                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i+1];//MODIF, original : defaultDistribution[lossUnitCounter, i]
+                            residualProb -= defaultDistribution[lossUnitCounter, i+1];//MODIF, IDEM
                         }
 
                         calcPV += UtilityLittleFunctions.MinOf(strike, sumLossUnit) * residualProb;
 
                         if (defaultProbability[i] == 0.0)
                         {
-                            res[1 + i, strikeCounter] = calcPV * zC * lossUnitAmount / (0.0001);
+                            res[ i+1, strikeCounter] = calcPV * zC * lossUnitAmount / (0.0001);
                         }
                         else
                         {
-                            res[1 + i, strikeCounter] = calcPV * zC * lossUnitAmount / (defaultProbability[i] * 0.05);
+                            res[ i+1, strikeCounter] = calcPV * zC * lossUnitAmount / (defaultProbability[i] * 0.05);
                         }
 
                         calcPV = 0.0;
-                        residualProb = 0.0 - defaultDistribution[0, i + numberOfIssuer];
+                        residualProb = 0.0 - defaultDistribution[0, i + numberOfIssuer+1];//MODIF, original : defaultDistribution[0, i + numberOfIssuer]
                         for (int lossUnitCounter = 1; lossUnitCounter <= maxNumLossUnitToReachStrikes; lossUnitCounter++)
                         {
-                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i + numberOfIssuer];
-                            residualProb -= defaultDistribution[lossUnitCounter, i + numberOfIssuer];
+                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i + numberOfIssuer+1];//IDEM
+                            residualProb -= defaultDistribution[lossUnitCounter, i + numberOfIssuer+1];//IDEM
                         }
 
                         calcPV += UtilityLittleFunctions.MinOf(strike, sumLossUnit) * residualProb;

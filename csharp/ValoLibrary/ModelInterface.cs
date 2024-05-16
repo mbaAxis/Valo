@@ -784,14 +784,15 @@ namespace ValoLibrary
                         double[] test1 = { ((double[])strikes)[1] };
                         EuropeanLow[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, test0, DefaultProbability, ((double[])correl)[0], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);//MODIF, ORGINAL EuropeanLow[i]
                         EuropeanHigh[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, test1, DefaultProbability, ((double[])correl)[1], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);
-                        European[i-1, 0] = ((double[,])EuropeanHigh[i-1])[0, 0] - ((double[,])EuropeanLow[i-1])[0, 0];
-
+                        European[i-1, 0] = (double)((object[,])EuropeanHigh[i - 1])[0, 1] - (double)((object[,])EuropeanLow[i - 1])[0, 1];//MODIF, original ((double[,])EuropeanHigh[i])[0,0] - ((double[,])EuropeanLow[i])[0, 0]
                         if (withGreeks)
                         {
                             for (j = 1; j <= numberOfIssuer; j++)
                             {
-                                European[i, j + 1] = European[i, 1] + (((double[,])EuropeanHigh[i])[1 + j, 0] - ((double[,])EuropeanLow[i])[1 + j, 1]) * dProb[i, j];
-                                European[i, numberOfIssuer + j + 1] = European[i, 1] + (((double[,])EuropeanHigh[i])[1 + j + numberOfIssuer, 1] - ((double[,])EuropeanLow[i])[1 + j + numberOfIssuer, 1]);
+                                European[i-1, j] = European[i-1, 0] + (double)((object[,])EuropeanHigh[i - 1])[j, 1]- (double)((object[,])EuropeanLow[i - 1])[j, 1] * dProb[i-1,j-1];
+                                European[i-1, numberOfIssuer + j] = European[i-1, 0] + (double)((object[,])EuropeanHigh[i - 1])[j+numberOfIssuer, 1]- (double)((object[,])EuropeanLow[i - 1])[j+numberOfIssuer, 1];
+                                // European[i, j + 1] = European[i, 1] + (((double[,])EuropeanHigh[i])[1 + j, 0] - ((double[,])EuropeanLow[i])[1 + j, 1]) * dProb[i, j];
+                                //European[i, numberOfIssuer + j + 1] = European[i, 1] + (((double[,])EuropeanHigh[i])[1 + j + numberOfIssuer, 1] - ((double[,])EuropeanLow[i])[1 + j + numberOfIssuer, 1]);
                             }
                         }
                     }
@@ -799,12 +800,12 @@ namespace ValoLibrary
                     else
                     {
                         CurrentZC = RiskFreeZC[i] * LossRate;
-                        European[i, 1] = DefaultProbability[1] * CurrentZC;
+                        European[i-1, 0] = DefaultProbability[0] * CurrentZC;
                         if (withGreeks)
                         {
                             // compute dCDS
-                            European[i, 2] = European[i, 1] + CurrentZC * dProb[i, 1];
-                            European[i, 3] = 0;
+                            European[i-1, 1] = European[i-1, 0] + CurrentZC * dProb[i-1, 0];
+                            European[i-1, 2] = 0;
                         }
                     }
 
