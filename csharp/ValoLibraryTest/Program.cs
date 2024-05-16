@@ -547,3 +547,4 @@ Console.WriteLine(StrippingCDS.GetCDSCurveId(issuerList[0]));
 string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, 3, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks, hedgingCDS, lossUnitAmount, integrationPeriod, 1, dBeta);
+//HELLO
