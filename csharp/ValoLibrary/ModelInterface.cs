@@ -665,7 +665,7 @@ namespace ValoLibrary
 
             //'
             //' Dimension the ouput array depending on whether greeks are requested or not
-            //'
+            //'noml
 
             string[,] x;
             if (!withGreeks)
@@ -859,7 +859,10 @@ namespace ValoLibrary
 
             // add
             // Store the NPV of the floated leg
-            //x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));//MODIF, que fait-elle là ?
+            if (!IsCDO)
+            {
+                x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));
+            }
 
 
             // -----------------------------------------------------------------------
@@ -988,6 +991,10 @@ namespace ValoLibrary
             // Store the NPV of the fixed leg
             x[2, 0] = ""  + Double.Parse(x[4, 0]) * TrancheWidth * Spread;//Modif: Original "" + (Double)nominalIssuer * Double.Parse(x[4, 0]) * TrancheWidth * Spread;
 
+            if (!IsCDO)
+            {
+                x[2,0]=""+(Double)nominalIssuer* Double.Parse(x[4, 0]) * TrancheWidth * Spread;
+            }
 
 
             // Store the NPV of the CDS/CDO (dirty, i.e. inclusive of next coupon)
@@ -1055,19 +1062,23 @@ namespace ValoLibrary
                         x[6 + i, 2] = "" + ((Double.Parse(x[6 + i, 3]) / (double)StrippingIRS.GetFXSpot(pricingCurrency)) * StrippingIRS.GetFXSpot(CreditDefaultSwapCurves.Curves[j].Currency));
                         x[6 + i, 5] = CreditDefaultSwapCurves.Curves[j].CDSName;
 
-                        ///////////////////::::addd
-                        //x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + ""; //MODIF, Original, why is this there same for the whole block of code below
+                        /////////////////::::addd
+                        if (!IsCDO)
+                        {
+                            x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + "";
 
-                        //for (i = 1; i <= numberOfIssuer; i++)
-                        //{
-                        //    x[6 + i, 0] = (double)nominalIssuer * Double.Parse(x[6 + i, 0]) + "";
-                        //    x[6 + i, 1] = (double)nominalIssuer * Double.Parse(x[6 + i, 1]) + "";
-                        //    x[6 + i, 2] = (double)nominalIssuer * Double.Parse(x[6 + i, 2]) + "";
-                        //    x[6 + i, 3] = (double)nominalIssuer * Double.Parse(x[6 + i, 3]) + "";
-                        //    x[6 + i, 4] = (double)nominalIssuer * Double.Parse(x[6 + i, 4]) + "";
-                        //    x[6 + i, 5] = x[6 + i, 5];
+                            for (i = 1; i <= numberOfIssuer; i++)
+                            {
+                                x[6 + i, 0] = (double)nominalIssuer * Double.Parse(x[6 + i, 0]) + "";
+                                x[6 + i, 1] = (double)nominalIssuer * Double.Parse(x[6 + i, 1]) + "";
+                                x[6 + i, 2] = (double)nominalIssuer * Double.Parse(x[6 + i, 2]) + "";
+                                x[6 + i, 3] = (double)nominalIssuer * Double.Parse(x[6 + i, 3]) + "";
+                                x[6 + i, 4] = (double)nominalIssuer * Double.Parse(x[6 + i, 4]) + "";
+                                x[6 + i, 5] = x[6 + i, 5];
 
-                        //}
+                            }
+                        }
+
 
 
                         if (IsCDO)
