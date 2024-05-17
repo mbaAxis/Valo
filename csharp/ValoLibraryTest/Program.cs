@@ -212,7 +212,7 @@ Console.WriteLine("===================Test Stripping CDS====================");
 
 
 string curveName = "EUR";
-DateTime paramDate = new(2024, 05, 6);
+DateTime paramDate = new(2024, 05, 17);
 double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
 string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
 int swapPeriod = 12;
@@ -508,7 +508,7 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 
 
 
-DateTime parameterDate = new DateTime(2024, 5, 6);
+DateTime parameterDate = new DateTime(2024, 5, 17);
 DateTime cdsRollDate = new DateTime(2024, 6, 20);
 int[] issuer = { 1, 2, 3 };
 string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
@@ -553,7 +553,8 @@ for (int i = 0;i< cdot.GetLength(0); i++)
 {
     for (int j = 0; j < cdot.GetLength(1); j++)
     {
-        Console.Write(cdot[i,j]);
+        Console.Write(cdot[i,j]+" | ");
     }
-    Console.WriteLine("");
+    Console.WriteLine(" ");
 }
+Console.WriteLine("FIN");
