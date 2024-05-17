@@ -818,15 +818,15 @@ namespace ValoLibrary
             // -----------------------------------------------------------------------
             // Compute the First term of the float leg. i.e. the European CDS/CDO at maturity
 
-            x[1, 0] = European[(int)NumberOfIntegrationDates, 1] + "";
+            x[1, 0] = European[(int)NumberOfIntegrationDates-1, 0] + "";//MODIF, Original : European[(int)NumberOfIntegrationDates, 1]
 
             if (withGreeks)
             {
                 for (j = 1; j <= numberOfIssuer; j++)
                 {
                     // store of the variation of the european tranche protection
-                    x[6 + j, 0] = European[(int)NumberOfIntegrationDates, 1 + j] + "";
-                    x[6 + j, 4] = European[(int)NumberOfIntegrationDates, 1 + numberOfIssuer + j] + "";
+                    x[6 + j, 0] = European[(int)NumberOfIntegrationDates-1,  j] + "";//MODIF, original: European[(int)NumberOfIntegrationDates,  j+1]
+                    x[6 + j, 4] = European[(int)NumberOfIntegrationDates-1,  numberOfIssuer + j] + "";//MODIF, idem
                 }
             }
 
@@ -843,14 +843,14 @@ namespace ValoLibrary
                     else
                     {
                         double Financing = (1 - RiskFreeZC[i] / (double)RiskFreeZC[i - 1]);
-                        x[1, 0] = (Double.Parse(x[1, 0]) + European[i, 1] * Financing) + "";
+                        x[1, 0] = (Double.Parse(x[1, 0]) + European[i-1, 0] * Financing) + "";//MODIF, original European[i, 1]
                         if (withGreeks)
                         {
                             for (j = 1; j <= numberOfIssuer; j++)
                             {
                                 // store of the variation of the european tranche protection
-                                x[6 + j, 0] = (Double.Parse(x[6 + j, 0]) + European[i, 1 + j] * Financing) + "";
-                                x[6 + j, 4] = (Double.Parse(x[6 + j, 4]) + European[i, 1 + numberOfIssuer + j] * Financing) + "";
+                                x[6 + j, 0] = (Double.Parse(x[6 + j, 0]) + European[i-1,  j] * Financing) + "";//MODIF, original European[i, 1 + j] * Financing)
+                                x[6 + j, 4] = (Double.Parse(x[6 + j, 4]) + European[i-1,  numberOfIssuer + j] * Financing) + "";//MODIF, idem
                             }
                         }
                     }
@@ -859,7 +859,7 @@ namespace ValoLibrary
 
             // add
             // Store the NPV of the floated leg
-            x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));
+            //x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));//MODIF, que fait-elle là ?
 
 
             // -----------------------------------------------------------------------
@@ -898,13 +898,13 @@ namespace ValoLibrary
                 }
             }
 
-            double[] bpv = new double[Lastj + 1];
+            double[] bpv = new double[Lastj];//MODIF original new double[Lastj + 1]
             double this_bpv;
 
             for (j = 1; j <= Lastj; j++)
             {
                 // Initialization
-                bpv[j] = 0;
+                bpv[j-1] = 0;//MODIF, original : bpv[j]
                 double PreviousProbNoDef = 1;
 
                 // compute sum of npv of 1 bp
@@ -928,13 +928,13 @@ namespace ValoLibrary
                                 // Risky Coupon if american leg
                                 if (isAmericanFixedLeg)
                                 {
-                                    double NextProbNoDef = (1.0 - European[k, j] / (double)RiskFreeZC[k] / (double)TrancheWidth / (double)LossRate);
+                                    double NextProbNoDef = (1.0 - European[k-1, j-1] / (double)RiskFreeZC[k] / (double)TrancheWidth / (double)LossRate);//MODIF: original European[k, j]
                                     this_bpv = this_bpv * (NextProbNoDef + 0.5 * PreviousProbNoDef * (1.0 - NextProbNoDef / (double)PreviousProbNoDef));
                                     PreviousProbNoDef = NextProbNoDef;
                                 }
 
                                 // Add all the coupon payment
-                                bpv[j] += this_bpv;
+                                bpv[j-1] += this_bpv;
                             }
                         }
                         else
@@ -949,7 +949,7 @@ namespace ValoLibrary
                             double DefaultDayCountFraction;
                             if (isAmericanFixedLeg)
                             {
-                                this_bpv = this_bpv * (1.0 - European[(int)NumberofIntegrationDateOnCouponDate[i], j] / (double)RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]] / (double)TrancheWidth / (double)LossRate);
+                                this_bpv = this_bpv * (1.0 - European[(int)NumberofIntegrationDateOnCouponDate[i]-1, j-1] / (double)RiskFreeZC[(int)NumberofIntegrationDateOnCouponDate[i]] / (double)TrancheWidth / (double)LossRate);//MODIF, original European[(int)NumberofIntegrationDateOnCouponDate[i], j]
 
                                 for (k = (int)NumberofIntegrationDateOnCouponDate[i - 1] + 1; k <= NumberofIntegrationDateOnCouponDate[i]; k++)
                                 {
@@ -961,7 +961,7 @@ namespace ValoLibrary
                                     DateTime dTmp = new DateTime((long)((Date2.Ticks + Date1.Ticks) / 2.0));
 
                                     DefaultDayCountFraction = (dTmp - schedule[i - 1]).Days / 360.0;
-                                    double NextProbNoDef = (1.0 - European[k, j] / (double)RiskFreeZC[k] / (double)TrancheWidth / (double)LossRate);
+                                    double NextProbNoDef = (1.0 - European[k-1, j-1] / (double)RiskFreeZC[k] / (double)TrancheWidth / (double)LossRate);//MODIF, original European[k, j]
                                     double Accrued_bpv = DefaultDayCountFraction * (-NextProbNoDef + PreviousProbNoDef) * Math.Sqrt(RiskFreeZC[k] * RiskFreeZC[k - 1]);
                                     this_bpv += Accrued_bpv;
                                     PreviousProbNoDef = NextProbNoDef;
@@ -969,14 +969,14 @@ namespace ValoLibrary
                             }
 
                             // Add all the coupon payment
-                            bpv[j] += this_bpv;
+                            bpv[j-1] += this_bpv;//MODIF original: bpv[j]
                         }
                     }
                 }
             }
 
             // Store the basis point value
-            x[4, 0] = bpv[1] + "";
+            x[4, 0] = bpv[0] + "";//MODIF, original bpv[1]
 
             // Compute the ATMSpread
             x[3, 0] = "" + (Double.Parse(x[1, 0]) / (double)TrancheWidth / Double.Parse(x[4, 0]));
@@ -986,7 +986,7 @@ namespace ValoLibrary
             }
 
             // Store the NPV of the fixed leg
-            x[2, 0] = "" + (Double)nominalIssuer * Double.Parse(x[4, 0]) * TrancheWidth * Spread;
+            x[2, 0] = ""  + Double.Parse(x[4, 0]) * TrancheWidth * Spread;//Modif: Original "" + (Double)nominalIssuer * Double.Parse(x[4, 0]) * TrancheWidth * Spread;
 
 
 
@@ -1007,10 +1007,10 @@ namespace ValoLibrary
                     // Change of fixed leg
                     if (Spread != 0 && isAmericanFixedLeg)
                     {
-                        x[6 + i, 0] = (Double.Parse(x[6 + i, 0]) - Spread * TrancheWidth * (bpv[i + 1] - bpv[1])) + "";
+                        x[6 + i, 0] = (Double.Parse(x[6 + i, 0]) - Spread * TrancheWidth * (bpv[i ] - bpv[0])) + "";//MODIF, original : (bpv[i + 1] - bpv[1]))
                         if (IsCDO)
                         {
-                            x[6 + i, 4] = (Double.Parse(x[6 + i, 4]) - Spread * TrancheWidth * (bpv[i + numberOfIssuer + 1] - bpv[1])) + "";
+                            x[6 + i, 4] = (Double.Parse(x[6 + i, 4]) - Spread * TrancheWidth * (bpv[i + numberOfIssuer ] - bpv[0])) + "";//MODIF, original: (bpv[i + numberOfIssuer + 1] - bpv[1])
                         }
                     }
 
@@ -1018,7 +1018,7 @@ namespace ValoLibrary
 
                     if (HedgingCDS != null)
                     {
-                        j = (IsCDO) ? ((int[])CDSListID)[i] : (int)CDSListID;
+                        j = (IsCDO) ? ((int[])CDSListID)[i-1] : (int)CDSListID;//MODIF, original ((int[])CDSListID)[i]
                         ThisCDS = CreditDefaultSwapCurves.Curves[j];
 
                         string[,] hedging_cds;
@@ -1056,18 +1056,18 @@ namespace ValoLibrary
                         x[6 + i, 5] = CreditDefaultSwapCurves.Curves[j].CDSName;
 
                         ///////////////////::::addd
-                        x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + "";
+                        //x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + ""; //MODIF, Original, why is this there same for the whole block of code below
 
-                        for (i = 1; i <= numberOfIssuer; i++)
-                        {
-                            x[6 + i, 0] = (double)nominalIssuer * Double.Parse(x[6 + i, 0]) + "";
-                            x[6 + i, 1] = (double)nominalIssuer * Double.Parse(x[6 + i, 1]) + "";
-                            x[6 + i, 2] = (double)nominalIssuer * Double.Parse(x[6 + i, 2]) + "";
-                            x[6 + i, 3] = (double)nominalIssuer * Double.Parse(x[6 + i, 3]) + "";
-                            x[6 + i, 4] = (double)nominalIssuer * Double.Parse(x[6 + i, 4]) + "";
-                            x[6 + i, 5] = x[6 + i, 5];
+                        //for (i = 1; i <= numberOfIssuer; i++)
+                        //{
+                        //    x[6 + i, 0] = (double)nominalIssuer * Double.Parse(x[6 + i, 0]) + "";
+                        //    x[6 + i, 1] = (double)nominalIssuer * Double.Parse(x[6 + i, 1]) + "";
+                        //    x[6 + i, 2] = (double)nominalIssuer * Double.Parse(x[6 + i, 2]) + "";
+                        //    x[6 + i, 3] = (double)nominalIssuer * Double.Parse(x[6 + i, 3]) + "";
+                        //    x[6 + i, 4] = (double)nominalIssuer * Double.Parse(x[6 + i, 4]) + "";
+                        //    x[6 + i, 5] = x[6 + i, 5];
 
-                        }
+                        //}
 
 
                         if (IsCDO)

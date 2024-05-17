@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using System.Diagnostics;
+using System.Net.WebSockets;
 using System.Numerics;
 using ValoLibrary;
 
@@ -507,7 +508,7 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 
 
 
-DateTime parameterDate = new DateTime(2024, 5, 2);
+DateTime parameterDate = new DateTime(2024, 5, 6);
 DateTime cdsRollDate = new DateTime(2024, 6, 20);
 int[] issuer = { 1, 2, 3 };
 string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
@@ -544,7 +545,15 @@ double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], paramete
 int u = StrippingIRS.GetCurveId(pricingCurrency);
 Console.WriteLine(u);
 Console.WriteLine(StrippingCDS.GetCDSCurveId(issuerList[0]));
+
 string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, 3, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-    isAmericanFixedLeg, withGreeks, hedgingCDS,null, integrationPeriod, 1, dBeta);
-//HELLO
+    isAmericanFixedLeg, withGreeks, hedgingCDS, null, integrationPeriod, 1, dBeta);
+for (int i = 0;i< cdot.GetLength(0); i++)
+{
+    for (int j = 0; j < cdot.GetLength(1); j++)
+    {
+        Console.Write(cdot[i,j]);
+    }
+    Console.WriteLine("");
+}
