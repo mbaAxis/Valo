@@ -52,44 +52,6 @@ namespace ValoLibrary
         private static double[,] AmericanLessEuropeanLeg;
         private static double[,] FullDefaultProb;
 
-
-        //public static int GetCurveId(object curveName)
-        //{
-        //    if (Utils.IsNumeric(curveName))
-        //    {
-        //        int curveId = Convert.ToInt32(curveName);
-        //        if (curveId >= 1 && curveId <= InterestRateCurves.NumberOfCurves)
-        //        {
-        //            InterestRateCurves.LastError = false;
-        //            return curveId;
-        //        }
-        //        else
-        //        {
-        //            return -1;
-        //        }
-        //    }
-
-        //    if (InterestRateCurves.Curves != null && InterestRateCurves.Curves.Length > InterestRateCurves.NumberOfCurves)
-        //    {
-        //        InterestRateCurves.NumberOfCurves = InterestRateCurves.Curves.Length;
-        //    }
-
-        //    for (int i = 1; i <= InterestRateCurves.NumberOfCurves; i++)
-        //    {
-        //        if (InterestRateCurves.Curves != null && i < InterestRateCurves.Curves.Length)
-        //        {
-        //            if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName.ToString(), StringComparison.OrdinalIgnoreCase))
-        //            {
-        //                InterestRateCurves.LastError = false;
-        //                return i;
-        //            }
-        //        }
-        //    }
-
-        //    return -1;
-        //}
-
-
         public static int GetCDSCurveId(string CDSName)
         {
 
@@ -124,36 +86,44 @@ namespace ValoLibrary
             }
             return -1;
         }
-        //public static int GetCDSCurveId(string CDSName)
-        //{
 
-            
-        //    if (LastCDSCurveID >= 1 && LastCDSCurveID <= CreditDefaultSwapCurves.NumberOfCurves)
-        //    {
-        //        // Testez si CDSName est égal à la dernière recherche
-        //        if (string.Equals(CreditDefaultSwapCurves.Curves[LastCDSCurveID - 1].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
-        //        {
-        //            CreditDefaultSwapCurves.LastError = false;
-        //            return LastCDSCurveID;
-        //        }
-        //    }
+        public static int GetCDSCurveIdV2(string CDSName)
+        {
 
-        //    if (CreditDefaultSwapCurves.Curves != null && CreditDefaultSwapCurves.Curves.Length > CreditDefaultSwapCurves.NumberOfCurves)
-        //    {
-        //        CreditDefaultSwapCurves.NumberOfCurves = CreditDefaultSwapCurves.Curves.Length;
-        //    }
 
-        //    for (int i = 0; i < CreditDefaultSwapCurves.NumberOfCurves; i++)
-        //    {
-        //        if (string.Equals(CreditDefaultSwapCurves.Curves[i].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
-        //        {
-        //            LastCDSCurveID = i+1;
-        //            CreditDefaultSwapCurves.LastError = false;
-        //            return LastCDSCurveID;
-        //        }
-        //    }
-        //    return -1;
-        //}
+            if (LastCDSCurveID >= 1 && LastCDSCurveID <= CreditDefaultSwapCurves.NumberOfCurves)
+            {
+                // Testez si CDSName est égal à la dernière recherche
+                if (string.Equals(CreditDefaultSwapCurves.Curves[LastCDSCurveID - 1].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
+                {
+                    CreditDefaultSwapCurves.LastError = false;
+                    return LastCDSCurveID;
+                }
+            }
+
+            if (CreditDefaultSwapCurves.Curves != null && CreditDefaultSwapCurves.Curves.Length > CreditDefaultSwapCurves.NumberOfCurves)
+            {
+                CreditDefaultSwapCurves.NumberOfCurves = CreditDefaultSwapCurves.Curves.Length;
+            }
+
+
+            for (int i = 0; i < CreditDefaultSwapCurves.NumberOfCurves; i++)
+            {
+                if (CreditDefaultSwapCurves.Curves != null && i < CreditDefaultSwapCurves.Curves.Length)
+                {
+                    if (string.Equals(CreditDefaultSwapCurves.Curves[i].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        LastCDSCurveID = i;//i+1 initialement sinon incrément d'un en trop
+                        CreditDefaultSwapCurves.LastError = false;
+                        return LastCDSCurveID;
+                    }
+                }
+            }
+            return -1;
+        }
+
+
+
 
         public static bool StoreDP(DateTime paramDate, int cdsID, string CDSName,
             double RecoveryRate, string Currency, string[] CurveDates,

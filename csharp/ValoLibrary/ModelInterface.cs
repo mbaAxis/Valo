@@ -153,21 +153,145 @@ namespace ValoLibrary
             return LossUnit(numberOfIssuer, nominalIssuer, recoveryRate, 0.0001);
         }
 
-        public static  string[,] CDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+        //    public static  string[,] CDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+        //int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+        //string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+        //double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+        //double withGreeks = 0, double[] hedgingCDS=null, double? lossUnitAmount = null,
+        //string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        //    {
+        //        int i;
+        //        double[] recoveryRate;
+
+        //        int curveId;
+        //        object vbaIssuerList;
+
+        //        curveId = StrippingIRS.GetCurveId(pricingCurrency);
+        //        vbaIssuerList = new string[issuerList.Length];
+
+        //        if (curveId == -1)
+        //        {
+        //            if (!StrippingIRS.InterestRateCurves.LastError)
+        //            {
+        //                Console.WriteLine($"CDO Pricing: Curve {pricingCurrency} was not stripped - Called from : {Environment.StackTrace}");
+        //                StrippingIRS.InterestRateCurves.LastError = true;
+        //            }
+        //            return null;
+        //        }
+
+        //        if (numberOfIssuer > issuerList.Length)
+        //        {
+        //            Console.WriteLine($"CDO Pricing: Not enough Issuers specified compared to the indicated number of issuer - Called from: {Environment.StackTrace}");
+        //            return null;
+        //        }
+        //        else if (issuerList == null)
+        //        {
+        //            Console.WriteLine($"CDO Pricing: No Issuers specified - Called from: {Environment.StackTrace}");
+        //            return null ;
+        //        }
+        //        else
+        //        {
+        //            for (i = 0; i < numberOfIssuer; i++)
+        //            {
+        //                if (issuerList.Length <= i)
+        //                {
+        //                    Console.WriteLine($"CDO Pricing: No Issuers specified in position {i} - Called from: {Environment.StackTrace}");
+        //                    return null ;
+        //                }
+        //                else
+        //                {
+        //                    if (!UtilityDates.IsNumeric(issuerList[i].ToString()))
+        //                    {
+        //                        ((int[])vbaIssuerList)[i] = StrippingCDS.GetCDSCurveId(issuerList[i].ToString());
+        //                    }
+        //                    else
+        //                    {
+        //                        ((string[])vbaIssuerList)[i] = issuerList[i];
+        //                    }
+
+        //                    if (((double[])vbaIssuerList)[i] == -1)
+        //                    {
+        //                        Console.WriteLine($"CDO Pricing: Position {i}: IssuerID {issuerList[i]} not recognized - Called from: {Environment.StackTrace}");
+        //                        return null ;
+
+        //                    }
+
+        //                    if (((int[])vbaIssuerList)[i] > StrippingCDS.CreditDefaultSwapCurves.NumberOfCurves)
+        //                    {
+        //                        Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) exceeds range of defined issuer - Called from: {Environment.StackTrace}");
+        //                        return null;
+        //                    }
+        //                    else if (!StrippingCDS.CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].CDSdone)
+        //                    {
+        //                        Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) CDS curve not stripped - Called from: {Environment.StackTrace}");
+        //                        return null;
+        //                    }
+        //                }
+        //            }
+        //        }
+
+        //        if (recoveryIssuer == null || recoveryIssuer.Length == 0)
+        //        {
+        //            recoveryRate = new double[(int)numberOfIssuer];
+        //            for (i = 0; i < numberOfIssuer; i++)
+        //            {
+        //                recoveryRate[i] = CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].Recovery;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            recoveryRate = new double[numberOfIssuer];
+        //            for (i = 0; i < numberOfIssuer; i++)
+        //            {
+        //                if (recoveryIssuer == null || recoveryIssuer.Length == 0)
+        //                    {
+        //                    recoveryRate[i] = CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].Recovery;
+        //                }
+        //                else
+        //                {
+        //                    recoveryRate[i] = recoveryIssuer[i];
+        //                }
+        //            }
+        //        }
+
+        //        if (!lossUnitAmount.HasValue || lossUnitAmount == null)
+        //        {
+        //            lossUnitAmount = LossUnit(numberOfIssuer, nominalIssuer, recoveryRate, 0.0001);
+        //        }
+
+        //        if (betaAdder == null || betaAdder.Length ==0)
+        //        {
+        //            betaAdder = new double[(int)numberOfIssuer];
+        //            for (i = 0; i < numberOfIssuer; i++)
+        //            {
+        //                betaAdder[i] = 0;
+        //            }
+        //        }
+
+        //        return AmericanSwap(maturity,
+        //            numberOfIssuer, vbaIssuerList, nominalIssuer, recoveryRate,
+        //            spread, cpnLastSettle, cpnPeriod, cpnConvention,
+        //            pricingCurrency, fxCorrel, fxVol,
+        //            strikes, correl, betaAdder,
+        //            isAmericanFloatLeg, isAmericanFixedLeg,
+        //            withGreeks, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
+        //    }
+
+
+
+        public static string[,] CDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double[] hedgingCDS=null, double? lossUnitAmount = null,
+    double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
     string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             int i;
             double[] recoveryRate;
-
             int curveId;
-            object vbaIssuerList;
 
             curveId = StrippingIRS.GetCurveId(pricingCurrency);
-            vbaIssuerList = new string[issuerList.Length];
+            int[] vbaIssuerList = new int[issuerList.Length];
 
             if (curveId == -1)
             {
@@ -187,7 +311,7 @@ namespace ValoLibrary
             else if (issuerList == null)
             {
                 Console.WriteLine($"CDO Pricing: No Issuers specified - Called from: {Environment.StackTrace}");
-                return null ;
+                return null;
             }
             else
             {
@@ -196,32 +320,32 @@ namespace ValoLibrary
                     if (issuerList.Length <= i)
                     {
                         Console.WriteLine($"CDO Pricing: No Issuers specified in position {i} - Called from: {Environment.StackTrace}");
-                        return null ;
+                        return null;
                     }
                     else
                     {
-                        if (!UtilityDates.IsNumeric(issuerList[i].ToString()))
+                        if (!int.TryParse(issuerList[i], out _))
                         {
-                            ((int[])vbaIssuerList)[i] = StrippingCDS.GetCDSCurveId(issuerList[i].ToString());
+                            vbaIssuerList[i] = StrippingCDS.GetCDSCurveId(issuerList[i]);
                         }
                         else
                         {
-                            ((string[])vbaIssuerList)[i] = issuerList[i];
+                            vbaIssuerList[i] = int.Parse(issuerList[i]);
                         }
 
-                        if (((double[])vbaIssuerList)[i] == -1)
+                        if (vbaIssuerList[i] == -1)
                         {
                             Console.WriteLine($"CDO Pricing: Position {i}: IssuerID {issuerList[i]} not recognized - Called from: {Environment.StackTrace}");
-                            return null ;
+                            return null;
 
                         }
 
-                        if (((int[])vbaIssuerList)[i] > StrippingCDS.CreditDefaultSwapCurves.NumberOfCurves)
+                        if (vbaIssuerList[i] > StrippingCDS.CreditDefaultSwapCurves.NumberOfCurves)
                         {
                             Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) exceeds range of defined issuer - Called from: {Environment.StackTrace}");
                             return null;
                         }
-                        else if (!StrippingCDS.CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].CDSdone)
+                        else if (!StrippingCDS.CreditDefaultSwapCurves.Curves[vbaIssuerList[i]].CDSdone)
                         {
                             Console.WriteLine($"CDO Pricing: Position {i}: IssuerID ({issuerList[i]}) CDS curve not stripped - Called from: {Environment.StackTrace}");
                             return null;
@@ -235,7 +359,7 @@ namespace ValoLibrary
                 recoveryRate = new double[(int)numberOfIssuer];
                 for (i = 0; i < numberOfIssuer; i++)
                 {
-                    recoveryRate[i] = CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].Recovery;
+                    recoveryRate[i] = CreditDefaultSwapCurves.Curves[vbaIssuerList[i]].Recovery;
                 }
             }
             else
@@ -244,8 +368,8 @@ namespace ValoLibrary
                 for (i = 0; i < numberOfIssuer; i++)
                 {
                     if (recoveryIssuer == null || recoveryIssuer.Length == 0)
-                        {
-                        recoveryRate[i] = CreditDefaultSwapCurves.Curves[((int[])vbaIssuerList)[i]].Recovery;
+                    {
+                        recoveryRate[i] = CreditDefaultSwapCurves.Curves[vbaIssuerList[i]].Recovery;
                     }
                     else
                     {
@@ -259,7 +383,7 @@ namespace ValoLibrary
                 lossUnitAmount = LossUnit(numberOfIssuer, nominalIssuer, recoveryRate, 0.0001);
             }
 
-            if (betaAdder == null || betaAdder.Length ==0)
+            if (betaAdder == null || betaAdder.Length == 0)
             {
                 betaAdder = new double[(int)numberOfIssuer];
                 for (i = 0; i < numberOfIssuer; i++)
@@ -276,7 +400,6 @@ namespace ValoLibrary
                 isAmericanFloatLeg, isAmericanFixedLeg,
                 withGreeks, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
         }
-
         public static string[,] CDS(string issuerIdParam, string maturity, double spread, double recoveryRate, double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -287,7 +410,7 @@ namespace ValoLibrary
 
             if (!Utils.IsNumeric(issuerIdParam))
             {
-                issuerId = StrippingCDS.GetCDSCurveId((string) issuerIdParam) - 1;
+                issuerId = StrippingCDS.GetCDSCurveId((string) issuerIdParam) - 1; //  issuerId = StrippingCDS.GetCDSCurveId((string) issuerIdParam) for GetCDSCurveIdV2;
             }
             else
             {
@@ -520,6 +643,7 @@ namespace ValoLibrary
             else
             {
                 European = new double[(int)NumberOfIntegrationDates, 1 + 1]; // 1
+
             }
 
 
@@ -731,8 +855,16 @@ namespace ValoLibrary
 
             // add
             // Store the NPV of the floated leg
-            x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));
 
+            if (IsCDO)
+            {
+                x[1, 0] = "" + (Double.Parse(x[1, 0]));
+            }
+            else
+            {
+                x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));
+
+            }
 
             // -----------------------------------------------------------------------
             // FIXED LEG
@@ -858,9 +990,15 @@ namespace ValoLibrary
             }
 
             // Store the NPV of the fixed leg
-            x[2, 0] = "" + (Double)nominalIssuer * Double.Parse(x[4, 0]) * TrancheWidth * Spread;
 
+            if (IsCDO)
+            {
+                x[2, 0] = "" + Double.Parse(x[4, 0]) * TrancheWidth * Spread;
+            }
+            else{
+                x[2, 0] = "" + (Double)nominalIssuer * Double.Parse(x[4, 0]) * TrancheWidth * Spread;
 
+            }
 
             // Store the NPV of the CDS/CDO (dirty, i.e. inclusive of next coupon)
             x[0, 0] = "" +  (Double.Parse(x[1, 0]) - Double.Parse(x[2, 0]));
@@ -928,16 +1066,22 @@ namespace ValoLibrary
                         x[6 + i, 5] = CreditDefaultSwapCurves.Curves[j].CDSName;
 
                         ///////////////////::::addd
-                        x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + "";
+                        ///
 
-                        for (i = 1; i <= numberOfIssuer; i++)
+                        if (!IsCDO)
                         {
-                            x[6 + i, 0] = (double)nominalIssuer * Double.Parse(x[6 + i, 0]) + "";
-                            x[6 + i, 1] = (double)nominalIssuer * Double.Parse(x[6 + i, 1]) + "";
-                            x[6 + i, 2] = (double)nominalIssuer * Double.Parse(x[6 + i, 2]) + "";
-                            x[6 + i, 3] = (double)nominalIssuer * Double.Parse(x[6 + i, 3]) + "";
-                            x[6 + i, 4] = (double)nominalIssuer * Double.Parse(x[6 + i, 4]) + "";
-                            x[6 + i, 5] = x[6 + i, 5];
+                            x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + "";
+
+                            for (i = 1; i <= numberOfIssuer; i++)
+                            {
+                                x[6 + i, 0] = (double)nominalIssuer * Double.Parse(x[6 + i, 0]) + "";
+                                x[6 + i, 1] = (double)nominalIssuer * Double.Parse(x[6 + i, 1]) + "";
+                                x[6 + i, 2] = (double)nominalIssuer * Double.Parse(x[6 + i, 2]) + "";
+                                x[6 + i, 3] = (double)nominalIssuer * Double.Parse(x[6 + i, 3]) + "";
+                                x[6 + i, 4] = (double)nominalIssuer * Double.Parse(x[6 + i, 4]) + "";
+                                x[6 + i, 5] = x[6 + i, 5];
+
+                            }
 
                         }
 
