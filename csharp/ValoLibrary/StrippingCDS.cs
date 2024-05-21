@@ -265,7 +265,7 @@ namespace ValoLibrary
 
             string issuerCurrency = CreditDefaultSwapCurves.Curves[issuerId].Currency;
             DateTime cdsRollDate = CreditDefaultSwapCurves.CDSRollDate;
-            double[,] defaultProb = CreditDefaultSwapCurves.Curves[issuerId].MonthlyDPandShocked;
+            double[,]   defaultProb = CreditDefaultSwapCurves.Curves[issuerId].MonthlyDPandShocked;
 
 
             DateTime testDate;
@@ -308,7 +308,8 @@ namespace ValoLibrary
 
                 prob = defaultProb[dateCounter - offset, scenario]; // offset update
 
-                if (prob != 0) //  && !double.IsNaN(prob)
+                //if (prob != 0) //  && !double.IsNaN(prob)
+                if(prob!=null && !double.IsNaN(prob))//MODIF, original au dessus
                 {
                     nextProbNoDef = 1.0 - prob;
 

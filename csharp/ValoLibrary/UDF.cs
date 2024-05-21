@@ -249,11 +249,10 @@ namespace ValoLibrary
    double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
-            lossUnitAmount = null;
+            lossUnitAmount=null;
             return ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
-
         }
 
     }

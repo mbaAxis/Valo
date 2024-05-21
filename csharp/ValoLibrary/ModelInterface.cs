@@ -789,7 +789,7 @@ namespace ValoLibrary
                         {
                             for (j = 1; j <= numberOfIssuer; j++)
                             {
-                                European[i-1, j] = European[i-1, 0] + (double)((object[,])EuropeanHigh[i - 1])[j, 1]- (double)((object[,])EuropeanLow[i - 1])[j, 1] * dProb[i-1,j-1];
+                                European[i-1, j] = European[i-1, 0] + ((double)((object[,])EuropeanHigh[i - 1])[j, 1]- (double)((object[,])EuropeanLow[i - 1])[j, 1]) * dProb[i-1,j-1];
                                 European[i-1, numberOfIssuer + j] = European[i-1, 0] + (double)((object[,])EuropeanHigh[i - 1])[j+numberOfIssuer, 1]- (double)((object[,])EuropeanLow[i - 1])[j+numberOfIssuer, 1];
                                 // European[i, j + 1] = European[i, 1] + (((double[,])EuropeanHigh[i])[1 + j, 0] - ((double[,])EuropeanLow[i])[1 + j, 1]) * dProb[i, j];
                                 //European[i, numberOfIssuer + j + 1] = European[i, 1] + (((double[,])EuropeanHigh[i])[1 + j + numberOfIssuer, 1] - ((double[,])EuropeanLow[i])[1 + j + numberOfIssuer, 1]);

@@ -521,16 +521,20 @@ double[] strikes = { 0.0, 3.0 };
 double[] correl = { 0.4, 0.5 };
 string pricingCurrency = "EUR";
 int numberOfIssuer = 3;
-string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU", "Adecco_MMR.EUR.SU" };
-double[] nominalIssuer = { 1.0, 1.0, 1.0 };
+//string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU", "Adecco_MMR.EUR.SU" };
+string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU" };
+//double[] nominalIssuer = { 1.0, 1.0, 1.0 };
+double[] nominalIssuer = { 1.0, 1.0 };
 double spread = 0.05;
 string cpnPeriod = "3m";
 string cpnConvention = "LongFirst";
 string cpnLastSettle = "";
 double fxCorrel = -0.05;
 double fxVol = 0.1;
-double[] betaAdder = { 0.0, 0.0, 0.0 };
-double[] recoveryIssuer = { 0.4, 0.4, 0.4 };
+//double[] betaAdder = { 0.0, 0.0, 0.0 };
+double[] betaAdder = { 0.0, 0.0 };
+//double[] recoveryIssuer = { 0.4, 0.4, 0.4 };
+double[] recoveryIssuer = { 0.4, 0.4 };
 double isAmericanFloatLeg = -1;
 double isAmericanFixedLeg = -1;
 double withGreeks = -1;
@@ -541,12 +545,12 @@ double dBeta = 0.01;
 
 //double[] test = StrippingCDS.StripDefaultProbability(1, issuerList[0], parameterDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4,false,"Curve points");
 double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], parameterDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
-double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], parameterDate, cdsRollDate, c3, CurveMaturity, pricingCurrency, 0.4, false, intensity);
+//double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], parameterDate, cdsRollDate, c3, CurveMaturity, pricingCurrency, 0.4, false, intensity);
 int u = StrippingIRS.GetCurveId(pricingCurrency);
 Console.WriteLine(u);
 Console.WriteLine(StrippingCDS.GetCDSCurveId(issuerList[0]));
 
-string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, 3, issuerList, nominalIssuer,
+string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, 2, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks, hedgingCDS, null, integrationPeriod, 1, dBeta);
 for (int i = 0;i< cdot.GetLength(0); i++)

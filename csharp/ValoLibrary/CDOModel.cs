@@ -1040,7 +1040,7 @@ namespace ValoLibrary
                 lossUnitIssuer[issuerCounter] = (int)Math.Round((nominalIssuer[issuerCounter-1] * (1 - recoveryIssuer[issuerCounter-1])) / lossUnitAmount);
                 
             }
-            Console.WriteLine("iici 12");
+            //Console.WriteLine("iici 12");
 
             cumulLossUnitIssuer[1] = lossUnitIssuer[1];
 
@@ -1067,20 +1067,20 @@ namespace ValoLibrary
                 betaVector[i] = sqrtCorrel + betaAdder[i];
             }
 
-            Console.WriteLine("hvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+            //Console.WriteLine("hvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
 
-            Console.WriteLine("lossUnitIssuer0=" + lossUnitIssuer[0]);
-            Console.WriteLine("lossUnitIssuer1=" + lossUnitIssuer[1]);
-            Console.WriteLine("lossUnitIssuer2=" + lossUnitIssuer[2]);
-            Console.WriteLine("lossUnitIssuer.lengh" + lossUnitIssuer.Length);
-            Console.WriteLine("cumulLossUnitIssue0r=" + cumulLossUnitIssuer[0]);
-            Console.WriteLine("cumulLossUnitIssuer1=" + cumulLossUnitIssuer[1]);
-            Console.WriteLine("cumulLossUnitIssuer2=" + cumulLossUnitIssuer[2]);
-            Console.WriteLine("cumulLossUnitIssuerlenng=" + cumulLossUnitIssuer.Length);
-            Console.WriteLine("betaVector0=" + betaVector[0]);
-            Console.WriteLine("betaVector1=" + betaVector[1]);
-            Console.WriteLine("betaVector2=" + betaVector[2]);
-            Console.WriteLine("betaVectorlengh=" + betaVector.Length);
+            //Console.WriteLine("lossUnitIssuer0=" + lossUnitIssuer[0]);
+            //Console.WriteLine("lossUnitIssuer1=" + lossUnitIssuer[1]);
+            //Console.WriteLine("lossUnitIssuer2=" + lossUnitIssuer[2]);
+            //Console.WriteLine("lossUnitIssuer.lengh" + lossUnitIssuer.Length);
+            //Console.WriteLine("cumulLossUnitIssue0r=" + cumulLossUnitIssuer[0]);
+            //Console.WriteLine("cumulLossUnitIssuer1=" + cumulLossUnitIssuer[1]);
+            //Console.WriteLine("cumulLossUnitIssuer2=" + cumulLossUnitIssuer[2]);
+            //Console.WriteLine("cumulLossUnitIssuerlenng=" + cumulLossUnitIssuer.Length);
+            //Console.WriteLine("betaVector0=" + betaVector[0]);
+            //Console.WriteLine("betaVector1=" + betaVector[1]);
+            //Console.WriteLine("betaVector2=" + betaVector[2]);
+            //Console.WriteLine("betaVectorlengh=" + betaVector.Length);
 
             double[,] defaultDistribution = GetDefaultDistributionLossUnit(numberOfIssuer, defaultProbability, lossUnitIssuer, 
                 cumulLossUnitIssuer, betaVector, maxNumLossUnitToReachStrikes, null, null, withGreeks, dBeta);
