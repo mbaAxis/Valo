@@ -1094,9 +1094,17 @@ namespace ValoLibrary
                 }
             }
 
+            for (i = 0; i <= 2; i++)
+            {
+                x[i, 1] = Double.Parse(x[i, 0]) / TrancheWidth + "";
+            }
+            for (i = 3; i <= 4; i++)
+            {
+                x[i, 1] = x[i, 0];
+            }
             // Computation time
             x[5, 0] = (DateTime.Now - StartTime) + "";
-
+            x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
             return x;
         }
     }
