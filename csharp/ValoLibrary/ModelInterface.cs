@@ -1094,7 +1094,7 @@ namespace ValoLibrary
                 }
             }
 
-            for (i = 0; i <= 2; i++)
+            for (i = 0; i <= 2; i++)//MODIF AJOUT
             {
                 x[i, 1] = Double.Parse(x[i, 0]) / TrancheWidth + "";
             }
