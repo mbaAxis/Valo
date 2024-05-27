@@ -67,7 +67,7 @@ namespace ValoLibrary
        double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1);
 
-        string[,] GetCDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+        string[,] GetCDO(string maturity, double[] strikes, double[] correl,double[] spreadStandard, string pricingCurrency,
         int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
         string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
         double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -242,7 +242,7 @@ namespace ValoLibrary
 
         }
 
-        public string[,] GetCDO(string maturity, double[] strikes, double[] correl, string pricingCurrency,
+        public string[,] GetCDO(string maturity, double[] strikes, double[] correl,double[] spreadStandard, string pricingCurrency,
    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -250,7 +250,7 @@ namespace ValoLibrary
    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             lossUnitAmount=null;
-            return ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
+            return ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
         }
