@@ -212,7 +212,7 @@ Console.WriteLine("===================Test Stripping CDS====================");
 
 
 string curveName = "EUR";
-DateTime paramDate = new(2024, 05, 17);
+DateTime paramDate = new(2024, 05, 27);
 double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
 string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
 int swapPeriod = 12;
@@ -508,7 +508,7 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 
 
 
-DateTime parameterDate = new DateTime(2024, 5, 17);
+DateTime parameterDate = new DateTime(2024, 5, 27);
 DateTime cdsRollDate = new DateTime(2024, 6, 20);
 int[] issuer = { 1, 2, 3 };
 string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
@@ -546,19 +546,18 @@ double dBeta = 0.01;
 //double[] test = StrippingCDS.StripDefaultProbability(1, issuerList[0], parameterDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4,false,"Curve points");
 double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], parameterDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
 //double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], parameterDate, cdsRollDate, c3, CurveMaturity, pricingCurrency, 0.4, false, intensity);
-int u = StrippingIRS.GetCurveId(pricingCurrency);
-Console.WriteLine(u);
-Console.WriteLine(StrippingCDS.GetCDSCurveId(issuerList[0]));
-
-string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, 2, issuerList, nominalIssuer,
-    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-    isAmericanFixedLeg, withGreeks, hedgingCDS, null, integrationPeriod, 1, dBeta);
-for (int i = 0;i< cdot.GetLength(0); i++)
-{
-    for (int j = 0; j < cdot.GetLength(1); j++)
-    {
-        Console.Write(cdot[i,j]+" | ");
-    }
-    Console.WriteLine(" ");
-}
-Console.WriteLine("FIN");
+//string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, pricingCurrency, 2, issuerList, nominalIssuer,
+//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+//    isAmericanFixedLeg, withGreeks, hedgingCDS, null, integrationPeriod, 1, dBeta);
+//for (int i = 0;i< cdot.GetLength(0); i++)
+//{
+//    for (int j = 0; j < cdot.GetLength(1); j++)
+//    {
+//        Console.Write(cdot[i,j]+" | ");
+//    }
+//    Console.WriteLine(" ");
+//}
+//Console.WriteLine("FIN");
+double defautprob;
+defautprob = StrippingCDS.GetDefaultProb(1,"120m") ;
+Console.WriteLine(defautprob);

@@ -340,7 +340,7 @@ namespace ValoLibrary
             int cdsRollDateDay = cdsRollDate.Day;
 
 
-            for (int i = zcCdsDateOffset; i < months; i++)
+            for (int i = zcCdsDateOffset; i <= months; i++)//MODIF, original : i<months
             {
                 DateTime zcDate = DateAndTime.DateSerial(cdsRollDateYear, cdsRollDateMonth + i, cdsRollDateDay);
                 

@@ -227,7 +227,7 @@ namespace ValoLibrary
 
             CreditDefaultSwapCurves.Curves[CurveID].MonthlyDPandShocked = new double[121 - CDSRollDateOffset, 2];
 
-            for (i = 0; i < 120 - CDSRollDateOffset; i++)
+            for (i = 0; i <= 120 - CDSRollDateOffset; i++)
             {
                 for (Scenario = 0; Scenario <= 1; Scenario++)
                 {
