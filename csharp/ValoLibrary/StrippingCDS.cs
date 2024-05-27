@@ -802,7 +802,8 @@ namespace ValoLibrary
 
                             if (Scenario == 1)
                             {
-                                double dSpread = UtilityLittleFunctions.MaxOf(SpreadShock * CDSSpread, MinSpreadShock);
+                                //double dSpread = UtilityLittleFunctions.MaxOf(SpreadShock * CDSSpread, MinSpreadShock);//MODIF ICHAK, on veut juste shift de 1 bp, on s'en fout du 5% désormais
+                                double dSpread = MinSpreadShock;
                                 CDSSpread += dSpread;
                                 if (UtilityDates.ConvertDate(CDSRollDate, NextCalcMonth + "M") <= ParamDate)
                                 {
@@ -886,7 +887,8 @@ namespace ValoLibrary
                             if (Scenario == 1)
                             {
 
-                                double dSpread = UtilityLittleFunctions.MaxOf(SpreadShock * CDSSpread, MinSpreadShock);
+                                //double dSpread = UtilityLittleFunctions.MaxOf(SpreadShock * CDSSpread, MinSpreadShock);//MODIF ICHAK
+                                double dSpread = MinSpreadShock;
                                 CDSSpread += dSpread;
                             }
 
