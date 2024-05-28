@@ -857,13 +857,6 @@ namespace ValoLibrary
                 }
             }
 
-            // add
-            // Store the NPV of the floated leg
-            if (!IsCDO)
-            {
-                x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));
-            }
-
 
             // -----------------------------------------------------------------------
             // FIXED LEG
@@ -996,10 +989,6 @@ namespace ValoLibrary
                 x[2,0]=""+(Double)nominalIssuer* Double.Parse(x[4, 0]) * TrancheWidth * Spread;
             }
 
-
-            // Store the NPV of the CDS/CDO (dirty, i.e. inclusive of next coupon)
-            x[0, 0] = "" + (Double.Parse(x[1, 0]) - Double.Parse(x[2, 0]));
-
             double Leverage = 0;
             //object[] HedgingCDS = null;
             if (withGreeks)
@@ -1101,7 +1090,15 @@ namespace ValoLibrary
                     x[5, 3] = "" + Leverage;
                 }
             }
+            // add
+            // Store the NPV of the floated leg
+            if (!IsCDO)
+            {
+                x[1, 0] = "" + (Double)nominalIssuer * (Double.Parse(x[1, 0]));
+            }
 
+            // Store the NPV of the CDS/CDO (dirty, i.e. inclusive of next coupon)
+            x[0, 0] = "" + (Double.Parse(x[1, 0]) - Double.Parse(x[2, 0]));
             for (i = 0; i <= 2; i++)//MODIF AJOUT
             {
                 x[i, 1] = Double.Parse(x[i, 0]) / TrancheWidth + "";
@@ -1113,6 +1110,8 @@ namespace ValoLibrary
             // Computation time
             x[5, 0] = (DateTime.Now - StartTime) + "";
             x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
+
+
             return x;
         }
     }
