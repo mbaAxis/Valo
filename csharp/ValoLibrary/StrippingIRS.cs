@@ -234,7 +234,7 @@ namespace ValoLibrary
                     months =(int) UtilityDates.MonthPeriod(curveDates[i]);
                 }
                 InterestRateCurves.Curves[curveId].SwapRates[i] = swapRates[i];
-                InterestRateCurves.Curves[curveId].StrippedZC[i] = strippedZC[i+1];//MODIF ORIGINAL InterestRateCurves.Curves[curveId].StrippedZC[i] = strippedZC[i];
+                InterestRateCurves.Curves[curveId].StrippedZC[i] = strippedZC[i+1];
             }
             Array.Resize(ref InterestRateCurves.Curves[curveId].MonthlyZC, months + 1);
 
@@ -340,7 +340,7 @@ namespace ValoLibrary
             int cdsRollDateDay = cdsRollDate.Day;
 
 
-            for (int i = zcCdsDateOffset; i <= months; i++)//MODIF, original : i<months
+            for (int i = zcCdsDateOffset; i <= months; i++)
             {
                 DateTime zcDate = DateAndTime.DateSerial(cdsRollDateYear, cdsRollDateMonth + i, cdsRollDateDay);
                 

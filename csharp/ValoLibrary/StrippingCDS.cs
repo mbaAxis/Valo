@@ -53,42 +53,6 @@ namespace ValoLibrary
         private static double[,] FullDefaultProb;
 
 
-        //public static int GetCurveId(object curveName)
-        //{
-        //    if (Utils.IsNumeric(curveName))
-        //    {
-        //        int curveId = Convert.ToInt32(curveName);
-        //        if (curveId >= 1 && curveId <= InterestRateCurves.NumberOfCurves)
-        //        {
-        //            InterestRateCurves.LastError = false;
-        //            return curveId;
-        //        }
-        //        else
-        //        {
-        //            return -1;
-        //        }
-        //    }
-
-        //    if (InterestRateCurves.Curves != null && InterestRateCurves.Curves.Length > InterestRateCurves.NumberOfCurves)
-        //    {
-        //        InterestRateCurves.NumberOfCurves = InterestRateCurves.Curves.Length;
-        //    }
-
-        //    for (int i = 1; i <= InterestRateCurves.NumberOfCurves; i++)
-        //    {
-        //        if (InterestRateCurves.Curves != null && i < InterestRateCurves.Curves.Length)
-        //        {
-        //            if (string.Equals(InterestRateCurves.Curves[i].CurveName, curveName.ToString(), StringComparison.OrdinalIgnoreCase))
-        //            {
-        //                InterestRateCurves.LastError = false;
-        //                return i;
-        //            }
-        //        }
-        //    }
-
-        //    return -1;
-        //}
-
 
         public static int GetCDSCurveId(string CDSName)
         {
@@ -124,36 +88,6 @@ namespace ValoLibrary
             }
             return -1;
         }
-        //public static int GetCDSCurveId(string CDSName)
-        //{
-
-            
-        //    if (LastCDSCurveID >= 1 && LastCDSCurveID <= CreditDefaultSwapCurves.NumberOfCurves)
-        //    {
-        //        // Testez si CDSName est égal à la dernière recherche
-        //        if (string.Equals(CreditDefaultSwapCurves.Curves[LastCDSCurveID - 1].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
-        //        {
-        //            CreditDefaultSwapCurves.LastError = false;
-        //            return LastCDSCurveID;
-        //        }
-        //    }
-
-        //    if (CreditDefaultSwapCurves.Curves != null && CreditDefaultSwapCurves.Curves.Length > CreditDefaultSwapCurves.NumberOfCurves)
-        //    {
-        //        CreditDefaultSwapCurves.NumberOfCurves = CreditDefaultSwapCurves.Curves.Length;
-        //    }
-
-        //    for (int i = 0; i < CreditDefaultSwapCurves.NumberOfCurves; i++)
-        //    {
-        //        if (string.Equals(CreditDefaultSwapCurves.Curves[i].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
-        //        {
-        //            LastCDSCurveID = i+1;
-        //            CreditDefaultSwapCurves.LastError = false;
-        //            return LastCDSCurveID;
-        //        }
-        //    }
-        //    return -1;
-        //}
 
         public static bool StoreDP(DateTime paramDate, int cdsID, string CDSName,
             double RecoveryRate, string Currency, string[] CurveDates,
@@ -227,7 +161,7 @@ namespace ValoLibrary
 
             CreditDefaultSwapCurves.Curves[CurveID].MonthlyDPandShocked = new double[121 - CDSRollDateOffset, 2];
 
-            for (i = 0; i <= 120 - CDSRollDateOffset; i++)//MODIF, original i<120
+            for (i = 0; i <= 120 - CDSRollDateOffset; i++)
             {
                 for (Scenario = 0; Scenario <= 1; Scenario++)
                 {
@@ -308,8 +242,7 @@ namespace ValoLibrary
 
                 prob = defaultProb[dateCounter - offset, scenario]; // offset update
 
-                //if (prob != 0) //  && !double.IsNaN(prob)
-                if(prob!=null && !double.IsNaN(prob))//MODIF, original au dessus
+                if(prob!=null && !double.IsNaN(prob))
                 {
                     nextProbNoDef = 1.0 - prob;
 
@@ -802,13 +735,10 @@ namespace ValoLibrary
 
                             if (Scenario == 1)
                             {
-                                //double dSpread = UtilityLittleFunctions.MaxOf(SpreadShock * CDSSpread, MinSpreadShock);//MODIF ICHAK, on veut juste shift de 1 bp, on s'en fout du 5% désormais
                                 double dSpread = MinSpreadShock;
                                 CDSSpread += dSpread;
                                 if (UtilityDates.ConvertDate(CDSRollDate, NextCalcMonth + "M") <= ParamDate)
                                 {
-                                    // ok deja
-                                    //NextRiskyZC = RiskyZC[NextCalcMonth, 0];
                                     NextRiskyZC = RiskyZC[NextCalcMonth - zcCdsDateOffset, 0];
                                 }
                                 else
@@ -818,8 +748,6 @@ namespace ValoLibrary
                             }
                             else
                             {
-                                // ok deja
-                                //NextRiskyZC = RiskyZC[PreviousCalcMonth, 0] / (double) (ZC[PreviousCalcMonth] * ZC[NextCalcMonth]);
                                 NextRiskyZC = RiskyZC[PreviousCalcMonth - zcCdsDateOffset, 0] / (double)ZC[PreviousCalcMonth - zcCdsDateOffset] * ZC[NextCalcMonth - zcCdsDateOffset];
                             }
 
@@ -829,7 +757,6 @@ namespace ValoLibrary
                             double CDS_PV;
                             do
                             {
-                                //RiskyZC[NextCalcMonth, Scenario] = NextRiskyZC;
                                 RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] = NextRiskyZC;
                                 CDS_PV = GetCDS_PV(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, zcCdsDateOffset);
                                 k += 1;
@@ -838,7 +765,6 @@ namespace ValoLibrary
                                     break;
                                 }
                                
-                                //RiskyZC[NextCalcMonth, Scenario] = NextRiskyZC + dRiskyZC;
                                 RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] = NextRiskyZC + dRiskyZC;
                                 dPV_dRiskyZC = (GetCDS_PV(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, zcCdsDateOffset) - CDS_PV) / (double) dRiskyZC;
                                
@@ -867,7 +793,6 @@ namespace ValoLibrary
                             RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] = NextRiskyZC; 
                             CDS_PV = GetCDS_PV(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, zcCdsDateOffset);
 
-                            //if (NextRiskyZC > (RiskyZC[PreviousCalcMonth, Scenario] / (double) (ZC[PreviousCalcMonth + 1] * ZC[NextCalcMonth + 1])))
                             if (NextRiskyZC > (RiskyZC[PreviousCalcMonth- zcCdsDateOffset, Scenario] / (double) (ZC[PreviousCalcMonth + 1- zcCdsDateOffset] * ZC[NextCalcMonth - zcCdsDateOffset + 1])))
                             {
                                 if (alterMode == true)
@@ -886,8 +811,6 @@ namespace ValoLibrary
                         {
                             if (Scenario == 1)
                             {
-
-                                //double dSpread = UtilityLittleFunctions.MaxOf(SpreadShock * CDSSpread, MinSpreadShock);//MODIF ICHAK
                                 double dSpread = MinSpreadShock;
                                 CDSSpread += dSpread;
                             }
@@ -916,7 +839,6 @@ namespace ValoLibrary
 
                             CDS_PV = GetCDS_PV_3m(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, PreviousDefaultIntensity, ShiftDefaultIntensity, zcCdsDateOffset);
 
-                            //if (FullDefaultProb[NextCalcMonth- zcCdsDateOffset, Scenario] < FullDefaultProb[NextCalcMonth - 1, Scenario]) 
                             if (FullDefaultProb[NextCalcMonth- zcCdsDateOffset, Scenario] < FullDefaultProb[NextCalcMonth - zcCdsDateOffset - 1, Scenario]) 
                             {
                                 if (alterMode == true)

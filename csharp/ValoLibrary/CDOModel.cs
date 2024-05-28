@@ -548,7 +548,7 @@ namespace ValoLibrary
             double[,] defaultDistribKnowingFactor;
             double[] defaultDistrib;
             double[] defaultThreshold = new double[numberOfIssuer];
-            double[] defaultProbKnowingFactor = new double[numberOfIssuer+1];//MODIF original new double[numberOfIssuer];
+            double[] defaultProbKnowingFactor = new double[numberOfIssuer+1];
             double[] dp_dProb = new double[numberOfIssuer];
             double[] dp_dBeta = new double[numberOfIssuer];
             double[] dDefaultThreshold = new double[numberOfIssuer];
@@ -610,7 +610,7 @@ namespace ValoLibrary
                 {
                     for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
                     {
-                        if (defaultProbability[issuerCounter] * ShockMultiplier >= 1.0)//MODIF, original pas de shockmultiplier ?
+                        if (defaultProbability[issuerCounter] * ShockMultiplier >= 1.0)
                         {
                             Console.WriteLine($"Can't shock default probability of issuer # {issuerCounter + 1}!");
                             Console.WriteLine("Delta will be wrong");
@@ -624,7 +624,7 @@ namespace ValoLibrary
                             }
                             else
                             {
-                                dDefaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, defaultProbability[issuerCounter] *ShockMultiplier);//MODIF, original pas de shockmultiplier ?
+                                dDefaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, defaultProbability[issuerCounter] *ShockMultiplier);
                             }
                         }
                     }
@@ -706,7 +706,7 @@ namespace ValoLibrary
                     for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
                     {
                         double beta = betaVector[issuerCounter];
-                        defaultProbKnowingFactor[issuerCounter+1] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta));//MODIF original defaultProbKnowingFactor[issuerCounter]
+                        defaultProbKnowingFactor[issuerCounter+1] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta));
                     }
 
                     if (withGreeks)
@@ -714,9 +714,9 @@ namespace ValoLibrary
                         for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
                         {
                             double beta = betaVector[issuerCounter];
-                            dp_dProb[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((dDefaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter+1];//Modif IDEM
+                            dp_dProb[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((dDefaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter+1];
                             beta += dBeta;
-                            dp_dBeta[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter+1];// Modif IDEM
+                            dp_dBeta[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter+1];
                         }
                     }
 
@@ -999,23 +999,23 @@ namespace ValoLibrary
             {
                 for (int j = 1; j <= strikes.Length; j++)
                 {
-                    res[0, j] = 0.0;//MODIF original : res[1, j] = 0.0;
+                    res[0, j] = 0.0;
                 }
 
                 for (int i = 1; i <= numberOfIssuer * 2; i++)
                 {
                     if (i <= numberOfIssuer)
                     {
-                        res[i, 0] = "dpv prob " + i;//MODIF original : res[i,0]
+                        res[i, 0] = "dpv prob " + i;
                     }
                     else
                     {
-                        res[i, 0] = "dpv beta " + (i - numberOfIssuer);//MODIF original : res[i,0]
+                        res[i, 0] = "dpv beta " + (i - numberOfIssuer);
                     }
 
                     for (int j = 1; j <= strikes.Length; j++)
                     {
-                        res[i , j] = 0.0; //MODIF original : res[i,0]
+                        res[i , j] = 0.0;
 
                     }
                 }
@@ -1113,12 +1113,12 @@ namespace ValoLibrary
                     for (int i = 0; i < numberOfIssuer; i++)
                     {
                         calcPV = 0.0;
-                        residualProb = 0.0 - defaultDistribution[0, i+1];//MODIF, original : defaultDistribution[0, i]
+                        residualProb = 0.0 - defaultDistribution[0, i+1];
 
                         for (int lossUnitCounter = 1; lossUnitCounter <= maxNumLossUnitToReachStrikes; lossUnitCounter++)
                         {
-                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i+1];//MODIF, original : defaultDistribution[lossUnitCounter, i]
-                            residualProb -= defaultDistribution[lossUnitCounter, i+1];//MODIF, IDEM
+                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i+1];
+                            residualProb -= defaultDistribution[lossUnitCounter, i+1];
                         }
 
                         calcPV += UtilityLittleFunctions.MinOf(strike, sumLossUnit) * residualProb;
@@ -1133,11 +1133,11 @@ namespace ValoLibrary
                         }
 
                         calcPV = 0.0;
-                        residualProb = 0.0 - defaultDistribution[0, i + numberOfIssuer+1];//MODIF, original : defaultDistribution[0, i + numberOfIssuer]
+                        residualProb = 0.0 - defaultDistribution[0, i + numberOfIssuer+1];
                         for (int lossUnitCounter = 1; lossUnitCounter <= maxNumLossUnitToReachStrikes; lossUnitCounter++)
                         {
-                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i + numberOfIssuer+1];//IDEM
-                            residualProb -= defaultDistribution[lossUnitCounter, i + numberOfIssuer+1];//IDEM
+                            calcPV += lossUnitCounter * defaultDistribution[lossUnitCounter, i + numberOfIssuer+1];
+                            residualProb -= defaultDistribution[lossUnitCounter, i + numberOfIssuer+1];
                         }
 
                         calcPV += UtilityLittleFunctions.MinOf(strike, sumLossUnit) * residualProb;
