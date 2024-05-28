@@ -212,7 +212,7 @@ Console.WriteLine("===================Test Stripping CDS====================");
 
 
 string curveName = "EUR";
-DateTime paramDate = new(2024, 05, 27);
+DateTime paramDate = new(2024, 05, 28);
 double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
 string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
 int swapPeriod = 12;
@@ -224,6 +224,7 @@ string CDSName = "ABNAMRO_MMR.EUR.SU";
 //DateTime ParamDate = new(2024, 03, 03);
 DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
 double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
+//double[] CDSCurve = { 0, 1.0, 1.0, 1.0, 1.0,0, 1.0, 1.0, 1.0 };
 //bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
 
 //Console.WriteLine("id vbaMontlyZC = " + vbaMontlyZC);

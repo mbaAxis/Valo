@@ -110,26 +110,20 @@ namespace ValoLibrary
             DateTime lastDate = paramDate;
 
             int j;
-            // en commentaire le decalage
-            //for (j = 0; j < ZC.Length-1; j = j + 1)
             for (j = 0; j < ZC.Length; j += 1)
             {
                 int dateCounter = j;
-                //if (ZCDate[dateCounter] != "" && ZCDate[dateCounter] != null && ZC[dateCounter+1] != 0)
                 if (ZCDate[dateCounter] != "" && ZCDate[dateCounter] != null && ZC[dateCounter] != 0)
                 {
                     DateTime nextDate = UtilityDates.ConvertDate(paramDate, ZCDate[dateCounter]);
                     if (nextDate >= maturityDateX)
                     {
                         return lastZC * Math.Pow((ZC[dateCounter] / (double)lastZC), (maturityDateX - lastDate).Days / (double)(nextDate - lastDate).Days);
-
-                        //return lastZC * Math.Pow((ZC[dateCounter+1] / (double) lastZC), (maturityDateX - lastDate).Days / (double) (nextDate - lastDate).Days);
                     }
                     else
                     {
                         lastZC = ZC[dateCounter];
 
-                        //lastZC = ZC[dateCounter+1];
                         lastDate = nextDate;
                     }
                 }

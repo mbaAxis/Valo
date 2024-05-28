@@ -346,6 +346,8 @@ namespace ValoLibrary
             }
             else
             {
+                double testvar;
+                testvar= (double)(NextDate - InitialDate).Days;
                 DailyProbNoDefIncrease = Math.Pow( (ProbNoDefaultNextMonth / (double) ProbNoDefaultPreviousMonth), 1.0 / (double) (NextDate - InitialDate).Days);
             }
 
@@ -703,7 +705,6 @@ namespace ValoLibrary
             {
                  Console.WriteLine("Not possible to calibrate risky ZC on curve with maturity beyond 10Y - Called from");
             }
-
             for (CurvePointCounter = 0; CurvePointCounter < CDSCurvePointNumber; CurvePointCounter++)
             {
                 CDSSpread = CDSCurve[CurvePointCounter];
