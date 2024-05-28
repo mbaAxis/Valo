@@ -265,71 +265,71 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 
 
 
-Console.WriteLine("=================== Start Model Interface ====================");
+//Console.WriteLine("=================== Start Model Interface ====================");
 
-string issuerId = "ABNAMRO_MMR.EUR.SU";
-string maturity = "5Y";
-double spread = 0.01;
-double recoveryRate = 0.4;
-double notional = 10.0;
-string pricingCurrency = "EUR";
-double fxCorrel = 0.0;
-double fxVol = 0.0;
+//string issuerId = "ABNAMRO_MMR.EUR.SU";
+//string maturity = "5Y";
+//double spread = 0.01;
+//double recoveryRate = 0.4;
+//double notional = 10.0;
+//string pricingCurrency = "EUR";
+//double fxCorrel = 0.0;
+//double fxVol = 0.0;
 
-string cpnPeriod = "3M";
-string cpnConvention = "LongFirst";
-string cpnLastSettle = "";
+//string cpnPeriod = "3M";
+//string cpnConvention = "LongFirst";
+//string cpnLastSettle = "";
 
-double isAmericanFloatLeg = 1; // 1 = true;
-double isAmericanFixedLeg = 1; // 1 = true;
-double withGreeks = 1; // 1 = true;
+//double isAmericanFloatLeg = 1; // 1 = true;
+//double isAmericanFixedLeg = 1; // 1 = true;
+//double withGreeks = 1; // 1 = true;
 
-string integrationPeriod = "1m";
-double probMultiplier = 1;
+//string integrationPeriod = "1m";
+//double probMultiplier = 1;
 
-double[] hedgingCds = { 0, 1, 1 }; // 1 = true
+//double[] hedgingCds = { 0, 1, 1 }; // 1 = true
 
 
-String[,] result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate, notional, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
- fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, integrationPeriod, probMultiplier);
+//String[,] result3 = ModelInterface.CDS(issuerId, maturity, spread, recoveryRate, notional, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
+// fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, hedgingCds, integrationPeriod, probMultiplier);
 
-// Affichage du résultat
-if (result3 != null)
-{
-    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
-    int rows = result3.GetLength(0);
-    int columns = result3.GetLength(1);
+//// Affichage du résultat
+//if (result3 != null)
+//{
+//    Console.WriteLine("Résultat de la fonction StripDefaultProbability : ");
+//    int rows = result3.GetLength(0);
+//    int columns = result3.GetLength(1);
 
-    for (int i = 0; i < rows; i++)
-    {
-        Console.Write($"{i} | \t\t");
+//    for (int i = 0; i < rows; i++)
+//    {
+//        Console.Write($"{i} | \t\t");
 
-        for (int j = 0; j < columns; j++)
-        {
-            if (j + 1 == columns)
-            {
-                Console.Write($"{result3[i, j]}\t");
-            }
-            else
-            {
-                if (i == rows - 2)
-                {
-                    Console.Write($"{result3[i, j]}\t\t\t -> \t");
-                }
-                else
-                {
-                    Console.Write($"{result3[i, j]}\t -> \t");
-                }
-            }
+//        for (int j = 0; j < columns; j++)
+//        {
+//            if (j + 1 == columns)
+//            {
+//                Console.Write($"{result3[i, j]}\t");
+//            }
+//            else
+//            {
+//                if (i == rows - 2)
+//                {
+//                    Console.Write($"{result3[i, j]}\t\t\t -> \t");
+//                }
+//                else
+//                {
+//                    Console.Write($"{result3[i, j]}\t -> \t");
+//                }
+//            }
 
-        }
-        Console.WriteLine("\n______________________________________________________________________________________________________________________________________________");
-    }
-}
-else
-{
-    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
-}
+//        }
+//        Console.WriteLine("\n______________________________________________________________________________________________________________________________________________");
+//    }
+//}
+//else
+//{
+//    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
+//}
 
 //Console.WriteLine("=================== End Model Interface ====================");
 
@@ -508,53 +508,53 @@ else
 
 
 
-//DateTime parameterDate = new DateTime(2024, 5, 27);
-//DateTime cdsRollDate = new DateTime(2024, 6, 20);
-//int[] issuer = { 1, 2, 3 };
-//string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
-//double[] c1 = { 0.0, 0.00133, 0.0020, 0.0026, 0.00316, 0.0, 0.004, 0.0044, 0.0048 };
-//double[] c2 = { 0.0, 0.0008, 0.0011, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
-//double[] c3 = { 0.0, 0.0006, 0.0010, 0.0018, 0.0027, 0.0, 0.0040, 0.0051, 0.0062 };
+DateTime parameterDate = new DateTime(2024, 5, 27);
+DateTime cdsRollDate = new DateTime(2024, 6, 20);
+int[] issuer = { 1, 2, 3 };
+string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+double[] c1 = { 0.0, 0.00133, 0.0020, 0.0026, 0.00316, 0.0, 0.004, 0.0044, 0.0048 };
+double[] c2 = { 0.0, 0.0008, 0.0011, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
+double[] c3 = { 0.0, 0.0006, 0.0010, 0.0018, 0.0027, 0.0, 0.0040, 0.0051, 0.0062 };
 
-//string maturity = "5Y";
-//double[] strikes = { 0.0, 3.0 };
-//double[] correl = { 0.4, 0.5 };
-//string pricingCurrency = "EUR";
-//int numberOfIssuer = 3;
-////string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU", "Adecco_MMR.EUR.SU" };
-//string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU" };
-////double[] nominalIssuer = { 1.0, 1.0, 1.0 };
-//double[] nominalIssuer = { 1.0, 1.0 };
-//double spread = 0.05;
-//string cpnPeriod = "3m";
-//string cpnConvention = "LongFirst";
-//string cpnLastSettle = "";
-//double fxCorrel = -0.05;
-//double fxVol = 0.1;
-////double[] betaAdder = { 0.0, 0.0, 0.0 };
-//double[] betaAdder = { 0.0, 0.0 };
-////double[] recoveryIssuer = { 0.4, 0.4, 0.4 };
-//double[] recoveryIssuer = { 0.4, 0.4 };
-//double isAmericanFloatLeg = -1;
-//double isAmericanFixedLeg = -1;
-//double withGreeks = -1;
-//double[] hedgingCDS = { 0.0, -1.0, -1.0 };
-////double lossUnitAmount = null;
-//string integrationPeriod = "1m";
-//double dBeta = 0.01;
-//double[] spreadStandard = { 100, 100 };
-////double[] test = StrippingCDS.StripDefaultProbability(1, issuerList[0], parameterDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4,false,"Curve points");
-//double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], parameterDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
+string maturity = "5Y";
+double[] strikes = { 0.0, 3.0 };
+double[] correl = { 0.4, 0.5 };
+string pricingCurrency = "EUR";
+int numberOfIssuer = 3;
+//string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU", "Adecco_MMR.EUR.SU" };
+string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU" };
+//double[] nominalIssuer = { 1.0, 1.0, 1.0 };
+double[] nominalIssuer = { 1.0, 1.0 };
+double spread = 0.05;
+string cpnPeriod = "3m";
+string cpnConvention = "LongFirst";
+string cpnLastSettle = "";
+double fxCorrel = -0.05;
+double fxVol = 0.1;
+//double[] betaAdder = { 0.0, 0.0, 0.0 };
+double[] betaAdder = { 0.0, 0.0 };
+//double[] recoveryIssuer = { 0.4, 0.4, 0.4 };
+double[] recoveryIssuer = { 0.4, 0.4 };
+double isAmericanFloatLeg = -1;
+double isAmericanFixedLeg = -1;
+double withGreeks = -1;
+double[] hedgingCDS = { 0.0, -1.0, -1.0 };
+//double lossUnitAmount = null;
+string integrationPeriod = "1m";
+double dBeta = 0.01;
+double[] spreadStandard = { 100, 100 };
+//double[] test = StrippingCDS.StripDefaultProbability(1, issuerList[0], parameterDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4,false,"Curve points");
+double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], parameterDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
 //double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], parameterDate, cdsRollDate, c3, CurveMaturity, pricingCurrency, 0.4, false, intensity);
-//string[,] cdot = ModelInterface.CDO(maturity, strikes, correl,spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
-//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-//    isAmericanFixedLeg, withGreeks, hedgingCDS, null, integrationPeriod, 1, dBeta);
-//for (int i = 0; i < cdot.GetLength(0); i++)
-//{
-//    for (int j = 0; j < cdot.GetLength(1); j++)
-//    {
-//        Console.Write(cdot[i, j] + " | ");
-//    }
-//    Console.WriteLine(" ");
-//}
-//Console.WriteLine("FIN");
+string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+    isAmericanFixedLeg, withGreeks, hedgingCDS, null, integrationPeriod, 1, dBeta);
+for (int i = 0; i < cdot.GetLength(0); i++)
+{
+    for (int j = 0; j < cdot.GetLength(1); j++)
+    {
+        Console.Write(cdot[i, j] + " | ");
+    }
+    Console.WriteLine(" ");
+}
+Console.WriteLine("FIN");
