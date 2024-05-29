@@ -409,6 +409,15 @@ namespace ValoLibrary
                     PreviousDate = NextDate;
                     CurrentProbNoDefault = NextProbNoDefault;
                     FullDefaultProb[j - zcCdsDateOffset, Scenario] = 1 - NextProbNoDefault;
+                    if (Double.IsInfinity(NextProbNoDefault))//MODIF ICHAK JTD
+                    {
+                        FullDefaultProb[j - zcCdsDateOffset, Scenario] = 1;
+                    }
+                    else
+                    {
+                        FullDefaultProb[j - zcCdsDateOffset, Scenario] = 1 - NextProbNoDefault;
+                    }
+
                 }
 
 
@@ -761,7 +770,7 @@ namespace ValoLibrary
                                 RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] = NextRiskyZC;
                                 CDS_PV = GetCDS_PV(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, zcCdsDateOffset);
                                 k += 1;
-                                if (CDS_PV == 0)
+                                if (CDS_PV == 0||Double.IsNaN(CDS_PV))//MODIF Ichak, jump to default
                                 {
                                     break;
                                 }
@@ -865,11 +874,15 @@ namespace ValoLibrary
                     CDSSpread = CDSCurve[CurvePointCounter];
                     if (CDSSpread != 0)
                     {
-
-                       
                         NextCalcMonth = (int)UtilityDates.MonthPeriod(CurveMaturity[CurvePointCounter], CDSRollDate);
-                                           
-                        Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 1.0 - RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] / (double) ZC[NextCalcMonth - zcCdsDateOffset];
+                        if(Double.IsNaN(RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario])||Double.IsInfinity(RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario]))//MODIF JUMP TO DEFAULT ichak
+                        {
+                            Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 1.0;
+                        }
+                        else
+                        {
+                            Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 1.0 - RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] / (double)ZC[NextCalcMonth - zcCdsDateOffset];
+                        }
                     }
                     else
                     {

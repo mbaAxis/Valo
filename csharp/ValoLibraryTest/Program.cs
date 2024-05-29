@@ -223,8 +223,9 @@ int cdsID = 1;
 string CDSName = "ABNAMRO_MMR.EUR.SU";
 //DateTime ParamDate = new(2024, 03, 03);
 DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
-double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
-//double[] CDSCurve = { 0, 1.0, 1.0, 1.0, 1.0,0, 1.0, 1.0, 1.0 };
+//double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
+double[] CDSCurve = { 0, 1.0, 1.0, 1.0, 1.0,0, 1.0, 1.0, 1.0 };
+//double[] CDSCurve = { 0, 0.8, 0.8, 0.8, 0.8, 0, 0.8, 0.8, 0.8 };
 //bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
 
 //Console.WriteLine("id vbaMontlyZC = " + vbaMontlyZC);
@@ -239,7 +240,6 @@ string intensity = "Curvepoint";//"3M"; // Vous pouvez ajuster cette valeur en f
 
 // Appel de la fonction à tester
 double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, paramDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
-
 
 // Vérification du résultat
 if (result != null)
@@ -272,7 +272,7 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 //string maturity = "5Y";
 //double spread = 0.01;
 //double recoveryRate = 0.4;
-//double notional = 10.0;
+//double notional = 1.0;
 //string pricingCurrency = "EUR";
 //double fxCorrel = 0.0;
 //double fxVol = 0.0;

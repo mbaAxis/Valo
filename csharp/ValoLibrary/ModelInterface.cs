@@ -465,7 +465,6 @@ namespace ValoLibrary
        double withGreeksVal, double[] HedgingCDS, double lossUnitAmount = 0.0, string integrationPeriod = "1m",
     DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1)
         {
-
             int i, j, k;
 
             double LossRate;

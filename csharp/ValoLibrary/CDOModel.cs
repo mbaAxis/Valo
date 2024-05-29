@@ -373,11 +373,21 @@ namespace ValoLibrary
                         for (int j = 0; j <= k; j++)
                         {
                             distrib[j, i] = distrib[j, 0] / omp;
+
+                            if(omp == 0)//MODIF ICHAK JTD TEST
+                            {
+                                distrib[j, i] = Math.Sign(distrib[j, 0]);
+                            }
                         }
 
                         for (int j = (int) lossUnitIssuer[i ]; j <= forcedMaxRequest; j++)
                         {
                             distrib[j, i] = (distrib[j, 0] - distrib[j - (int) lossUnitIssuer[i], i] * p) / omp;
+
+                            if (omp == 0)//MODIF ICHAK JTD TEST
+                            {
+                                distrib[j, i] = Math.Sign(distrib[j, 0] - distrib[j - (int)lossUnitIssuer[i], i] * p);
+                            }
 
                             if (distrib[j, i] < 0)
                             {
@@ -526,7 +536,7 @@ namespace ValoLibrary
                     }
                 }
             }
-
+            double s = 0;//MODIF COMPTEUR A ENLEVER
             for (int piece = 1; piece <= 2; piece++)
             {
                 int factorStartIndex;
@@ -594,7 +604,7 @@ namespace ValoLibrary
                     {
                         lossUnitIssuer_2[i] = lossUnitIssuer[i];
                     }
-
+                    s += 1;
                     defaultDistribKnowingFactor = RecursionLossUnit(numberOfIssuer, defaultProbKnowingFactor,
                         lossUnitIssuer_2, cumulLossUnitIssuer, maxRequest, withGreeks);
 
