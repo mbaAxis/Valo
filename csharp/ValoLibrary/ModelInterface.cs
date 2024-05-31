@@ -562,6 +562,13 @@ namespace ValoLibrary
                 x[6, 5] = "Name";
                 x[6, 6] = "Jump to Default";//MODIF JTD
                 x[5, 2] = "Leverage=";
+                for (i = 0; i <= 5; i++)
+                {
+                    for (j = 3; j <= 5; j++)
+                    {
+                        x[i, j] = 0 + "";
+                    }
+                }
             }
             else
             {
@@ -572,14 +579,15 @@ namespace ValoLibrary
                 x[6, 3] = "delta not. (Product CCY)";
                 x[6, 4] = "dPV(dBeta)";
                 x[6, 5] = "Name";
-            }
-            for (i = 0; i <= 5; i++)
-            {
-                for (j = 2; j <= 5; j++)
+                for (i = 0; i <= 5; i++)
                 {
-                    x[i, j] = 0 + "";
+                    for (j = 2; j <= 5; j++)
+                    {
+                        x[i, j] = 0 + "";
+                    }
                 }
             }
+
 
             //'
             //' Compute the series of European CDO
@@ -1026,8 +1034,8 @@ namespace ValoLibrary
                     }
                     StrippingCDS.StripDefaultProbability(i, StrippingCDS.CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
                     string[,] test = AmericanSwap(maturity, numberOfIssuer, IssuerID, nominalIssuer, recoveryIssuer, standardSpread, inputSpread, cpnLastSettle, cpnPeriod, cpnConvention, pricingCurrency, fxCorrel,
-                        fxVol, strikes, correl, betaAdder, isAmericanFloatLegVal, isAmericanFixedLegVal, withGreeksVal,0, HedgingCDS, lossUnitAmount, integrationPeriod, cpnSchedule, probMultiplier, dBeta);
-                    x[6 + i, 6] = test[0, 0];
+                        fxVol, strikes, correl, betaAdder, isAmericanFloatLegVal, isAmericanFixedLegVal, 0,0, HedgingCDS, lossUnitAmount, integrationPeriod, cpnSchedule, probMultiplier, dBeta);
+                    x[6 + i, 6] = double.Parse(x[0,0])- double.Parse(test[0, 0])+"";
                     StrippingCDS.StripDefaultProbability(i, StrippingCDS.CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, curve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
                 }
             }
