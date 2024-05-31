@@ -71,11 +71,10 @@ namespace ValoLibrary
         int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
         string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
         double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-        double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+        double withGreeks = 0,double withJtdVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
 
         double[] testFR(double[] a);
-        double[] GetCDOtest(string maturity, double[] strikes);
 
     }
 
@@ -88,11 +87,6 @@ namespace ValoLibrary
     [ClassInterface(ClassInterfaceType.None)]
     public class UDF : IUDF
     {
-        // test function 
-        public double[] GetCDOtest(string maturity, double[] strikes)
-        {
-            return ModelInterface.CDOtest(maturity, strikes);  
-        }
         public double[] testFR(double[] a)
         {
             return a;
@@ -246,13 +240,13 @@ namespace ValoLibrary
    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-   double withGreeks = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+   double withGreeks = 0, double withJtdVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             lossUnitAmount=null;
             return ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-    isAmericanFixedLeg, withGreeks, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
+    isAmericanFixedLeg, withGreeks,withJtdVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
         }
 
     }

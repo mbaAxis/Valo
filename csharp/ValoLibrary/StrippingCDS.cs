@@ -64,7 +64,7 @@ namespace ValoLibrary
                 if (string.Equals(CreditDefaultSwapCurves.Curves[LastCDSCurveID - 1].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
                 {
                     CreditDefaultSwapCurves.LastError = false;
-                    return LastCDSCurveID;
+                    return LastCDSCurveID-1;//MODIF JTD
                 }
             }
 
