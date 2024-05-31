@@ -223,8 +223,8 @@ int cdsID = 1;
 string CDSName = "ABNAMRO_MMR.EUR.SU";
 //DateTime ParamDate = new(2024, 03, 03);
 DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
-//double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
-double[] CDSCurve = { 0, 1.0, 1.0, 1.0, 1.0,0, 1.0, 1.0, 1.0 };
+double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
+//double[] CDSCurve = { 0, 1.0, 1.0, 1.0, 1.0,0, 1.0, 1.0, 1.0 };
 //double[] CDSCurve = { 0, 0.8, 0.8, 0.8, 0.8, 0, 0.8, 0.8, 0.8 };
 //bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
 

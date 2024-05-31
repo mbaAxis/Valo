@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Interop.Excel;
+﻿using Microsoft.Office.Core;
+using Microsoft.Office.Interop.Excel;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -673,13 +674,14 @@ namespace ValoLibrary
             }
             else
             {
-                x = new string[6 + numberOfIssuer + 1, 6];
+                x = new string[6 + numberOfIssuer + 1, 7];//MODIF JTD , 6 colonnes originalement
                 x[6, 0] = "dPV"; // dPV/dCDS_PV
                 x[6, 1] = "dHedge";
                 x[6, 2] = "delta not. (Hedge Crncy)";
                 x[6, 3] = "delta not. (Product CCY)";
                 x[6, 4] = "dPV(dBeta)";
                 x[6, 5] = "Name";
+                x[6, 6] = "Jump to Default";//MODIF JTD
                 for (i = 0; i <= 5; i++)
                 {
                     for (j = 2; j <= 5; j++)
@@ -1108,6 +1110,27 @@ namespace ValoLibrary
             x[5, 0] = (DateTime.Now - StartTime) + "";
             x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
 
+            double defaultSpread = 1.998;//MODIF JTD
+            double[] shockedCurve = new double[9];
+            if (IsCDO)
+            {
+                for (i = 1; i <= numberOfIssuer; i++)
+                {
+                    double[] curve = StrippingCDS.CreditDefaultSwapCurves.Curves[i].CDSSpread;
+
+                    for(j = 0;j< curve.Length;j++)
+                    {
+                        if (curve[j] != 0)
+                        {
+                            shockedCurve[j] = defaultSpread;
+                        }
+                        else
+                        {
+                            shockedCurve[j] = 0;
+                        }
+                    }
+                }
+            }
 
             return x;
         }
