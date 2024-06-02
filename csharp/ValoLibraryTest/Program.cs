@@ -214,11 +214,13 @@ Console.WriteLine("===================Test Stripping CDS====================");
 string curveName = "EUR";
 DateTime paramDate = new(2024, 05, 31);
 double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
+double[] values = { 0.0098, 0.0103, 0.0110, 0.0121, 0.0131, 0.0141, 0.0151, 0.0160, 0.0170, 0.0179, 0.0212, 0.0234 };
 string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
 int swapPeriod = 12;
-int swapBasis = 4;
+int swapBasis = 3;
 double fxSpot = 1;
 StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
+StrippingIRS.StripZC(paramDate, "JPY", values, curveMaturity, 6, 4, 165.5616);
 int cdsID = 1;
 string CDSName = "ABNAMRO_MMR.EUR.SU";
 //DateTime ParamDate = new(2024, 03, 03);
@@ -519,7 +521,7 @@ double[] c3 = { 0.0, 0.0006, 0.0010, 0.0018, 0.0027, 0.0, 0.0040, 0.0051, 0.0062
 string maturity = "5Y";
 double[] strikes = { 0.0, 3.0 };
 double[] correl = { 0.4, 0.5 };
-string pricingCurrency = "EUR";
+string pricingCurrency = "JPY";
 int numberOfIssuer = 3;
 //string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU", "Adecco_MMR.EUR.SU" };
 string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU" };

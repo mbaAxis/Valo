@@ -551,9 +551,9 @@ namespace ValoLibrary
             {
                 x = new string[6, 2];
             }
-            else if(IsCDO)
+            else if(IsCDO && withJTD)
             {
-                x = new string[6 + numberOfIssuer + 1, 7];//MODIF JTD , 6 colonnes originalement
+                x = new string[6 + numberOfIssuer + 1, 10];//MODIF JTD , 6 colonnes originalement
                 x[6, 0] = "dPV"; // dPV/dCDS_PV
                 x[6, 1] = "dHedge";
                 x[6, 2] = "delta not. (Hedge Crncy)";
@@ -561,6 +561,28 @@ namespace ValoLibrary
                 x[6, 4] = "dPV(dBeta)";
                 x[6, 5] = "Name";
                 x[6, 6] = "Jump to Default";//MODIF JTD
+                x[6, 7] = "dHedge JTD";
+                x[6, 8] = "delta not. (Hedge Crncy)";
+                x[6, 9] = "delta not. (Product CCY)";
+                x[5, 2] = "Leverage=";
+                x[5, 7] = "Leverage=";
+                for (i = 0; i <= 5; i++)
+                {
+                    for (j = 3; j <= 5; j++)
+                    {
+                        x[i, j] = 0 + "";
+                    }
+                }
+            }
+            else if (IsCDO)
+            {
+                x = new string[6 + numberOfIssuer + 1, 6];
+                x[6, 0] = "dPV"; // dPV/dCDS_PV
+                x[6, 1] = "dHedge";
+                x[6, 2] = "delta not. (Hedge Crncy)";
+                x[6, 3] = "delta not. (Product CCY)";
+                x[6, 4] = "dPV(dBeta)";
+                x[6, 5] = "Name";
                 x[5, 2] = "Leverage=";
                 for (i = 0; i <= 5; i++)
                 {
@@ -884,6 +906,9 @@ namespace ValoLibrary
 
             double Leverage = 0;
             //object[] HedgingCDS = null;
+            double val1=0;
+            double val2=0;
+            double val3=0;
             if (withGreeks)
             {
                 for (i = 1; i <= numberOfIssuer; i++)
@@ -911,7 +936,6 @@ namespace ValoLibrary
                         ThisCDS = CreditDefaultSwapCurves.Curves[j];
 
                         string[,] hedging_cds;
-                        double val1;
                         if (!IsCDO)
                         {
                             val1 = HedgingCDS[0];
@@ -920,8 +944,8 @@ namespace ValoLibrary
                         {
                             val1 = ((double[])standardSpread)[i - 1]/10000;
                         }
-                        double val2 = HedgingCDS[1];
-                        double val3 = HedgingCDS[2];
+                        val2 = HedgingCDS[1];
+                        val3 = HedgingCDS[2];
 
                         if (IsCDO)
                         {
@@ -941,8 +965,13 @@ namespace ValoLibrary
 
                         }
 
-
+                        //Npv of the CDS and the tranche before a default
                         x[6 + i, 1] = hedging_cds[7, 0];
+                        if (IsCDO && withGreeks&& withJTD)
+                        {
+                            x[6 + i, 7] = hedging_cds[0, 0];
+                        }
+
 
                         // Hedge in CD0 currency (delta CDO is in CDO currency unit) 
                         x[6 + i, 3] = "" + (Double.Parse(x[6 + i, 0]) / Double.Parse(hedging_cds[7, 0]));
@@ -1004,7 +1033,7 @@ namespace ValoLibrary
             x[5, 0] = (DateTime.Now - StartTime) + "";
             x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
 
-            if (IsCDO && withJTD)
+            if (IsCDO && withJTD && withGreeks)
             {
                 double defaultSpread = 1.998;//MODIF JTD
                 double[] shockedCurve = new double[9];
@@ -1012,7 +1041,9 @@ namespace ValoLibrary
                 string intensity = "Curvepoint";//MODIF JTD, temporaire
                 double[] curve;
                 string[] issuerList = new string[numberOfIssuer];
+                string[,] hedging_cds;
                 withJTD = false;
+                Leverage = 0;
                 for (i = 0; i < numberOfIssuer; i++)
                 {
                     issuerList[i] = StrippingCDS.CreditDefaultSwapCurves.Curves[i + 1].CDSName;
@@ -1032,12 +1063,25 @@ namespace ValoLibrary
                             shockedCurve[j] = 0;
                         }
                     }
-                    StrippingCDS.StripDefaultProbability(i, StrippingCDS.CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
-                    string[,] test = AmericanSwap(maturity, numberOfIssuer, IssuerID, nominalIssuer, recoveryIssuer, standardSpread, inputSpread, cpnLastSettle, cpnPeriod, cpnConvention, pricingCurrency, fxCorrel,
+                    StrippingCDS.StripDefaultProbability(i, CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, CreditDefaultSwapCurves.Curves[i].Currency, 0.4, false, intensity);
+                    hedging_cds = AmericanSwap(maturity, 1, i, 1.0, CreditDefaultSwapCurves.Curves[i].Recovery,
+                            0, val1, cpnLastSettle, cpnPeriod,
+                            cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, 0.0, 0.0, 0.0, 0.0,
+                           betaAdder, val2, val3, 0, 0, null, lossUnitAmount,
+                            integrationPeriod, schedule, probMultiplier);
+                    string[,] test = AmericanSwap(maturity, numberOfIssuer, IssuerID, nominalIssuer, recoveryIssuer, standardSpread, inputSpread, cpnLastSettle, cpnPeriod, cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, fxCorrel,
                         fxVol, strikes, correl, betaAdder, isAmericanFloatLegVal, isAmericanFixedLegVal, 0,0, HedgingCDS, lossUnitAmount, integrationPeriod, cpnSchedule, probMultiplier, dBeta);
-                    x[6 + i, 6] = double.Parse(x[0,0])- double.Parse(test[0, 0])+"";
+                    x[6 + i, 6] =  double.Parse(test[0, 0])- double.Parse(x[0, 0]) + "";
+                    x[6 + i, 7] = double.Parse(hedging_cds[0, 0]) - double.Parse(x[6+i,7]) + "";
+
+                    x[6 + i, 9] = "" + (Double.Parse(x[6 + i, 6]) / Double.Parse(x[6 + i, 7]));
+
+                    // Hedge in CDS currency (delta CDO is in CDO currency unit => it has to be converted)
+                    x[6 + i, 8] = "" + ((Double.Parse(x[6 + i, 9]) / StrippingIRS.GetFXSpot(pricingCurrency)) * StrippingIRS.GetFXSpot(CreditDefaultSwapCurves.Curves[i].Currency));
+                    Leverage += double.Parse(x[6 + i, 9]);
                     StrippingCDS.StripDefaultProbability(i, StrippingCDS.CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, curve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
                 }
+                x[5, 8] = Leverage / TrancheWidth + "";
             }
             return x;
         }
