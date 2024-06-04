@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
 using MathNet.Numerics.Distributions;
+using ValoLibrary;
 
 namespace ValoLibrary
 {
@@ -625,6 +626,27 @@ namespace ValoLibrary
                     }
 
                     remainingWeights -= factorWeight;
+                    //Stochastic Recovery PART MODIF
+
+                    double[] StochasticRecoveryIssuer = new double[numberOfIssuer];
+                    double[] StochasticProbabilities = { 0.4, 0.3, 0.2, 0.1 };
+                    double[,] defaultProbKnowingFactorSR = new double[numberOfIssuer, StochasticProbabilities.Length+1];
+                    double[,] defaultThresholdSR = new double[numberOfIssuer, StochasticProbabilities.Length+1];
+                    for (int i = 0; i < numberOfIssuer; i++)
+                    {
+                        for (int j = 0; j <= StochasticProbabilities.Length; j++)
+                        {
+                            double p = 0;
+                            for (int m = 0; m < j; m++)
+                            {
+                                p += StochasticProbabilities[m];
+                            }
+                            defaultProbKnowingFactorSR[i, j] =  (1 - p);
+                            defaultThresholdSR[i, j] = Normal.InvCDF(0.0, 1.0, defaultProbKnowingFactorSR[i, j]);
+                        }
+                    }
+
+                    //FIN part
 
                     if ((forcedMaxRequest + 1) * forcedMaxRequest / 2.0 * remainingWeights < 1.0 * 0.0001)
                     {
@@ -798,6 +820,244 @@ namespace ValoLibrary
             }
 
             return res;
+        }
+        //---------------------------------------------STOCHASTIC RECOVERY PART------------------------------------------------------------
+        public static double[,] GetDefaultDistributionLossUnitSR(int numberOfIssuer, double[] defaultProbability, int[] lossUnitIssuer,
+        int[] cumulLossUnitIssuer, double[] betaVector, int? maxRequest = null,
+        double[] inputThreshold = null, int? factorIndex = null, bool withGreeks = false, double dBeta = 0.1)
+        {
+            double[,] defaultDistribKnowingFactor;
+            double[] defaultDistrib;
+            double[] defaultThreshold = new double[numberOfIssuer];
+            double[] defaultProbKnowingFactor = new double[numberOfIssuer + 1];
+            double[] dp_dProb = new double[numberOfIssuer];
+            double[] dp_dBeta = new double[numberOfIssuer];
+            double[] dDefaultThreshold = new double[numberOfIssuer];
+            double factor;
+            double factorWeight;
+            double remainingWeights;
+            int forcedMaxRequest;
+            int factorCounter;
+            int nbOfGaussHermitePoints = 64;
+            //int gaussHermiteAbscissaLength = 64;
+            double gaussHermiteMidTable = nbOfGaussHermitePoints / 2 + 1;
+            double[] gaussHermiteAbscissa = new double[]
+            {
+                -10.5261231679605, -9.89528758682953, -9.37315954964672, -8.90724909996476, -8.47752908337986, -8.07368728501022, -7.68954016404049, -7.32101303278094,
+                -6.9652411205511, -6.62011226263602, -6.28401122877482, -5.95566632679948, -5.63405216434997, -5.31832522463327, -5.00777960219876, -4.70181564740749,
+                -4.39991716822813, -4.10163447456665, -3.80657151394536, -3.5143759357409, -3.22473129199203, -2.93735082300462, -2.65197243543063, -2.3683545886324,
+                -2.08627287988176, -1.80551717146554, -1.52588914020986, -1.24720015694311, -0.969269423071178, -0.691922305810044, -0.414988824121078, -0.138302244987009,
+                    0.138302244987009, 0.414988824121078, 0.691922305810044, 0.969269423071178, 1.24720015694311, 1.52588914020986, 1.80551717146554, 2.08627287988176,
+                    2.3683545886324, 2.65197243543063, 2.93735082300462, 3.22473129199203, 3.5143759357409, 3.80657151394536, 4.10163447456665, 4.39991716822813,
+                    4.70181564740749, 5.00777960219876, 5.31832522463327, 5.63405216434997, 5.95566632679948, 6.28401122877482, 6.62011226263602, 6.9652411205511,
+                    7.32101303278094, 7.68954016404049, 8.07368728501022, 8.47752908337986, 8.90724909996476, 9.37315954964672, 9.89528758682953, 10.5261231679605
+            };
+            double[] gaussHermiteWeight = new double[]
+            {
+                2.53418710060459E-25, 1.22602411040096E-22, 1.63228017722665E-20, 1.05092412334527E-18, 4.10618806999281E-17, 1.09871222523276E-15, 2.16838907840016E-14, 3.31758747989528E-13,
+                4.07710009958856E-12, 4.13239336761409E-11, 3.5254084284956E-10, 2.57250350487446E-09, 1.62656661863386E-08, 9.00688368649578E-08, 4.40658777599536E-07, 1.91902972761357E-06,
+                7.48598005351949E-06, 2.62991006123899E-05, 8.3592377852976E-05, 2.41356276405779E-04, 6.35207286288721E-04, 1.52839476722543E-03, 3.37087743793626E-03, 6.82981749780981E-03,
+                1.27370763383524E-02, 2.18997473380829E-02, 3.47633024351237E-02, 5.10056393070224E-02, 6.92371821856065E-02, 8.70172186157688E-02, 0.101310028539473, 0.109304305522575,
+                0.109304305522575, 0.101310028539473, 8.70172186157688E-02, 6.92371821856065E-02, 5.10056393070224E-02, 3.47633024351237E-02, 2.18997473380829E-02, 1.27370763383524E-02,
+                6.82981749780981E-03, 3.37087743793626E-03, 1.52839476722543E-03, 6.35207286288721E-04, 2.41356276405779E-04, 8.3592377852976E-05, 2.62991006123899E-05, 7.48598005351949E-06,
+                1.91902972761357E-06, 4.40658777599536E-07, 9.00688368649578E-08, 1.62656661863386E-08, 2.57250350487446E-09, 3.5254084284956E-10, 4.13239336761409E-11, 4.07710009958856E-12,
+                3.31758747989528E-13, 2.16838907840016E-14, 1.09871222523276E-15, 4.10618806999281E-17, 1.05092412334527E-18, 1.63228017722665E-20, 1.22602411040096E-22, 2.53418710060459E-25
+            };
+
+            if (!maxRequest.HasValue)
+            {
+                forcedMaxRequest = cumulLossUnitIssuer[numberOfIssuer] - 1;
+            }
+            else
+            {
+                forcedMaxRequest = Math.Min(maxRequest.Value, cumulLossUnitIssuer[numberOfIssuer] - 1);
+            }
+
+            if (inputThreshold == null)
+            {
+                for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
+                {
+                    if (defaultProbability[issuerCounter] == 0.0)
+                    {
+                        defaultThreshold[issuerCounter] = -100.0;
+                    }
+                    else
+                    {
+                        defaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, defaultProbability[issuerCounter]);
+                    }
+                }
+
+                if (withGreeks)
+                {
+                    for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
+                    {
+                        if (defaultProbability[issuerCounter] * ShockMultiplier >= 1.0)
+                        {
+                            Console.WriteLine($"Can't shock default probability of issuer # {issuerCounter + 1}!");
+                            Console.WriteLine("Delta will be wrong");
+                            dDefaultThreshold[issuerCounter] = defaultThreshold[issuerCounter];
+                        }
+                        else
+                        {
+                            if (defaultProbability[issuerCounter] == 0.0)
+                            {
+                                dDefaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, 0.0001);
+                            }
+                            else
+                            {
+                                dDefaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, defaultProbability[issuerCounter] * ShockMultiplier);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                defaultThreshold = inputThreshold;
+            }
+
+            double[,] defaultDistribArray;
+            if (!withGreeks)
+            {
+                defaultDistribArray = new double[forcedMaxRequest + 2, 1];
+            }
+            else
+            {
+                defaultDistribArray = new double[forcedMaxRequest + 2, 2 * numberOfIssuer + 1];
+            }
+
+            for (int lossUnitCounter = 0; lossUnitCounter <= forcedMaxRequest + 1; lossUnitCounter++)
+            {
+                defaultDistribArray[lossUnitCounter, 0] = 0.0;
+                if (withGreeks)
+                {
+                    for (int j = 1; j <= numberOfIssuer; j++)
+                    {
+                        defaultDistribArray[lossUnitCounter, j] = 0.0;
+                        defaultDistribArray[lossUnitCounter, j + numberOfIssuer] = 0.0;
+                    }
+                }
+            }
+            double s = 0;//MODIF COMPTEUR A ENLEVER
+            for (int piece = 1; piece <= 2; piece++)
+            {
+                int factorStartIndex;
+                int factorEndIndex;
+                int factorStep = -1;
+                if (!factorIndex.HasValue)
+                {
+                    if (piece == 1)
+                    {
+                        factorStartIndex = (int)gaussHermiteMidTable - 1;
+                        factorEndIndex = nbOfGaussHermitePoints - 1;
+                        factorStep = 1;
+                    }
+                    else
+                    {
+                        factorStartIndex = (int)gaussHermiteMidTable - 2;
+                        factorEndIndex = 0;
+                        factorStep = -1;
+                    }
+                }
+                else
+                {
+                    if (factorIndex >= gaussHermiteMidTable)
+                    {
+                        factorStartIndex = (int)factorIndex - 1;
+                        factorEndIndex = (int)factorIndex - 1;
+                    }
+                    else
+                    {
+                        factorStartIndex = 0;
+                        factorEndIndex = -1;
+                    }
+                }
+
+                remainingWeights = 0.0;
+                for (factorCounter = factorStartIndex; factorCounter != factorEndIndex + Math.Sign(factorEndIndex - factorStartIndex); factorCounter += factorStep)// Permet de rentrer dans la boucle quand factorstep = -1
+                {
+                    remainingWeights += gaussHermiteWeight[factorCounter];
+                }
+
+                for (factorCounter = factorStartIndex; factorCounter != factorEndIndex + Math.Sign(factorEndIndex - factorStartIndex); factorCounter += factorStep)
+                {
+                    factor = gaussHermiteAbscissa[factorCounter];
+                    factorWeight = gaussHermiteWeight[factorCounter];
+
+                    for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
+                    {
+                        double beta = betaVector[issuerCounter];
+                        defaultProbKnowingFactor[issuerCounter + 1] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta));
+                    }
+
+                    if (withGreeks)
+                    {
+                        for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
+                        {
+                            double beta = betaVector[issuerCounter];
+                            dp_dProb[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((dDefaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter + 1];
+                            beta += dBeta;
+                            dp_dBeta[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter + 1];
+                        }
+                    }
+
+                    double[] lossUnitIssuer_2 = new double[lossUnitIssuer.Length];
+                    for (int i = 0; i < lossUnitIssuer_2.Length; i++)
+                    {
+                        lossUnitIssuer_2[i] = lossUnitIssuer[i];
+                    }
+                    s += 1;
+                    defaultDistribKnowingFactor = RecursionLossUnit(numberOfIssuer, defaultProbKnowingFactor,
+                        lossUnitIssuer_2, cumulLossUnitIssuer, maxRequest, withGreeks);
+
+                    //int numberOfIssuer, double[] defaultProbKnowingfFactor, int[] lossUnitIssuer, int[] cumulLossUnitIssuer, 
+                    //  int? maxRequest = null, bool withGreeks = false
+
+                    for (int lossUnitCounter = 0; lossUnitCounter <= forcedMaxRequest + 1; lossUnitCounter++)
+                    {
+                        defaultDistribArray[lossUnitCounter, 0] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, 0];
+                        if (withGreeks)
+                        {
+                            for (int j = 0; j < numberOfIssuer; j++)
+                            {
+                                defaultDistribArray[lossUnitCounter, j + 1] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, j + 1] * dp_dProb[j];
+                                defaultDistribArray[lossUnitCounter, j + numberOfIssuer + 1] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, j + 1] * dp_dBeta[j];
+                            }
+                        }
+                    }
+
+                    remainingWeights -= factorWeight;
+
+                    //Stochastic Recovery PART MODIF
+
+                    double[] StochasticRecoveryIssuer = new double[numberOfIssuer];
+                    double[] StochasticProbabilities = { 0.4, 0.3, 0.2, 0.1 };
+                    double[,] defaultProbKnowingFactorSR = new double[numberOfIssuer, StochasticProbabilities.Length];
+                    double[,] defaultThresholdSR = new double[numberOfIssuer, StochasticProbabilities.Length];
+                    for (int i = 0; i < numberOfIssuer; i++)
+                    {
+                        for(int j = 0; j < StochasticProbabilities.Length; j++)
+                        {
+                            double p = 0;
+                            for (j = 0; j < StochasticProbabilities.Length; j++)
+                            {
+                                p += StochasticProbabilities[j];
+                            }
+                            defaultProbKnowingFactorSR[i, j] = defaultProbKnowingFactor[i + 1]*(1 - p);
+                            defaultThresholdSR[i, j] = Normal.InvCDF(0.0, 1.0, defaultProbKnowingFactorSR[i, j]);
+                        }
+                    }
+
+                    //FIN part
+
+                    if ((forcedMaxRequest + 1) * forcedMaxRequest / 2.0 * remainingWeights < 1.0 * 0.0001)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return defaultDistribArray;
         }
     }
 }
