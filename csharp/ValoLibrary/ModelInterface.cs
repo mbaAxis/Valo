@@ -1029,9 +1029,6 @@ namespace ValoLibrary
             {
                 x[i, 1] = x[i, 0];
             }
-            // Computation time
-            x[5, 0] = (DateTime.Now - StartTime) + "";
-            x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
 
             if (IsCDO && withJTD && withGreeks)
             {
@@ -1082,6 +1079,9 @@ namespace ValoLibrary
                     StrippingCDS.StripDefaultProbability(i, StrippingCDS.CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, curve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
                 }
                 x[5, 8] = Leverage / TrancheWidth + "";
+                // Computation time
+                x[5, 0] = (DateTime.Now - StartTime) + "";
+                x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
             }
             return x;
         }

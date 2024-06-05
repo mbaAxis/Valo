@@ -13,7 +13,6 @@ namespace ValoLibrary
     {
         public const double ShockMultiplier = 1.05;
         public const double Shock = 0.05;
-
         public static double[,] Recursion(int numberOfIssuer, double[] defaultProbKnowingFactor, int? maxRequest = null, bool withGreeks = false)
         {
             int forcedMaxRequest;
@@ -425,6 +424,17 @@ namespace ValoLibrary
             int[] cumulLossUnitIssuer, double[] betaVector, int? maxRequest = null, 
             double[] inputThreshold = null, int? factorIndex = null, bool withGreeks = false, double dBeta =0.1)
         {
+            //stochastic recov part modif
+            stochasticRecoveryIntegrated = new double[numberOfIssuer];
+            double[] stochasticRecoveryIssuer = new double[numberOfIssuer];
+            double[] stochasticProbabilities = { 0.4, 0.3, 0.2, 0.1 };//pk
+            double[] stochasticRecovery = { 0.6, 0.4, 0.2, 0.0 };
+            double[,] defaultProbKnowingFactorSR = new double[numberOfIssuer, stochasticProbabilities.Length + 1];//qij
+            double[,] defaultThresholdSR = new double[numberOfIssuer, stochasticProbabilities.Length + 1];//cij
+            double[,] stochasticDistribution = new double[numberOfIssuer, stochasticProbabilities.Length];//pij
+            double[] stochasticRecoveryKnowingFactor = new double[numberOfIssuer];
+            //end sto recov part
+
             double[,] defaultDistribKnowingFactor;
             double[] defaultDistrib;
             double[] defaultThreshold = new double[numberOfIssuer];
@@ -626,27 +636,6 @@ namespace ValoLibrary
                     }
 
                     remainingWeights -= factorWeight;
-                    //Stochastic Recovery PART MODIF
-
-                    double[] StochasticRecoveryIssuer = new double[numberOfIssuer];
-                    double[] StochasticProbabilities = { 0.4, 0.3, 0.2, 0.1 };
-                    double[,] defaultProbKnowingFactorSR = new double[numberOfIssuer, StochasticProbabilities.Length+1];
-                    double[,] defaultThresholdSR = new double[numberOfIssuer, StochasticProbabilities.Length+1];
-                    for (int i = 0; i < numberOfIssuer; i++)
-                    {
-                        for (int j = 0; j <= StochasticProbabilities.Length; j++)
-                        {
-                            double p = 0;
-                            for (int m = 0; m < j; m++)
-                            {
-                                p += StochasticProbabilities[m];
-                            }
-                            defaultProbKnowingFactorSR[i, j] =  (1 - p);
-                            defaultThresholdSR[i, j] = Normal.InvCDF(0.0, 1.0, defaultProbKnowingFactorSR[i, j]);
-                        }
-                    }
-
-                    //FIN part
 
                     if ((forcedMaxRequest + 1) * forcedMaxRequest / 2.0 * remainingWeights < 1.0 * 0.0001)
                     {
@@ -719,12 +708,20 @@ namespace ValoLibrary
             int[] lossUnitIssuer = new int[numberOfIssuer+1];
             int[] cumulLossUnitIssuer = new int[numberOfIssuer+1];
 
+            double[] betaVector = new double[numberOfIssuer];
+            double sqrtCorrel = Math.Sqrt(correl);
+
+            for (int i = 0; i < numberOfIssuer; i++)
+            {
+                betaVector[i] = sqrtCorrel + betaAdder[i];
+            }
+
             lossUnitIssuer[0] = 0;
             cumulLossUnitIssuer[0] = 0;
-
+            double[] recovery = GetStochasticRecovery(numberOfIssuer, defaultProbability, betaVector);//MODIF STO RECOV
             for (int issuerCounter = 1; issuerCounter <= numberOfIssuer; issuerCounter++)
             {
-                lossUnitIssuer[issuerCounter] = (int)Math.Round((nominalIssuer[issuerCounter-1] * (1 - recoveryIssuer[issuerCounter-1])) / lossUnitAmount);
+                lossUnitIssuer[issuerCounter] = (int)Math.Round((nominalIssuer[issuerCounter-1] * (1 - recovery[issuerCounter-1])) / lossUnitAmount);
                 
             }
             //Console.WriteLine("iici 12");
@@ -744,14 +741,6 @@ namespace ValoLibrary
             if (maxNumLossUnitToReachStrikes > sumLossUnit -1)
             {            
                 maxNumLossUnitToReachStrikes = sumLossUnit - 1;
-            }
-
-            double[] betaVector = new double[numberOfIssuer];
-            double sqrtCorrel = Math.Sqrt(correl);
-
-            for (int i = 0; i < numberOfIssuer; i++)
-            {
-                betaVector[i] = sqrtCorrel + betaAdder[i];
             }
 
 
@@ -822,21 +811,20 @@ namespace ValoLibrary
             return res;
         }
         //---------------------------------------------STOCHASTIC RECOVERY PART------------------------------------------------------------
-        public static double[,] GetDefaultDistributionLossUnitSR(int numberOfIssuer, double[] defaultProbability, int[] lossUnitIssuer,
-        int[] cumulLossUnitIssuer, double[] betaVector, int? maxRequest = null,
-        double[] inputThreshold = null, int? factorIndex = null, bool withGreeks = false, double dBeta = 0.1)
+        public static double[] GetStochasticRecovery(int numberOfIssuer, double[] defaultProbability, double[] betaVector)
         {
-            double[,] defaultDistribKnowingFactor;
-            double[] defaultDistrib;
             double[] defaultThreshold = new double[numberOfIssuer];
-            double[] defaultProbKnowingFactor = new double[numberOfIssuer + 1];
-            double[] dp_dProb = new double[numberOfIssuer];
-            double[] dp_dBeta = new double[numberOfIssuer];
-            double[] dDefaultThreshold = new double[numberOfIssuer];
+            double[] stochasticRecoveryIntegrated = new double[numberOfIssuer];
+            double[] stochasticRecoveryIssuer = new double[numberOfIssuer];
+            double[] stochasticProbabilities = { 0.4, 0.3, 0.2, 0.1 };//pk
+            double[] stochasticRecovery = { 0.6, 0.4, 0.2, 0.0 };
+            double[,] defaultProbKnowingFactorSR = new double[numberOfIssuer, stochasticProbabilities.Length + 1];//qij
+            double[,] defaultThresholdSR = new double[numberOfIssuer, stochasticProbabilities.Length + 1];//cij
+            double[,] stochasticDistribution = new double[numberOfIssuer, stochasticProbabilities.Length];//pij
+            double[] stochasticRecoveryKnowingFactor = new double[numberOfIssuer];
             double factor;
             double factorWeight;
             double remainingWeights;
-            int forcedMaxRequest;
             int factorCounter;
             int nbOfGaussHermitePoints = 64;
             //int gaussHermiteAbscissaLength = 64;
@@ -863,115 +851,24 @@ namespace ValoLibrary
                 1.91902972761357E-06, 4.40658777599536E-07, 9.00688368649578E-08, 1.62656661863386E-08, 2.57250350487446E-09, 3.5254084284956E-10, 4.13239336761409E-11, 4.07710009958856E-12,
                 3.31758747989528E-13, 2.16838907840016E-14, 1.09871222523276E-15, 4.10618806999281E-17, 1.05092412334527E-18, 1.63228017722665E-20, 1.22602411040096E-22, 2.53418710060459E-25
             };
-
-            if (!maxRequest.HasValue)
-            {
-                forcedMaxRequest = cumulLossUnitIssuer[numberOfIssuer] - 1;
-            }
-            else
-            {
-                forcedMaxRequest = Math.Min(maxRequest.Value, cumulLossUnitIssuer[numberOfIssuer] - 1);
-            }
-
-            if (inputThreshold == null)
-            {
-                for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
-                {
-                    if (defaultProbability[issuerCounter] == 0.0)
-                    {
-                        defaultThreshold[issuerCounter] = -100.0;
-                    }
-                    else
-                    {
-                        defaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, defaultProbability[issuerCounter]);
-                    }
-                }
-
-                if (withGreeks)
-                {
-                    for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
-                    {
-                        if (defaultProbability[issuerCounter] * ShockMultiplier >= 1.0)
-                        {
-                            Console.WriteLine($"Can't shock default probability of issuer # {issuerCounter + 1}!");
-                            Console.WriteLine("Delta will be wrong");
-                            dDefaultThreshold[issuerCounter] = defaultThreshold[issuerCounter];
-                        }
-                        else
-                        {
-                            if (defaultProbability[issuerCounter] == 0.0)
-                            {
-                                dDefaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, 0.0001);
-                            }
-                            else
-                            {
-                                dDefaultThreshold[issuerCounter] = Normal.InvCDF(0.0, 1.0, defaultProbability[issuerCounter] * ShockMultiplier);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                defaultThreshold = inputThreshold;
-            }
-
-            double[,] defaultDistribArray;
-            if (!withGreeks)
-            {
-                defaultDistribArray = new double[forcedMaxRequest + 2, 1];
-            }
-            else
-            {
-                defaultDistribArray = new double[forcedMaxRequest + 2, 2 * numberOfIssuer + 1];
-            }
-
-            for (int lossUnitCounter = 0; lossUnitCounter <= forcedMaxRequest + 1; lossUnitCounter++)
-            {
-                defaultDistribArray[lossUnitCounter, 0] = 0.0;
-                if (withGreeks)
-                {
-                    for (int j = 1; j <= numberOfIssuer; j++)
-                    {
-                        defaultDistribArray[lossUnitCounter, j] = 0.0;
-                        defaultDistribArray[lossUnitCounter, j + numberOfIssuer] = 0.0;
-                    }
-                }
-            }
-            double s = 0;//MODIF COMPTEUR A ENLEVER
             for (int piece = 1; piece <= 2; piece++)
             {
                 int factorStartIndex;
                 int factorEndIndex;
                 int factorStep = -1;
-                if (!factorIndex.HasValue)
+                if (piece == 1)
                 {
-                    if (piece == 1)
-                    {
-                        factorStartIndex = (int)gaussHermiteMidTable - 1;
-                        factorEndIndex = nbOfGaussHermitePoints - 1;
-                        factorStep = 1;
-                    }
-                    else
-                    {
-                        factorStartIndex = (int)gaussHermiteMidTable - 2;
-                        factorEndIndex = 0;
-                        factorStep = -1;
-                    }
+                    factorStartIndex = (int)gaussHermiteMidTable - 1;
+                    factorEndIndex = nbOfGaussHermitePoints - 1;
+                    factorStep = 1;
                 }
                 else
                 {
-                    if (factorIndex >= gaussHermiteMidTable)
-                    {
-                        factorStartIndex = (int)factorIndex - 1;
-                        factorEndIndex = (int)factorIndex - 1;
-                    }
-                    else
-                    {
-                        factorStartIndex = 0;
-                        factorEndIndex = -1;
-                    }
+                    factorStartIndex = (int)gaussHermiteMidTable - 2;
+                    factorEndIndex = 0;
+                    factorStep = -1;
                 }
+
 
                 remainingWeights = 0.0;
                 for (factorCounter = factorStartIndex; factorCounter != factorEndIndex + Math.Sign(factorEndIndex - factorStartIndex); factorCounter += factorStep)// Permet de rentrer dans la boucle quand factorstep = -1
@@ -983,81 +880,51 @@ namespace ValoLibrary
                 {
                     factor = gaussHermiteAbscissa[factorCounter];
                     factorWeight = gaussHermiteWeight[factorCounter];
-
-                    for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
-                    {
-                        double beta = betaVector[issuerCounter];
-                        defaultProbKnowingFactor[issuerCounter + 1] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta));
-                    }
-
-                    if (withGreeks)
-                    {
-                        for (int issuerCounter = 0; issuerCounter < numberOfIssuer; issuerCounter++)
-                        {
-                            double beta = betaVector[issuerCounter];
-                            dp_dProb[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((dDefaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter + 1];
-                            beta += dBeta;
-                            dp_dBeta[issuerCounter] = UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[issuerCounter] - beta * factor) / Math.Sqrt(1.0 - beta * beta)) - defaultProbKnowingFactor[issuerCounter + 1];
-                        }
-                    }
-
-                    double[] lossUnitIssuer_2 = new double[lossUnitIssuer.Length];
-                    for (int i = 0; i < lossUnitIssuer_2.Length; i++)
-                    {
-                        lossUnitIssuer_2[i] = lossUnitIssuer[i];
-                    }
-                    s += 1;
-                    defaultDistribKnowingFactor = RecursionLossUnit(numberOfIssuer, defaultProbKnowingFactor,
-                        lossUnitIssuer_2, cumulLossUnitIssuer, maxRequest, withGreeks);
-
-                    //int numberOfIssuer, double[] defaultProbKnowingfFactor, int[] lossUnitIssuer, int[] cumulLossUnitIssuer, 
-                    //  int? maxRequest = null, bool withGreeks = false
-
-                    for (int lossUnitCounter = 0; lossUnitCounter <= forcedMaxRequest + 1; lossUnitCounter++)
-                    {
-                        defaultDistribArray[lossUnitCounter, 0] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, 0];
-                        if (withGreeks)
-                        {
-                            for (int j = 0; j < numberOfIssuer; j++)
-                            {
-                                defaultDistribArray[lossUnitCounter, j + 1] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, j + 1] * dp_dProb[j];
-                                defaultDistribArray[lossUnitCounter, j + numberOfIssuer + 1] += factorWeight * defaultDistribKnowingFactor[lossUnitCounter, j + 1] * dp_dBeta[j];
-                            }
-                        }
-                    }
-
                     remainingWeights -= factorWeight;
 
                     //Stochastic Recovery PART MODIF
-
-                    double[] StochasticRecoveryIssuer = new double[numberOfIssuer];
-                    double[] StochasticProbabilities = { 0.4, 0.3, 0.2, 0.1 };
-                    double[,] defaultProbKnowingFactorSR = new double[numberOfIssuer, StochasticProbabilities.Length];
-                    double[,] defaultThresholdSR = new double[numberOfIssuer, StochasticProbabilities.Length];
                     for (int i = 0; i < numberOfIssuer; i++)
                     {
-                        for(int j = 0; j < StochasticProbabilities.Length; j++)
+                        if (defaultProbability[i] == 0.0)
+                        {
+                            defaultThreshold[i] = -100.0;
+                        }
+                        else
+                        {
+                            defaultThreshold[i] = Normal.InvCDF(0.0, 1.0, defaultProbability[i]);
+                        }
+                        stochasticRecoveryKnowingFactor[i] = 0;
+                        for (int j = 0; j <= stochasticProbabilities.Length; j++)
                         {
                             double p = 0;
-                            for (j = 0; j < StochasticProbabilities.Length; j++)
+                            for (int m = 0; m < j; m++)
                             {
-                                p += StochasticProbabilities[j];
+                                p += stochasticProbabilities[m];
                             }
-                            defaultProbKnowingFactorSR[i, j] = defaultProbKnowingFactor[i + 1]*(1 - p);
+                            defaultProbKnowingFactorSR[i, j] = defaultProbability[i] * (1 - p);
                             defaultThresholdSR[i, j] = Normal.InvCDF(0.0, 1.0, defaultProbKnowingFactorSR[i, j]);
+                            if (j > 0)
+                            {
+                                double beta = betaVector[i];
+                                stochasticDistribution[i, j - 1] = (UtilityBiNormal.NormalCumulativeDistribution((defaultThresholdSR[i, j - 1] - beta * factor) / Math.Sqrt(1.0 - beta * beta))
+                                    - UtilityBiNormal.NormalCumulativeDistribution((defaultThresholdSR[i, j] - beta * factor) / Math.Sqrt(1.0 - beta * beta)))
+                                    / UtilityBiNormal.NormalCumulativeDistribution((defaultThreshold[i] - beta * factor) / Math.Sqrt(1.0 - beta * beta));//Ici Krekel à échangé j-1 et j au numérateur à priori
+                                stochasticRecoveryKnowingFactor[i] += stochasticDistribution[i, j - 1] * stochasticRecovery[j - 1];
+                            }
                         }
+                        stochasticRecoveryIntegrated[i] += stochasticRecoveryKnowingFactor[i] * factorWeight;
                     }
 
                     //FIN part
 
-                    if ((forcedMaxRequest + 1) * forcedMaxRequest / 2.0 * remainingWeights < 1.0 * 0.0001)
+                    if ((numberOfIssuer + 1) * numberOfIssuer / 2.0 * remainingWeights < 1.0 * 0.0001)
                     {
                         break;
                     }
                 }
             }
 
-            return defaultDistribArray;
+            return stochasticRecoveryIntegrated;
         }
     }
 }
