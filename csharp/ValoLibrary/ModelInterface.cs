@@ -1080,9 +1080,9 @@ namespace ValoLibrary
                 }
                 x[5, 8] = Leverage / TrancheWidth + "";
                 // Computation time
-                x[5, 0] = (DateTime.Now - StartTime) + "";
-                x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
             }
+            x[5, 0] = (DateTime.Now - StartTime) + "";
+            x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
             return x;
         }
     }

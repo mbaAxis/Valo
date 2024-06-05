@@ -424,19 +424,9 @@ namespace ValoLibrary
             int[] cumulLossUnitIssuer, double[] betaVector, int? maxRequest = null, 
             double[] inputThreshold = null, int? factorIndex = null, bool withGreeks = false, double dBeta =0.1)
         {
-            //stochastic recov part modif
-            stochasticRecoveryIntegrated = new double[numberOfIssuer];
-            double[] stochasticRecoveryIssuer = new double[numberOfIssuer];
-            double[] stochasticProbabilities = { 0.4, 0.3, 0.2, 0.1 };//pk
-            double[] stochasticRecovery = { 0.6, 0.4, 0.2, 0.0 };
-            double[,] defaultProbKnowingFactorSR = new double[numberOfIssuer, stochasticProbabilities.Length + 1];//qij
-            double[,] defaultThresholdSR = new double[numberOfIssuer, stochasticProbabilities.Length + 1];//cij
-            double[,] stochasticDistribution = new double[numberOfIssuer, stochasticProbabilities.Length];//pij
-            double[] stochasticRecoveryKnowingFactor = new double[numberOfIssuer];
-            //end sto recov part
 
             double[,] defaultDistribKnowingFactor;
-            double[] defaultDistrib;
+            //double[] defaultDistrib;
             double[] defaultThreshold = new double[numberOfIssuer];
             double[] defaultProbKnowingFactor = new double[numberOfIssuer+1];
             double[] dp_dProb = new double[numberOfIssuer];
@@ -547,7 +537,6 @@ namespace ValoLibrary
                     }
                 }
             }
-            double s = 0;//MODIF COMPTEUR A ENLEVER
             for (int piece = 1; piece <= 2; piece++)
             {
                 int factorStartIndex;
@@ -615,7 +604,6 @@ namespace ValoLibrary
                     {
                         lossUnitIssuer_2[i] = lossUnitIssuer[i];
                     }
-                    s += 1;
                     defaultDistribKnowingFactor = RecursionLossUnit(numberOfIssuer, defaultProbKnowingFactor,
                         lossUnitIssuer_2, cumulLossUnitIssuer, maxRequest, withGreeks);
 
@@ -724,7 +712,6 @@ namespace ValoLibrary
                 lossUnitIssuer[issuerCounter] = (int)Math.Round((nominalIssuer[issuerCounter-1] * (1 - recovery[issuerCounter-1])) / lossUnitAmount);
                 
             }
-            //Console.WriteLine("iici 12");
 
             cumulLossUnitIssuer[1] = lossUnitIssuer[1];
 
