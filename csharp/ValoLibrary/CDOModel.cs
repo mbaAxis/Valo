@@ -634,9 +634,9 @@ namespace ValoLibrary
 
             return defaultDistribArray;
         }
-        
+
         public static object[,] EuropeanCDOLossUnit(int numberOfIssuer, double lossUnitAmount, double[] strikes, double[] defaultProbability,
-        double correl, double[] betaAdder, double zC, double[] nominalIssuer, double[] recoveryIssuer, bool withGreeks = false, double dBeta = 0.1)
+        double correl, double[] betaAdder, double zC, double[] nominalIssuer, double[] recoveryIssuer, bool withStochasticRecovery = false, bool withGreeks = false, double dBeta = 0.1)
         {
             int r, c;
             object[,] res;
@@ -706,12 +706,25 @@ namespace ValoLibrary
 
             lossUnitIssuer[0] = 0;
             cumulLossUnitIssuer[0] = 0;
-            double[] recovery = GetStochasticRecovery(numberOfIssuer, defaultProbability, betaVector);//MODIF STO RECOV
-            for (int issuerCounter = 1; issuerCounter <= numberOfIssuer; issuerCounter++)
+            if (withStochasticRecovery)
             {
-                lossUnitIssuer[issuerCounter] = (int)Math.Round((nominalIssuer[issuerCounter-1] * (1 - recovery[issuerCounter-1])) / lossUnitAmount);
-                
+                double[] recovery = StochasticRecovery(numberOfIssuer, defaultProbability, betaVector);//MODIF STO RECOV
+                lossUnitAmount = ModelInterface.LossUnit(numberOfIssuer, nominalIssuer, recovery);
+                for (int issuerCounter = 1; issuerCounter <= numberOfIssuer; issuerCounter++)
+                {
+                    lossUnitIssuer[issuerCounter] = (int)Math.Round((nominalIssuer[issuerCounter - 1] * (1 - recovery[issuerCounter - 1])) / lossUnitAmount);
+
+                }
             }
+            else
+            {
+                for (int issuerCounter = 1; issuerCounter <= numberOfIssuer; issuerCounter++)
+                {
+                    lossUnitIssuer[issuerCounter] = (int)Math.Round((nominalIssuer[issuerCounter - 1] * (1 - recoveryIssuer[issuerCounter - 1])) / lossUnitAmount);
+
+                }
+            }
+
 
             cumulLossUnitIssuer[1] = lossUnitIssuer[1];
 
@@ -798,7 +811,7 @@ namespace ValoLibrary
             return res;
         }
         //---------------------------------------------STOCHASTIC RECOVERY PART------------------------------------------------------------
-        public static double[] GetStochasticRecovery(int numberOfIssuer, double[] defaultProbability, double[] betaVector)
+        public static double[] StochasticRecovery(int numberOfIssuer, double[] defaultProbability, double[] betaVector)
         {
             double[] defaultThreshold = new double[numberOfIssuer];
             double[] stochasticRecoveryIntegrated = new double[numberOfIssuer];

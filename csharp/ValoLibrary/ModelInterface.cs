@@ -54,6 +54,10 @@ namespace ValoLibrary
             }
 
             double lossRateUnit = AmountUnit(numberOfNames, lossRates, optionalPrecision);
+            if(lossRateUnit < 0.01)//MODIF Stochastic Recovery, if not, let an infinite time computation problem
+            {
+                lossRateUnit = 0.01;
+            }
 
             double lossUnit = nominalUnit * lossRateUnit;
             double lossAmount = nominals[0] * (1.0 - recoveries[0]);
@@ -160,7 +164,7 @@ namespace ValoLibrary
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double withJtdVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    double withGreeks = 0, double withJtdVAL = 0,double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
     string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             int i;
@@ -275,7 +279,7 @@ namespace ValoLibrary
                 pricingCurrency, fxCorrel, fxVol,
                 strikes, correl, betaAdder,
                 isAmericanFloatLeg, isAmericanFixedLeg,
-                withGreeks,withJtdVAL, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
+                withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta);
         }
         public static string[,] CDS(string issuerIdParam, string maturity, double spread, double recoveryRate,double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
@@ -328,7 +332,7 @@ namespace ValoLibrary
             }
 
             return AmericanSwap(maturity, 1, issuerId, notional, recoveryRate, 0,spread, cpnLastSettle , cpnPeriod, cpnConvention,
-                pricingCurrency, fxCorrel, fxVol, 0.0, 0.0, 0.0, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,0, hedgingCds, 1,
+                pricingCurrency, fxCorrel, fxVol, 0.0, 0.0, 0.0, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,0,0, hedgingCds, 1,
                 integrationPeriod,null, probMultiplier);
         }
         public static string[,] AmericanSwap(object maturity, int numberOfIssuer, object IssuerID, object nominalIssuer, object recoveryIssuer, object standardSpread,
@@ -336,7 +340,7 @@ namespace ValoLibrary
     string pricingCurrency, double fxCorrel, double fxVol,
     object strikes, object correl, object betaAdder,
     double isAmericanFloatLegVal, double isAmericanFixedLegVal,
-       double withGreeksVal, double withJtdVAl, double[] HedgingCDS, double lossUnitAmount = 0.0, string integrationPeriod = "1m",
+       double withGreeksVal, double withJtdVAl,double withStochasticRecoveryVAL, double[] HedgingCDS, double lossUnitAmount = 0.0, string integrationPeriod = "1m",
     DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1)
         {
             int i, j, k;
@@ -350,10 +354,15 @@ namespace ValoLibrary
             bool isAmericanFixedLeg = false;
             bool withGreeks = false;
             bool withJTD = false;
+            bool withStochasticRecovery = false;
 
             if (withJtdVAl != 0)
             {
                 withJTD = true;
+            }
+            if (withStochasticRecoveryVAL != 0)
+            {
+                withStochasticRecovery = true;
             }
 
             if (isAmericanFloatLegVal != 0)
@@ -699,8 +708,8 @@ namespace ValoLibrary
                     {
                         double[] test0 = { ((double[])strikes)[0] };
                         double[] test1 = { ((double[])strikes)[1] };
-                        EuropeanLow[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, test0, DefaultProbability, ((double[])correl)[0], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);
-                        EuropeanHigh[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, test1, DefaultProbability, ((double[])correl)[1], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer, withGreeks, dBeta);
+                        EuropeanLow[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, test0, DefaultProbability, ((double[])correl)[0], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer,withStochasticRecovery, withGreeks, dBeta);
+                        EuropeanHigh[i-1] = CDOModel.EuropeanCDOLossUnit(numberOfIssuer, lossUnitAmount, test1, DefaultProbability, ((double[])correl)[1], (double[])betaAdder, CurrentZC, (double[])nominalIssuer, (double[])recoveryIssuer,withStochasticRecovery, withGreeks, dBeta);
                         European[i-1, 0] = (double)((object[,])EuropeanHigh[i - 1])[0, 1] - (double)((object[,])EuropeanLow[i - 1])[0, 1];
                         if (withGreeks)
                         {
@@ -952,7 +961,7 @@ namespace ValoLibrary
                             hedging_cds = AmericanSwap(maturity, 1, j, 1.0, ThisCDS.Recovery,
                                                         0,val1,cpnLastSettle, cpnPeriod,
                                                         cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
-                                                       betaAdder, val2, val3, withGreeksVal,0, null, lossUnitAmount,
+                                                       betaAdder, val2, val3, withGreeksVal,0,0, null, lossUnitAmount,
                                                         integrationPeriod, schedule, probMultiplier);
                         }
                         else
@@ -960,7 +969,7 @@ namespace ValoLibrary
                             hedging_cds = AmericanSwap(maturity, 1, j, 1.0, ThisCDS.Recovery,0,
                                            val1, cpnLastSettle, cpnPeriod,
                                            cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
-                                            betaAdder, val2, val3, withGreeksVal,0, null, 1.0,
+                                            betaAdder, val2, val3, withGreeksVal,0,0, null, 1.0,
                                            integrationPeriod, schedule, probMultiplier);
 
                         }
@@ -1064,10 +1073,10 @@ namespace ValoLibrary
                     hedging_cds = AmericanSwap(maturity, 1, i, 1.0, CreditDefaultSwapCurves.Curves[i].Recovery,
                             0, val1, cpnLastSettle, cpnPeriod,
                             cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, 0.0, 0.0, 0.0, 0.0,
-                           betaAdder, val2, val3, 0, 0, null, lossUnitAmount,
+                           betaAdder, val2, val3, 0, 0,0, null, lossUnitAmount,
                             integrationPeriod, schedule, probMultiplier);
                     string[,] test = AmericanSwap(maturity, numberOfIssuer, IssuerID, nominalIssuer, recoveryIssuer, standardSpread, inputSpread, cpnLastSettle, cpnPeriod, cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, fxCorrel,
-                        fxVol, strikes, correl, betaAdder, isAmericanFloatLegVal, isAmericanFixedLegVal, 0,0, HedgingCDS, lossUnitAmount, integrationPeriod, cpnSchedule, probMultiplier, dBeta);
+                        fxVol, strikes, correl, betaAdder, isAmericanFloatLegVal, isAmericanFixedLegVal, 0,0,0, HedgingCDS, lossUnitAmount, integrationPeriod, cpnSchedule, probMultiplier, dBeta);
                     x[6 + i, 6] =  double.Parse(test[0, 0])- double.Parse(x[0, 0]) + "";
                     x[6 + i, 7] = double.Parse(hedging_cds[0, 0]) - double.Parse(x[6+i,7]) + "";
 

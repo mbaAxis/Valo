@@ -546,12 +546,13 @@ string integrationPeriod = "1m";
 double dBeta = 0.01;
 double[] spreadStandard = { 100, 100 };
 double withJtd = -1;
+double withStochasticRecovery = 1;
 //double[] test = StrippingCDS.StripDefaultProbability(1, issuerList[0], paramDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4,false,"Curve points");
 double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
 //double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], paramDate, cdsRollDate, c3, CurveMaturity, pricingCurrency, 0.4, false, intensity);
 string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-    isAmericanFixedLeg, withGreeks,withJtd, hedgingCDS, null, integrationPeriod, 1, dBeta);
+    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
 for (int i = 0; i < cdot.GetLength(0); i++)
 {
     for (int j = 0; j < cdot.GetLength(1); j++)
@@ -561,3 +562,4 @@ for (int i = 0; i < cdot.GetLength(0); i++)
     Console.WriteLine(" ");
 }
 Console.WriteLine("FIN");
+
