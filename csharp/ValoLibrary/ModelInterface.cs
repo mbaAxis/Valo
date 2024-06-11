@@ -54,7 +54,7 @@ namespace ValoLibrary
             }
 
             double lossRateUnit = AmountUnit(numberOfNames, lossRates, optionalPrecision);
-            if(lossRateUnit < 0.01)//MODIF Stochastic Recovery, if not, let an infinite time computation problem
+            if(lossRateUnit < 0.01)//Modification for Stochastic Recovery, if not, the lossRateUnit will be near 0 and lead to a theoretical infinite computation time
             {
                 lossRateUnit = 0.01;
             }
@@ -562,14 +562,14 @@ namespace ValoLibrary
             }
             else if(IsCDO && withJTD)
             {
-                x = new string[6 + numberOfIssuer + 1, 10];//MODIF JTD , 6 colonnes originalement
+                x = new string[6 + numberOfIssuer + 1, 10];//Modification Jump-to-Default, columns are added
                 x[6, 0] = "dPV"; // dPV/dCDS_PV
                 x[6, 1] = "dHedge";
                 x[6, 2] = "delta not. (Hedge Crncy)";
                 x[6, 3] = "delta not. (Product CCY)";
                 x[6, 4] = "dPV(dBeta)";
                 x[6, 5] = "Name";
-                x[6, 6] = "Jump to Default";//MODIF JTD
+                x[6, 6] = "Jump to Default";
                 x[6, 7] = "dHedge JTD";
                 x[6, 8] = "delta not. (Hedge Crncy)";
                 x[6, 9] = "delta not. (Product CCY)";
@@ -1041,7 +1041,7 @@ namespace ValoLibrary
 
             if (IsCDO && withJTD && withGreeks)
             {
-                double defaultSpread = 1.998;//MODIF JTD
+                double defaultSpread = 1.998;//Modification Jump-to-Default, highest constant for the spread such that it compiles and let the possibility to simulate a default
                 double[] shockedCurve = new double[9];
                 string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };//MODIF JTD, temporaire
                 string intensity = "Curvepoint";//MODIF JTD, temporaire

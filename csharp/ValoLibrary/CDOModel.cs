@@ -374,7 +374,7 @@ namespace ValoLibrary
                         {
                             distrib[j, i] = distrib[j, 0] / omp;
 
-                            if(omp == 0)//MODIF ICHAK JTD TEST
+                            if(omp == 0)//Modification Jump-to-Default, if omp = 0, we give a value to distrib rather than infinite
                             {
                                 distrib[j, i] = Math.Sign(distrib[j, 0]);
                             }
@@ -384,7 +384,7 @@ namespace ValoLibrary
                         {
                             distrib[j, i] = (distrib[j, 0] - distrib[j - (int) lossUnitIssuer[i], i] * p) / omp;
 
-                            if (omp == 0)//MODIF ICHAK JTD TEST
+                            if (omp == 0)//Modification Jump-to-Default, same
                             {
                                 distrib[j, i] = Math.Sign(distrib[j, 0] - distrib[j - (int)lossUnitIssuer[i], i] * p);
                             }
@@ -708,7 +708,7 @@ namespace ValoLibrary
             cumulLossUnitIssuer[0] = 0;
             if (withStochasticRecovery)
             {
-                double[] recovery = StochasticRecovery(numberOfIssuer, defaultProbability, betaVector);//MODIF STO RECOV
+                double[] recovery = StochasticRecovery(numberOfIssuer, defaultProbability, betaVector);//Modification Stochastic Recovery
                 lossUnitAmount = ModelInterface.LossUnit(numberOfIssuer, nominalIssuer, recovery);
                 for (int issuerCounter = 1; issuerCounter <= numberOfIssuer; issuerCounter++)
                 {
@@ -882,7 +882,6 @@ namespace ValoLibrary
                     factorWeight = gaussHermiteWeight[factorCounter];
                     remainingWeights -= factorWeight;
 
-                    //Stochastic Recovery PART MODIF
                     for (int i = 0; i < numberOfIssuer; i++)
                     {
                         if (defaultProbability[i] == 0.0)
@@ -894,15 +893,15 @@ namespace ValoLibrary
                             defaultThreshold[i] = Normal.InvCDF(0.0, 1.0, defaultProbability[i]);
                         }
                         stochasticRecoveryKnowingFactor[i] = 0;
-                        for (int j = 0; j <= stochasticProbabilities.Length; j++)
+                        for (int j = 0; j <= stochasticProbabilities.Length; j++)//See Krekel article on the Stochastic Recovery to understand what's done here
                         {
                             double p = 0;
                             for (int m = 0; m < j; m++)
                             {
                                 p += stochasticProbabilities[m];
                             }
-                            defaultProbKnowingFactorSR[i, j] = defaultProbability[i] * (1 - p);
-                            defaultThresholdSR[i, j] = Normal.InvCDF(0.0, 1.0, defaultProbKnowingFactorSR[i, j]);
+                            defaultProbKnowingFactorSR[i, j] = defaultProbability[i] * (1 - p);//qij
+                            defaultThresholdSR[i, j] = Normal.InvCDF(0.0, 1.0, defaultProbKnowingFactorSR[i, j]);//cij
                             if (j > 0)
                             {
                                 double beta = betaVector[i];
@@ -914,8 +913,6 @@ namespace ValoLibrary
                         }
                         stochasticRecoveryIntegrated[i] += stochasticRecoveryKnowingFactor[i] * factorWeight;
                     }
-
-                    //FIN part
 
                     if ((numberOfIssuer + 1) * numberOfIssuer / 2.0 * remainingWeights < 1.0 * 0.0001)
                     {

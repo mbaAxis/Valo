@@ -64,7 +64,7 @@ namespace ValoLibrary
                 if (string.Equals(CreditDefaultSwapCurves.Curves[LastCDSCurveID - 1].CDSName, CDSName, StringComparison.OrdinalIgnoreCase))
                 {
                     CreditDefaultSwapCurves.LastError = false;
-                    return LastCDSCurveID-1;//MODIF JTD
+                    return LastCDSCurveID-1;//Modification Jump-to-Default, error if not
                 }
             }
 
@@ -409,7 +409,7 @@ namespace ValoLibrary
                     PreviousDate = NextDate;
                     CurrentProbNoDefault = NextProbNoDefault;
                     FullDefaultProb[j - zcCdsDateOffset, Scenario] = 1 - NextProbNoDefault;
-                    if (Double.IsInfinity(NextProbNoDefault))//MODIF ICHAK JTD
+                    if (Double.IsInfinity(NextProbNoDefault))//Modification Jump-to-Default, take the case where this variable is ifinite and give it a value that the code can handle
                     {
                         FullDefaultProb[j - zcCdsDateOffset, Scenario] = 1;
                     }
@@ -770,7 +770,7 @@ namespace ValoLibrary
                                 RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario] = NextRiskyZC;
                                 CDS_PV = GetCDS_PV(ParamDate, CDSRollDate, ZC, PreviousCalcMonth, NextCalcMonth, LossRate, CDSSpread, Scenario, zcCdsDateOffset);
                                 k += 1;
-                                if (CDS_PV == 0||Double.IsNaN(CDS_PV))//MODIF Ichak, jump to default
+                                if (CDS_PV == 0||Double.IsNaN(CDS_PV))//Modification Jump-to-Default, we get out of the function if the Present Value of the CDS is wrong
                                 {
                                     break;
                                 }
@@ -875,7 +875,7 @@ namespace ValoLibrary
                     if (CDSSpread != 0)
                     {
                         NextCalcMonth = (int)UtilityDates.MonthPeriod(CurveMaturity[CurvePointCounter], CDSRollDate);
-                        if(Double.IsNaN(RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario])||Double.IsInfinity(RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario]))//MODIF JUMP TO DEFAULT ichak
+                        if(Double.IsNaN(RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario])||Double.IsInfinity(RiskyZC[NextCalcMonth - zcCdsDateOffset, Scenario]))//Modification Jump-to-Default, handling infinite value
                         {
                             Res[CurvePointCounter + CDSCurvePointNumber * Scenario] = 1.0;
                         }
