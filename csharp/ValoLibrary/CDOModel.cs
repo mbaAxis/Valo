@@ -827,7 +827,6 @@ namespace ValoLibrary
             double remainingWeights;
             int factorCounter;
             int nbOfGaussHermitePoints = 64;
-            //int gaussHermiteAbscissaLength = 64;
             double gaussHermiteMidTable = nbOfGaussHermitePoints / 2 + 1;
             double[] gaussHermiteAbscissa = new double[]
             {
@@ -902,6 +901,10 @@ namespace ValoLibrary
                             }
                             defaultProbKnowingFactorSR[i, j] = defaultProbability[i] * (1 - p);//qij
                             defaultThresholdSR[i, j] = Normal.InvCDF(0.0, 1.0, defaultProbKnowingFactorSR[i, j]);//cij
+                            if (defaultProbKnowingFactorSR[i, j] < 1E-10)
+                            {
+                                defaultThresholdSR[i, j] = -100;
+                            }
                             if (j > 0)
                             {
                                 double beta = betaVector[i];
@@ -919,6 +922,7 @@ namespace ValoLibrary
                         break;
                     }
                 }
+
             }
 
             return stochasticRecoveryIntegrated;

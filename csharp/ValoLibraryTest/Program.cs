@@ -515,12 +515,13 @@ DateTime cdsRollDate = new DateTime(2024, 6, 20);
 int[] issuer = { 1, 2, 3 };
 string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
 double[] c1 = { 0.0, 0.00133, 0.0020, 0.0026, 0.00316, 0.0, 0.004, 0.0044, 0.0048 };
-double[] c2 = { 0.0, 1.98, 1.98, 1.98, 1.98, 0.0, 1.98, 1.98, 1.98 };
-//double[] c2 = { 0.0, 0.0008, 0.0011, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
+//double[] c2 = { 0.0, 1.98, 1.98, 1.98, 1.98, 0.0, 1.98, 1.98, 1.98 };
+double[] c2 = { 0.0, 0.0008, 0.0011, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
 double[] c3 = { 0.0, 0.0006, 0.0010, 0.0018, 0.0027, 0.0, 0.0040, 0.0051, 0.0062 };
 
 string maturity = "5Y";
-double[] strikes = { 0.0, 3.0 };
+//double[] strikes = { 0.0, 3.0 };
+double[] strikes = { 65.0, 100.0 };
 double[] correl = { 0.4, 0.5 };
 string pricingCurrency = "JPY";
 int numberOfIssuer = 3;
