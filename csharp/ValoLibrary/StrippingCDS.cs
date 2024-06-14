@@ -1094,8 +1094,20 @@ namespace ValoLibrary
             double lambda = -Math.Log(-(DP[0] - 1))/dt;
             double newdt = UtilityDates.DurationYear(UtilityDates.ConvertDate(CDSRollDate, "5Y"), paramDate);
             double DP5Y = 1 - Math.Exp(-newdt*lambda);
-            curveMaturity = new string[] { maturity, "5Y"};
-
+            int k = 0;
+            if(MaturityDate>UtilityDates.ConvertDate(CDSRollDate, "5Y"))
+            {
+                curveMaturity = new string[] {  "5Y" , maturity,};
+                k = 1;
+            }
+            else if(MaturityDate > UtilityDates.ConvertDate(CDSRollDate, "5Y"))
+            {
+                curveMaturity = new string[] { maturity, "5Y" };
+            }
+            else
+            {
+                return spread;
+            }
 
             double dp = 0;
             double error = 0.01;
@@ -1103,9 +1115,23 @@ namespace ValoLibrary
             do
             {
                 m = (a + b) / 2;
-                spreadCurve = new double[] { spread, m };
+                if (k == 0)
+                {
+                    spreadCurve = new double[] { spread, m };
+                }
+                else
+                {
+                    spreadCurve = new double[] { m, spread };
+                }
                 double[] spreade = StripDefaultProbability(id, "test", paramDate, CDSRollDate, spreadCurve, curveMaturity, currency, recovery, false, intensity);
-                dp = spreade[1];
+                if (k == 0)
+                {
+                    dp = spreade[1];
+                }
+                else
+                {
+                    dp = spreade[0];
+                }
                 if ( DP5Y -dp<= 0)
                 {
                     b = m;

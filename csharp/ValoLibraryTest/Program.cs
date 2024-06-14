@@ -552,6 +552,22 @@ double withStochasticRecovery = 1;
 //    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
 double t = StrippingCDS.getSpreadIchak(3, "test", 0.009796, "1Y", paramDate, cdsRollDate, 0.4, intensity, pricingCurrency);
 Console.WriteLine("ok: " + t);
+string[] years = { "2Y", "1Y", "2Y", "1Y", "4Y", "6Y", "3Y", "3Y", "1Y", "1Y", "1Y", "3Y", "1Y", "3Y", "2Y", "3Y", "3Y", "3Y", "2Y", "1Y", "2Y", "2Y", "2Y", "2Y", "2Y", "2Y", "8Y", "1Y", "2Y", "2Y", "1Y", "2Y", "2Y", "2Y", "1Y", "6Y", "3Y", "1Y", "1Y", "1Y", "1Y", "2Y", "2Y", "5Y", "2Y", "1Y", "1Y", "4Y", "1Y", "3Y", "10Y", "2Y", "3Y", "2Y", "2Y", "2Y", "2Y", "2Y", "5Y", "9Y", "4Y", "2Y", "2Y", "2Y", "5Y", "1Y", "2Y", "1Y", "2Y", "3Y", "2Y", "1Y", "4Y", "3Y", "2Y", "4Y", "3Y", "2Y", "1Y", "1Y", "3Y", "2Y", "3Y", "2Y", "1Y", "2Y", "1Y", "3M", "1Y", "2Y" };
+double[] spreads = {0.88, 1.63, 1.63, 1.75, 1.25, 3.40, 1.38, 3.85, 1.63, 0.38, 1.00, 3.38, 1.25, 1.00, 0.88, 0.50, 3.40, 2.50, 1.38, 1.00, 1.38, 1.13, 0.75, 4.00, 0.75, 3.75, 3.75, 2.38, 2.38, 0.63, 2.75,
+    3.88, 3.88, 3.00, 1.75, 2.50, 1.15, 2.75, 1.25, 2.00, 1.38, 1.25, 1.25, 6.88, 0.50, 2.38,
+    0.88, 3.63, 1.13, 5.13, 15.00, 1.50,
+    0.57, 1.00, 3.38, 2.50, 1.75, 2.97, 4.38, 5.63, 1.50, 1.25, 1.63, 1.13, 0.55, 0.88, 2.25, 1.75, 0.13, 5.63, 0.75, 1.88, 3.88, 1.63,
+    1.13, 5.75, 0.50, 1.38, 1.00, 1.38, 0.88,
+    1.50, 3.00, 1.88, 1.88, 2.25, 0.63, 1.63, 1.50, 0.75};
+double[] vraispreads = new double[spreads.Length];
+for (int i = 0; i < spreads.Length; i++)
+{
+    spreads[i] = spreads[i] / 100;
+    vraispreads[i] = StrippingCDS.getSpreadIchak(3+i, "test", spreads[i], years[i], paramDate, cdsRollDate, 0.4, intensity, pricingCurrency);
+    Console.Write(vraispreads[i]+"|");
+}
+
+
 //for (int i = 0; i < cdot.GetLength(0); i++)
 //{
 //    for (int j = 0; j < cdot.GetLength(1); j++)
