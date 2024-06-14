@@ -517,17 +517,15 @@ string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y",
 double[] c1 = { 0.0, 0.00133, 0.0020, 0.0026, 0.00316, 0.0, 0.004, 0.0044, 0.0048 };
 //double[] c2 = { 0.0, 1.98, 1.98, 1.98, 1.98, 0.0, 1.98, 1.98, 1.98 };
 double[] c2 = { 0.0, 0.0008, 0.0011, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
-double[] c3 = { 0.0, 0.0006, 0.0010, 0.0018, 0.0027, 0.0, 0.0040, 0.0051, 0.0062 };
-
+double[] c3 = { 0.45 };
+string[] curveMaturityc3 = { "2Y" };
 string maturity = "5Y";
 //double[] strikes = { 0.0, 3.0 };
 double[] strikes = { 65.0, 100.0 };
 double[] correl = { 0.4, 0.5 };
 string pricingCurrency = "JPY";
 int numberOfIssuer = 3;
-//string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU", "Adecco_MMR.EUR.SU" };
 string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU" };
-//double[] nominalIssuer = { 1.0, 1.0, 1.0 };
 double[] nominalIssuer = { 1.0, 1.0 };
 double spread = 0.05;
 string cpnPeriod = "3m";
@@ -535,9 +533,7 @@ string cpnConvention = "LongFirst";
 string cpnLastSettle = "";
 double fxCorrel = -0.05;
 double fxVol = 0.1;
-//double[] betaAdder = { 0.0, 0.0, 0.0 };
 double[] betaAdder = { 0.0, 0.0 };
-//double[] recoveryIssuer = { 0.4, 0.4, 0.4 };
 double[] recoveryIssuer = { 0.4, 0.4 };
 double isAmericanFloatLeg = -1;
 double isAmericanFixedLeg = -1;
@@ -549,19 +545,20 @@ double dBeta = 0.01;
 double[] spreadStandard = { 100, 100 };
 double withJtd = -1;
 double withStochasticRecovery = 1;
-//double[] test = StrippingCDS.StripDefaultProbability(1, issuerList[0], paramDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4,false,"Curve points");
-double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
-//double[] test2 = StrippingCDS.StripDefaultProbability(3, issuerList[2], paramDate, cdsRollDate, c3, CurveMaturity, pricingCurrency, 0.4, false, intensity);
-string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
-    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
-for (int i = 0; i < cdot.GetLength(0); i++)
-{
-    for (int j = 0; j < cdot.GetLength(1); j++)
-    {
-        Console.Write(cdot[i, j] + " | ");
-    }
-    Console.WriteLine(" ");
-}
-Console.WriteLine("FIN");
+//double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
+//double[] test = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsRollDate, c3, curveMaturityc3, pricingCurrency, 0.4, false, intensity);
+//string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+//    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
+double t = StrippingCDS.getSpreadIchak(3, "test", 0.009796, "1Y", paramDate, cdsRollDate, 0.4, intensity, pricingCurrency);
+Console.WriteLine("ok: " + t);
+//for (int i = 0; i < cdot.GetLength(0); i++)
+//{
+//    for (int j = 0; j < cdot.GetLength(1); j++)
+//    {
+//        Console.Write(cdot[i, j] + " | ");
+//    }
+//    Console.WriteLine(" ");
+//}
+//Console.WriteLine("FIN");
 
