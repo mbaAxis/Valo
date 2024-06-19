@@ -8,6 +8,7 @@ from data_importation_preprocessing.data_getters import getters, preprocess_data
 from Moteur.path_generation import path_generator
 from Payoff import PayoffCalculator
 from Moteur.greeks import GreeksComputations
+from Moteur.FHC_computation_2 import Autocall_delta_hedging
 import time
 import os
 import matplotlib.pyplot as plt
@@ -67,7 +68,7 @@ def main():
     print('payoff matrix')
     print(payoff_matrix)
 
-    price = pc.compute_price(n, notional, payoff_matrix, curve, T, freq_obs)
+    price = pc.compute_price(n, notional, payoff_matrix, curve, obs_dates)
     print('price of Autocall', price)
 
     delta, gamma, vega, vomma = GreeksComputations(n, paths, curve, dividends_matrix, N, T, init_stock, list_params_matrix, vol_type, price, payoff_matrix,
@@ -77,6 +78,12 @@ def main():
     print('gamma', gamma)
     print('vega', vega)
     print('vomma', vomma)
+    transaction_costs, portfolio_values = Autocall_delta_hedging(n,N, paths,T,dividends_matrix,list_params_matrix,vol_type,notional,freq_obs, BP, AT, coupon,curve,nbr_hedges).FHC_MC_approach(S_matrix,T,price,delta,init_stock,nbr_hedges,ks = 0.001,step_size=252)
+    hedge_dates = Autocall_delta_hedging.compute_hedge_dates(T, nbr_hedges)
+    hedge_dates = np.insert(hedge_dates, 0, 0)
+    plt.plot(hedge_dates, np.array(portfolio_values), label='Hedged')
+    plt.legend()
+    plt.show()
     end_time = time.time()
     print(end_time - start_time)
 
@@ -102,6 +109,7 @@ if __name__ == "__main__":
     coupon = 0.1
     freq_obs = 4
     T = 1
+    nbr_hedges = 21
     print('my delta is higher because SG is computing sticky delta which tends to be lower than delta when the iv surface has downward then upward slopes')
     main()
 

@@ -12,7 +12,6 @@ def price_eval_matrix(N,obs_dates,evaluation_matrix,AT,total_nbr_obs,k):
     payoff_kg_matrix = np.zeros((N, len(obs_dates)))
 
     for obs in range(len(obs_dates) - 1):
-        print('slice to evaluate ', evaluation_matrix[:, obs])
         condition_1 = evaluation_matrix[:, obs] >= AT[obs]
         state_min = np.min(state_matrix[:, :], axis=1)
         payoff_coupon_matrix[:, obs] = np.where(condition_1, (T * (obs + 1+ k) / total_nbr_obs) * coupon * state_min, 0)

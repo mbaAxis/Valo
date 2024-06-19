@@ -36,10 +36,10 @@ class GreeksComputations:
                          self.freq_obs, self.BP, self.AT, self.coupon, self.obs_dates)
         _,_,_,_,payoff_matrix = pc.compute_payoff()
         if self.n > 1:
-            prices = [pc.compute_price(1, self.notional, payoff_matrix[i], self.curve, self.T, self.freq_obs) for i in range(payoff_matrix.shape[0])]
+            prices = [pc.compute_price(1, self.notional, payoff_matrix[i], self.curve,self.obs_dates) for i in range(payoff_matrix.shape[0])]
             return np.array(prices)
         else :
-            price = pc.compute_price(1, self.notional, payoff_matrix, self.curve, self.T, self.freq_obs)
+            price = pc.compute_price(1, self.notional, payoff_matrix, self.curve,self.obs_dates )
             return np.array(price)
 
 

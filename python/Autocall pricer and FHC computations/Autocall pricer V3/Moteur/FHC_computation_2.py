@@ -4,124 +4,111 @@ from Moteur.greeks import GreeksComputations
 from Payoff import PayoffCalculator
 from data_importation_preprocessing.data_getters import getters
 import bisect
+import matplotlib.pyplot as plt
 loaded_matrix = np.load(r'C:\Users\m.ben-el-ghoul\PycharmProjects\Autocall pricer V3\matrix.npy')
 params = np.load(r'C:\Users\m.ben-el-ghoul\PycharmProjects\Autocall pricer V3\params.npy')
-def price_eval_matrix(N,obs_dates,evaluation_matrix,AT,total_nbr_obs,k):
-    state_matrix = np.ones((N, len(obs_dates)))
-    payoff_coupon_matrix = np.zeros((N, len(obs_dates)))
-    payoff_kg_matrix = np.zeros((N, len(obs_dates)))
-    for obs in range(len(obs_dates) - 1):
-        condition_1 = evaluation_matrix[:, obs] >= AT[obs]
-        state_min = np.min(state_matrix[:, :], axis=1)
-        payoff_coupon_matrix[:, obs] = np.where(condition_1, (T * (obs + 1+ k) / total_nbr_obs) * coupon * state_min, 0)
-        payoff_kg_matrix[:, obs] = np.where(condition_1, state_min, 0)
-        state_matrix[:, obs] = np.where(condition_1, 0, state_matrix[:, obs])
-    final_state_min = np.min(state_matrix[:, :], axis=1)
-    payoff_coupon_matrix[:, -1], payoff_kg_matrix[:, -1] = calculate_final_payoffs(
-        evaluation_matrix[:, -1], final_state_min, AT[-1], BP)
-    payoff_matrix = payoff_coupon_matrix + payoff_kg_matrix
-    return evaluation_matrix, payoff_coupon_matrix, payoff_kg_matrix, state_matrix, payoff_matrix
 
-def calculate_final_payoffs(evaluation_final, state_min, AT_final, BP):
-    '''
-    computes the payoff at the last observation dates
-    '''
-    comparison_AT = evaluation_final >= AT_final
-    comparison_BP = (evaluation_final < AT_final) & (evaluation_final >= BP)
-    payoff_coupon_final = np.where(comparison_AT,T * coupon * state_min, 0)
-    payoff_kg_final = np.where(comparison_AT, state_min, 0)
-    payoff_kg_final = np.where(comparison_BP, state_min, payoff_kg_final)
-    payoff_kg_final = np.where(~comparison_AT & ~comparison_BP, state_min, payoff_kg_final)
-    payoff_coupon_final = np.where(~comparison_AT & ~comparison_BP, -(1 - evaluation_final) * state_min, payoff_coupon_final)
-    return payoff_coupon_final, payoff_kg_final
-def compute_payoff(n,N,evaluation_matrix,obs_dates,AT,total_nbr_obs,k):
-    '''
-    computes the payoff for a single or multi asset
-    '''
-    AT = np.full(len(obs_dates),AT)
-    return price_eval_matrix(N,obs_dates,evaluation_matrix,AT,total_nbr_obs,k)
+class Autocall_delta_hedging:
+    def __init__(self,n,N, paths,T,dividends_matrix,list_params_matrix,vol_type,notional,freq_obs, BP, AT, coupon,curve,nbr_hedges):
+        self.n = n
+        self.N = N
+        self.paths = paths
+        self.T = T
+        self.dividends_matrix = dividends_matrix
+        self.list_params_matrix = list_params_matrix
+        self.vol_type = vol_type
+        self.notional = notional
+        self.freq_obs = freq_obs
+        self.BP = BP
+        self.AT = AT
+        self.coupon = coupon
+        self.curve = curve
+        self.nbr_hedges = nbr_hedges
+        self.obs_dates = PayoffCalculator.compute_obs_dates(self.T,self.freq_obs)
+    def compute_payoff(self,evaluation_matrix,obs_dates_new,total_nbr_obs,k):
+        AT = np.full(len(obs_dates_new),self.AT)
+        state_matrix = np.ones((self.N,len(obs_dates_new)))
+        payoff_coupon_matrix = np.zeros((self.N,len(obs_dates_new)))
+        payoff_kg_matrix = np.zeros((self.N,len(obs_dates_new)))
+        for obs in range(len(obs_dates_new) - 1):
+            condition_1 = evaluation_matrix[:, obs] >= AT[obs]
+            state_min = np.min(state_matrix[:, :], axis=1)
+            payoff_coupon_matrix[:, obs] = np.where(condition_1, (self.T * (obs + 1 + k) / total_nbr_obs) * self.coupon * state_min,0)
+            payoff_kg_matrix[:, obs] = np.where(condition_1, state_min, 0)
+            state_matrix[:, obs] = np.where(condition_1, 0, state_matrix[:, obs])
+        final_state_min = np.min(state_matrix[:, :], axis=1)
+        payoff_coupon_matrix[:, -1], payoff_kg_matrix[:, -1] = PayoffCalculator.calculate_final_payoffs(self.T,evaluation_matrix[:, -1], final_state_min, AT[-1],self.BP,self.coupon)
+        payoff_matrix = payoff_coupon_matrix + payoff_kg_matrix
+        return evaluation_matrix, payoff_coupon_matrix, payoff_kg_matrix, state_matrix, payoff_matrix
+    @staticmethod
+    def compute_hedge_dates(T,nbr_hedges,step_size = 252):
+        hedge_intervals = T * step_size / nbr_hedges
+        hedge_dates = np.array([int(i * hedge_intervals) for i in range(1, int(np.ceil(T * step_size / hedge_intervals)))])
+        return hedge_dates
 
-def compute_price(n, notional, matrice, curve,obs_dates_new):
-    '''
-    discounts the payoffs to compute the prices
-    :return:
-    '''
-    if n > 1:
-        price = [np.mean(matrice[:, :, i]) * np.exp(-0.01 * curve(obs_dates_new[i] / 252) * obs_dates_new[i] / 252) for i in
-                 range(len(obs_dates_new))]
-    else:
-        price = [np.mean(matrice[:, i]) * np.exp(-0.01 * curve(obs_dates_new[i] / 252) * obs_dates_new[i] / 252) for i in
-                 range(len(obs_dates_new))]
-    return notional * np.array(price).sum()
-def count_nbr_hedges(array1, array2):
-    array = np.zeros_like(array2)
-    i, count = 0, 0
-    for j, elem in enumerate(array2):
-        while i < len(array1) and array1[i] < elem:
-            count += 1
-            i += 1
-        array[j] = count
-    result = np.zeros_like(array)
-    result[0] = array[0]
-    result[1:] = array[1:] - array[:-1]
-    return result
-def FHC_MC_approach(n,N,S_matrix,T,init_price,init_delta,init_spot,nbr_hedges,freq_obs,BP,AT,coupon,step_size=252):
-    hedge_intervals = T*step_size/nbr_hedges
-    hedge_dates = np.array([int(i*hedge_intervals) for i in range(1,int(np.ceil(T*step_size/hedge_intervals)))])
-    portfolio_value = init_price-init_spot*init_delta
-    transaction_cost = 0
-    portfolio_values = []
-    transaction_costs = []
-    transaction_costs.append(transaction_cost)
-    portfolio_values.append(portfolio_value)
-    obs_dates = PayoffCalculator.compute_obs_dates(T, freq_obs)
-    print(obs_dates)
-    print(hedge_dates)
-    prev_pos = 0
-    k = 0
-    total_nbr_obs = len(obs_dates)
-    for hedge_date in hedge_dates:
+    def compute_price_at_hedge_date(self,coupon_counter, position_counter,obs_dates,hedge_date,init_spot):
         position = bisect.bisect_left(obs_dates, hedge_date)
-        if position != prev_pos:
-            prev_pos = position
-            k = k + 1
-        print(hedge_date)
+        if position != coupon_counter:
+            position_counter = position
+            coupon_counter = coupon_counter + 1
         obs_dates_new = [x for x in obs_dates - hedge_date if x > 0]
-        init_spot = S_matrix[:, int(hedge_intervals)].mean()
-        matrix,matrix_up,matrix_down = [path_generator().generate_paths(n,paths, curve,dividends_matrix, N,(T - hedge_date / 252),
-                                                       init_spot,
-                                                       list_params_matrix, vol_type, 'Delta', shock) for shock in [None,'Up','Down']]
-        S_matrix = matrix
-        eval_matrix,eval_matrix_up,eval_matrix_down = [mat[:,obs_dates_new]/matrix[:,0][:, np.newaxis] for mat in [matrix,matrix_up,matrix_down]]
-        results = [compute_payoff(n, N, evaluation_matrix, obs_dates_new, AT, total_nbr_obs, k)
-                   for evaluation_matrix in [eval_matrix,eval_matrix_up,eval_matrix_down]]
+        matrix, matrix_up, matrix_down = [
+            path_generator().generate_paths(self.n, self.paths, self.curve, self.dividends_matrix, self.N, (self.T - hedge_date / 252),init_spot,
+                                            self.list_params_matrix, self.vol_type, 'Delta', shock) for shock in [None, 'Up', 'Down']]
+        init_spot = matrix[:, int(self.T * 252 / self.nbr_hedges)].mean()
+        spot_hedge_date = matrix[:,0].mean()
+        eval_matrix, eval_matrix_up, eval_matrix_down = [mat[:, obs_dates_new] / matrix[:, 0][:, np.newaxis] for mat in
+                                                         [matrix, matrix_up, matrix_down]]
+        results = [self.compute_payoff(evaluation_matrix, obs_dates_new, len(obs_dates), coupon_counter)
+                   for evaluation_matrix in [eval_matrix, eval_matrix_up, eval_matrix_down]]
         (_, _, _, sm, pm), (_, _, _, sm_up, pm_up), (_, _, _, sm_down, pm_down) = results
-        price,price_up,price_down = [compute_price(n,notional,payoff_matrix,curve,obs_dates_new) for payoff_matrix in [pm,pm_up,pm_down]]
+        price, price_up, price_down = [PayoffCalculator.compute_price(self.n, self.notional, payoff_matrix, self.curve, obs_dates_new) for payoff_matrix in [pm, pm_up, pm_down]]
+        return coupon_counter, position_counter, price, price_up, price_down,spot_hedge_date,init_spot
 
-        print('price',price)
-        print('price up', price_up)
-        print('price down',price_down)
-        delta = ((price_up - price_down)/(2*init_spot.mean()*0.1))
-        print('delta',delta)
-        portfolio_value = (portfolio_value)* np.exp(curve(hedge_date / 252)/100 * hedge_date / 252) + (
-                    delta - init_delta) * matrix[:,0].mean()
-        transaction_cost = transaction_cost * np.exp(curve(hedge_date / 252)/100 * hedge_date / 252) - ks * np.abs(
-            (delta - init_delta)) * matrix[:,0].mean()
-        transaction_costs.append(transaction_cost)
-        portfolio_values.append(portfolio_value)
-        init_delta = delta
-    #print(transaction_costs)
-    #print(portfolio_values)
-    print('hedging cost', transaction_cost*(-1)*np.exp(-curve(T)/100 * T))
-    return obs_dates, hedge_dates
+    def initialize_portfolio(self, init_price, init_spot, init_delta):
+        portfolio_value = init_price - init_spot * init_delta
+        transaction_cost = 0
+        return portfolio_value, transaction_cost, [portfolio_value], [transaction_cost]
+    def FHC_MC_approach(self,S_matrix,T,init_price,init_delta,init_spot,nbr_hedges,ks = 0.001,step_size=252):
+        hedge_dates = Autocall_delta_hedging.compute_hedge_dates(self.T,nbr_hedges)
+        obs_dates = PayoffCalculator.compute_obs_dates(self.T, self.freq_obs)
+        portfolio_value, transaction_cost, portfolio_values, transaction_costs = self.initialize_portfolio(init_price, init_spot, init_delta)
+        portfolio_no_hedging = []
+        portfolio_no_hedging.append(init_price)
+        print(obs_dates)
+        print(hedge_dates)
+        position_counter, coupon_counter = 0,0
+        init_spot = S_matrix[:, int(self.T * 252 / nbr_hedges)].mean()
+        for hedge_date in hedge_dates:
+            print(hedge_date)
+            coupon_counter,position_counter, price, price_up, price_down,spot_hedge_date,init_spot = self.compute_price_at_hedge_date(coupon_counter,position_counter,obs_dates,hedge_date,init_spot)
+            discount_factor = np.exp(self.curve(hedge_date / 252) / 100 * hedge_date / 252)
+            print('price',price)
+            print('price up', price_up)
+            print('price down',price_down)
+            delta = ((price_up - price_down)/(2*spot_hedge_date*0.15))
+            print('delta',delta)
+            portfolio_value = portfolio_value*discount_factor - (delta - init_delta) * spot_hedge_date
+            transaction_cost = transaction_cost * discount_factor - ks * np.abs(delta - init_delta) * spot_hedge_date
+            init_delta = delta
+            transaction_costs.append(transaction_cost)
+            portfolio_values.append(portfolio_value)
+            portfolio_no_hedging.append(price)
+        print('hedging cost', transaction_cost*(-1)*np.exp(-self.curve(self.T)/100 * self.T))
+        return transaction_costs,portfolio_values,portfolio_no_hedging
 
 
 
 
+# Example usage
+# Ensure to define all required variables and imports before running the example usage
+# n, N, S_matrix, T, init_price, init_delta, init_spot, nbr_hedges, freq_obs, BP, AT, coupon, step_size
+# auto_call = DeltaHedgingAutoCall(...)
+# obs_dates, hedge_dates, portfolio_values, transaction_costs = auto_call.run_hedging_strategy()
 
 
-paths = r'C:\Users\m.ben-el-ghoul\PycharmProjects\Autocall pricer\data and keys\AIRBUS_25_04_2024.xlsx'
-vol_type = 'LV'
+#paths = r'C:\Users\m.ben-el-ghoul\PycharmProjects\Autocall pricer\data and keys\AIRBUS_25_04_2024.xlsx'
+'''vol_type = 'LV'
 list_params_matrix = params
 dividends_matrix = np.array([1])
 n = 1
@@ -139,9 +126,14 @@ init_delta = 0.03228550160293015
 curve = getters().get_riskless_rates()
 notional = 100
 ks = 0.01
-a,b = FHC_MC_approach(n,N,S_matrix,T,init_price,init_delta,init_spot,nbr_hedges,freq_obs,BP,AT,coupon)
-
-
+transaction_costs,portfolio_values,portfolio_no_hedging = Autocall_delta_hedging(n,N,T,freq_obs,BP,AT,coupon).FHC_MC_approach(S_matrix,T,init_price,init_delta,init_spot,nbr_hedges,step_size=252)
+#a,b = FHC_MC_approach(n,N,S_matrix,T,init_price,init_delta,init_spot,nbr_hedges,freq_obs,BP,AT,coupon)
+hedge_dates = Autocall_delta_hedging.compute_hedge_dates(T,nbr_hedges)
+hedge_dates = np.insert(hedge_dates,0,0)
+plt.plot(hedge_dates, np.array(portfolio_values), label = 'Hedged')
+plt.plot(hedge_dates, np.array(portfolio_no_hedging), label = 'No hedge')
+plt.legend()
+plt.show()'''
 #Façon brute ( comme dans la thése ) avec des frequences de hedge bien determiné
 #Façon brute ( comme dans la thése ) avec des limites sur les sensi
 #Façon BNP .

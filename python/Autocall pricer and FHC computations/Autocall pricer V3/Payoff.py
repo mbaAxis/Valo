@@ -83,29 +83,31 @@ class PayoffCalculator:
             state_matrix[:, obs] = np.where(condition_1, 0, state_matrix[:, obs])
 
         final_state_min = np.min(state_matrix[:, :], axis=1)
-        payoff_coupon_matrix[:, -1], payoff_kg_matrix[:, -1] = self.calculate_final_payoffs(
-            self.evaluation_matrix[:, -1], final_state_min, AT[-1], self.BP)
+        payoff_coupon_matrix[:, -1], payoff_kg_matrix[:, -1] = PayoffCalculator.calculate_final_payoffs(self.T,
+            self.evaluation_matrix[:, -1], final_state_min, AT[-1], self.BP,self.coupon)
         payoff_matrix = payoff_coupon_matrix + payoff_kg_matrix
         return self.evaluation_matrix, payoff_coupon_matrix, payoff_kg_matrix, state_matrix, payoff_matrix
-    def calculate_final_payoffs(self, evaluation_final, state_min, AT_final, BP):
+    @staticmethod
+    def calculate_final_payoffs(T,evaluation_final, state_min, AT_final, BP,coupon):
         '''
         computes the payoff at the last observation dates
         '''
         comparison_AT = evaluation_final >= AT_final
         comparison_BP = (evaluation_final < AT_final) & (evaluation_final >= BP)
-        payoff_coupon_final = np.where(comparison_AT, self.T * self.coupon * state_min, 0)
+        payoff_coupon_final = np.where(comparison_AT, T * coupon * state_min, 0)
         payoff_kg_final = np.where(comparison_AT, state_min, 0)
         payoff_kg_final = np.where(comparison_BP, state_min, payoff_kg_final)
         payoff_kg_final = np.where(~comparison_AT & ~comparison_BP, state_min, payoff_kg_final)
         payoff_coupon_final = np.where(~comparison_AT & ~comparison_BP, -(1 - evaluation_final) * state_min, payoff_coupon_final)
         return payoff_coupon_final, payoff_kg_final
+
     @staticmethod
-    def compute_price(n, notional, matrice, curve, T, freq_obs):
+    def compute_price(n, notional, matrice, curve, obs_dates):
         '''
         discounts the payoffs to compute the prices
         :return:
         '''
-        obs_dates = PayoffCalculator.compute_obs_dates(T, freq_obs)
+        #obs_dates = PayoffCalculator.compute_obs_dates(T, freq_obs)
         if n > 1:
             price = [np.mean(matrice[:, :, i]) * np.exp(-0.01 * curve(obs_dates[i] / 252) * obs_dates[i] / 252) for i in
                      range(len(obs_dates))]
