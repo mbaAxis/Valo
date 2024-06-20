@@ -326,7 +326,7 @@ namespace ValoLibrary
                 return null;
             }
 
-            if (double.IsNaN(recoveryRate))
+            if (double.IsNaN(recoveryRate)|| recoveryRate ==-1)
             {
                 recoveryRate = StrippingCDS.CreditDefaultSwapCurves.Curves[Convert.ToInt32(issuerId)].Recovery;
             }
