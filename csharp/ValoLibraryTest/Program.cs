@@ -521,7 +521,7 @@ double[] c3 = { 0.45 };
 string[] curveMaturityc3 = { "2Y" };
 string maturity = "5Y";
 //double[] strikes = { 0.0, 3.0 };
-double[] strikes = { 65.0, 100.0 };
+double[] strikes = { 0, 3.0 };
 double[] correl = { 0.4, 0.5 };
 string pricingCurrency = "JPY";
 int numberOfIssuer = 3;
@@ -545,36 +545,24 @@ double dBeta = 0.01;
 double[] spreadStandard = { 100, 100 };
 double withJtd = -1;
 double withStochasticRecovery = 1;
-//double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
-//double[] test = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsRollDate, c3, curveMaturityc3, pricingCurrency, 0.4, false, intensity);
-//string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
-//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-//    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
-double t = StrippingCDS.getSpreadIchak(3, "test", 0.009796, "1Y", paramDate, cdsRollDate, 0.4, intensity, pricingCurrency);
-Console.WriteLine("ok: " + t);
-string[] years = { "2Y", "1Y", "2Y", "1Y", "4Y", "6Y", "3Y", "3Y", "1Y", "1Y", "1Y", "3Y", "1Y", "3Y", "2Y", "3Y", "3Y", "3Y", "2Y", "1Y", "2Y", "2Y", "2Y", "2Y", "2Y", "2Y", "8Y", "1Y", "2Y", "2Y", "1Y", "2Y", "2Y", "2Y", "1Y", "6Y", "3Y", "1Y", "1Y", "1Y", "1Y", "2Y", "2Y", "5Y", "2Y", "1Y", "1Y", "4Y", "1Y", "3Y", "10Y", "2Y", "3Y", "2Y", "2Y", "2Y", "2Y", "2Y", "5Y", "9Y", "4Y", "2Y", "2Y", "2Y", "5Y", "1Y", "2Y", "1Y", "2Y", "3Y", "2Y", "1Y", "4Y", "3Y", "2Y", "4Y", "3Y", "2Y", "1Y", "1Y", "3Y", "2Y", "3Y", "2Y", "1Y", "2Y", "1Y", "3M", "1Y", "2Y" };
-double[] spreads = {0.88, 1.63, 1.63, 1.75, 1.25, 3.40, 1.38, 3.85, 1.63, 0.38, 1.00, 3.38, 1.25, 1.00, 0.88, 0.50, 3.40, 2.50, 1.38, 1.00, 1.38, 1.13, 0.75, 4.00, 0.75, 3.75, 3.75, 2.38, 2.38, 0.63, 2.75,
-    3.88, 3.88, 3.00, 1.75, 2.50, 1.15, 2.75, 1.25, 2.00, 1.38, 1.25, 1.25, 6.88, 0.50, 2.38,
-    0.88, 3.63, 1.13, 5.13, 15.00, 1.50,
-    0.57, 1.00, 3.38, 2.50, 1.75, 2.97, 4.38, 5.63, 1.50, 1.25, 1.63, 1.13, 0.55, 0.88, 2.25, 1.75, 0.13, 5.63, 0.75, 1.88, 3.88, 1.63,
-    1.13, 5.75, 0.50, 1.38, 1.00, 1.38, 0.88,
-    1.50, 3.00, 1.88, 1.88, 2.25, 0.63, 1.63, 1.50, 0.75};
-double[] vraispreads = new double[spreads.Length];
-for (int i = 0; i < spreads.Length; i++)
+double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
+double[] test = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsRollDate, c3, curveMaturityc3, pricingCurrency, 0.4, false, intensity);
+string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
+
+
+
+for (int i = 0; i < cdot.GetLength(0); i++)
 {
-    spreads[i] = spreads[i] / 100;
-    vraispreads[i] = StrippingCDS.getSpreadIchak(3+i, "test", spreads[i], years[i], paramDate, cdsRollDate, 0.4, intensity, pricingCurrency);
-    Console.Write(vraispreads[i]+"|");
+    for (int j = 0; j < cdot.GetLength(1); j++)
+    {
+        Console.Write(cdot[i, j] + " | ");
+    }
+    Console.WriteLine(" ");
 }
-
-
-//for (int i = 0; i < cdot.GetLength(0); i++)
-//{
-//    for (int j = 0; j < cdot.GetLength(1); j++)
-//    {
-//        Console.Write(cdot[i, j] + " | ");
-//    }
-//    Console.WriteLine(" ");
-//}
-//Console.WriteLine("FIN");
+Console.WriteLine(ModelInterface.SBMSensitivities(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta));
+Console.WriteLine("FIN");
 

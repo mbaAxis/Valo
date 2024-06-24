@@ -74,8 +74,12 @@ namespace ValoLibrary
         double withGreeks = 0,double withJtdVAL = 0,double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
 
-        double[] testFR(double[] a);
-
+        double[] GetSBMSensitivities(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+        int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+        string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+        double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+        double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
     }
 
 
@@ -87,10 +91,6 @@ namespace ValoLibrary
     [ClassInterface(ClassInterfaceType.None)]
     public class UDF : IUDF
     {
-        public double[] testFR(double[] a)
-        {
-            return a;
-        }
         public string GetWelcome()
         {
             return "Welcome JorOIJGREZdan";
@@ -247,6 +247,23 @@ namespace ValoLibrary
             return ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
+        }
+
+        public double[] GetSBMSensitivities(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            lossUnitAmount = null;
+            return ModelInterface.SBMSensitivities(maturity, strikes, correl, spreadStandard, pricingCurrency,
+    numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
+     cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder,
+     recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg,
+    withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount,
+    integrationPeriod, probMultiplier, dBeta);
+
         }
 
     }
