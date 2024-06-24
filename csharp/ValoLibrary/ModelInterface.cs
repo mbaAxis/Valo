@@ -1041,6 +1041,7 @@ namespace ValoLibrary
 
             if (IsCDO && withJTD && withGreeks)
             {
+                double[] recovery = (double[])recoveryIssuer;
                 double defaultSpread = 1.998;//Modification Jump-to-Default, highest constant for the spread such that it compiles and let the possibility to simulate a default
                 double[] shockedCurve = new double[9];
                 string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };//MODIF JTD, temporaire
@@ -1070,16 +1071,18 @@ namespace ValoLibrary
                         }
                     }
                     StrippingCDS.StripDefaultProbability(i, CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, CreditDefaultSwapCurves.Curves[i].Currency, 0.4, false, intensity);
-                    hedging_cds = AmericanSwap(maturity, 1, i, 1.0, CreditDefaultSwapCurves.Curves[i].Recovery,
-                            0, val1, cpnLastSettle, cpnPeriod,
-                            cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, 0.0, 0.0, 0.0, 0.0,
-                           betaAdder, val2, val3, 0, 0,0, null, lossUnitAmount,
-                            integrationPeriod, schedule, probMultiplier);
-                    string[,] test = AmericanSwap(maturity, numberOfIssuer, IssuerID, nominalIssuer, recoveryIssuer, standardSpread, inputSpread, cpnLastSettle, cpnPeriod, cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, fxCorrel,
+                    hedging_cds = AmericanSwap(maturity, 1, i, 1.0, 0.25,
+                            0, val1, cpnLastSettle, cpnPeriod, cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, 0.0, 0.0, 0.0, 0.0,
+                           betaAdder, val2, val3, 0, 0, 0, null, lossUnitAmount,
+                            integrationPeriod, schedule, probMultiplier);//Recovery fixed at 0.25%, see MAR 22.12 (same as non tranched MBS ?)
+                    double oldRecovery = recovery[i-1];
+                    recovery[i - 1] = 0.0;//Recovery fixed at 0, see MAR 22.11 for the DRC
+                    string[,] test = AmericanSwap(maturity, numberOfIssuer, IssuerID, nominalIssuer, recovery, standardSpread, inputSpread, cpnLastSettle, cpnPeriod, cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, fxCorrel,
                         fxVol, strikes, correl, betaAdder, isAmericanFloatLegVal, isAmericanFixedLegVal, 0,0,0, HedgingCDS, lossUnitAmount, integrationPeriod, cpnSchedule, probMultiplier, dBeta);
+                    recovery[i - 1] = oldRecovery;
                     x[6 + i, 6] =  double.Parse(test[0, 0])- double.Parse(x[0, 0]) + "";
-                    x[6 + i, 7] = double.Parse(hedging_cds[0, 0]) - double.Parse(x[6+i,7]) + "";
-
+                    //x[6 + i, 7] = double.Parse(hedging_cds[0, 0]) - double.Parse(x[6+i,7]) + "";
+                    x[6 + i, 7] = 0.75 - double.Parse(x[6 + i, 7]) + "";//P&L CDS is just the payout if default ?? u dumb
                     x[6 + i, 9] = "" + (Double.Parse(x[6 + i, 6]) / Double.Parse(x[6 + i, 7]));
 
                     // Hedge in CDS currency (delta CDO is in CDO currency unit => it has to be converted)
