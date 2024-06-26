@@ -561,7 +561,7 @@ for (int i = 0; i < cdot.GetLength(0); i++)
     }
     Console.WriteLine(" ");
 }
-Console.WriteLine(ModelInterface.GIRRDelta(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+Console.WriteLine(ModelInterface.SBMDelta(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta));
 Console.WriteLine("FIN");

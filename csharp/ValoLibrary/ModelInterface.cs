@@ -1097,7 +1097,7 @@ namespace ValoLibrary
             x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
             return x;
         }
-        public static double[] GIRRDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+        public static double[,] SBMDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -1107,15 +1107,17 @@ namespace ValoLibrary
             string[] tenors = { "3M", "6M","1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
             double[] nonShocked = new double[10];
             double[] shocked = new double[10];
-            double[] results = new double[10];
+            double[,] results = new double[2,10];
             StrippingIRS.IRCurveList curveList = StrippingIRS.InterestRateCurves;
             double shockedCurveFactorBP = 0.0001;
             for (int i = 0; i < tenors.Length; i++)
             {
-                nonShocked[i] = Double.Parse(CDO(tenors[i], strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList,
+                string[,] nonShockedCDO = CDO(tenors[i], strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList,
                     nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
                     isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod,
-                    probMultiplier, dBeta)[0, 0]);
+                    probMultiplier, dBeta);
+                nonShocked[i] = Double.Parse(nonShockedCDO[0, 0]);
+                results[1, i] = -Double.Parse(nonShockedCDO[4, 0]) * (strikes[1] - strikes[0]);
             }
             //GIRRDelta--------------------
             for (int i = 0; i < curveList.Curves.Length; i++)
@@ -1141,7 +1143,7 @@ namespace ValoLibrary
                     nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
                     isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod,
                     probMultiplier, dBeta)[0, 0]);
-                results[i] = (shocked[i] - nonShocked[i]) / shockedCurveFactorBP;
+                results[0,i] = (shocked[i] - nonShocked[i]) / shockedCurveFactorBP;
             }
 
             for (int i = 0; i < curveList.Curves.Length; i++)//Reset the change from the shock
@@ -1163,25 +1165,6 @@ namespace ValoLibrary
             }
 
             return results;
-        }
-        public static double[] CSRDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
-        {
-            string[] tenors = { "3M", "6M", "1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
-            double[] results = new double[10];
-            for (int i = 0;i<tenors.Length;i++)
-            {
-                results[i] = -Double.Parse(CDO(tenors[i], strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList,
-                    nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-                    isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod,
-                    probMultiplier, dBeta)[4, 0])*(strikes[1]-strikes[0]);//négatif au début car on shock vers le haut le spread, donc la fixed augmente ainsi la npv diminue, hors la bpv est positive
-            }
-            return results;
-
         }
     }
 }

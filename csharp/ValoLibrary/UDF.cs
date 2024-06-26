@@ -74,13 +74,7 @@ namespace ValoLibrary
         double withGreeks = 0,double withJtdVAL = 0,double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
 
-        double[] GetGIRRDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-        int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-        string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-        double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-        double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
-        double[] GetCSRDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+        double[,] GetSBMDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
         int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
         string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
         double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -255,7 +249,7 @@ namespace ValoLibrary
     isAmericanFixedLeg, withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
         }
 
-        public double[] GetGIRRDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+        public double[,] GetSBMDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -263,28 +257,13 @@ namespace ValoLibrary
     string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             lossUnitAmount = null;
-            return ModelInterface.GIRRDelta(maturity, strikes, correl, spreadStandard, pricingCurrency,
+            return ModelInterface.SBMDelta(maturity, strikes, correl, spreadStandard, pricingCurrency,
     numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
      cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder,
      recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg,
     withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount,
     integrationPeriod, probMultiplier, dBeta);
 
-        }
-        public double[] GetCSRDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
-        {
-            lossUnitAmount = null;
-            return ModelInterface.CSRDelta(maturity, strikes, correl, spreadStandard, pricingCurrency,
-    numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
-     cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder,
-     recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg,
-    withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount,
-    integrationPeriod, probMultiplier, dBeta);
         }
 
     }
