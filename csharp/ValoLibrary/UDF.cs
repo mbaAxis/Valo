@@ -65,21 +65,23 @@ namespace ValoLibrary
         string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate,double notional,
        string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
        double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-       double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1);
+       double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1, int girrMonth = 0);
 
         string[,] GetCDO(string maturity, double[] strikes, double[] correl,double[] spreadStandard, string pricingCurrency,
         int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
         string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
         double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
         double withGreeks = 0,double withJtdVAL = 0,double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0);
 
-        double[,] GetSBMDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+        double[] GetCDODeltaGIRR(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
         int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
         string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
         double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
         double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+        double[,] GetCDSDeltaGIRR(string[] issuerName, double[] standardSpread, double[] recovery, double[] nominal, string cpnPeriod,
+        string cpnConvention, string cpnLastSettle, string pricingCurrency, double[] hedgingCds, string integrationPeriod);
     }
 
 
@@ -227,12 +229,12 @@ namespace ValoLibrary
         public string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate, double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1)
+        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1,int girrMonth = 0)
         {
             return ModelInterface.CDS(issuerIdParam, maturity, spread, recoveryRate,notional,
              cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
              fxCorrel, fxVol, isAmericanFloatLeg, isAmericanFixedLeg,
-             withGreeks, hedgingCds, integrationPeriod, probMultiplier);
+             withGreeks, hedgingCds, integrationPeriod, probMultiplier, girrMonth);
 
         }
 
@@ -241,15 +243,15 @@ namespace ValoLibrary
    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
    double withGreeks = 0, double withJtdVAL = 0,double withStochasticRecoveryVAL= 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-   string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+   string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0)
         {
             lossUnitAmount=null;
             return ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-    isAmericanFixedLeg, withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
+    isAmericanFixedLeg, withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, girrMonth);
         }
 
-        public double[,] GetSBMDelta(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+        public double[] GetCDODeltaGIRR(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
@@ -257,13 +259,18 @@ namespace ValoLibrary
     string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             lossUnitAmount = null;
-            return ModelInterface.SBMDelta(maturity, strikes, correl, spreadStandard, pricingCurrency,
+            return ModelInterface.CDODeltaGIRR(maturity, strikes, correl, spreadStandard, pricingCurrency,
     numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
      cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder,
      recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg,
     withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount,
     integrationPeriod, probMultiplier, dBeta);
 
+        }
+        public double[,] GetCDSDeltaGIRR(string[] issuerName, double[] standardSpread, double[] recovery, double[] nominal, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, string pricingCurrency, double[] hedgingCds, string integrationPeriod)
+        {
+            return ModelInterface.CDSDeltaGIRR(issuerName, standardSpread, recovery, nominal, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, hedgingCds, integrationPeriod);
         }
 
     }
