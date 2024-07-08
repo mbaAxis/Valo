@@ -914,6 +914,10 @@ namespace ValoLibrary
                 x[2,0]=""+(Double)nominalIssuer* Double.Parse(x[4, 0]) * TrancheWidth * Spread;
             }
 
+            if (!IsCDO)
+            {
+                x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + "";
+            }
             double Leverage = 0;
             //object[] HedgingCDS = null;
             double val1=0;
@@ -994,7 +998,7 @@ namespace ValoLibrary
                         /////////////////::::addd
                         if (!IsCDO)
                         {
-                            x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + "";
+                            //x[4, 0] = (double)nominalIssuer * Double.Parse(x[4, 0]) + "";
 
                             for (i = 1; i <= numberOfIssuer; i++)
                             {
@@ -1105,11 +1109,16 @@ namespace ValoLibrary
     double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
     string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
+            double additionalWeight = 1;
+            if(pricingCurrency == "EUR" || pricingCurrency == "USD" || pricingCurrency == "GPB" || pricingCurrency == "AUD" || pricingCurrency == "JPY" || pricingCurrency == "SEK" || pricingCurrency == "CAD")//see 21.44
+            {
+                additionalWeight = Math.Sqrt(2);
+            }
             double shockedGIRR = 0.0001;
             string[] tenors = { "3M", "6M","1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
             int[] months = {3,6,12,24,36,60,120,180,240,360 };
             double[] riskWeights = { 0.017, 0.017, 0.016, 0.013, 0.012, 0.011, 0.011, 0.011, 0.011, 0.011 };
-            double[] results = new double[10];
+            double[] results = new double[11];
             double[] nonShocked = new double[10];
             double[] shocked = new double[10];
             for(int i = 0; i < tenors.Length; i++)
@@ -1121,15 +1130,39 @@ namespace ValoLibrary
                     cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,
                     withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, months[i])[0, 0]);
                 results[i] = (shocked[i] - nonShocked[i]) / shockedGIRR;
+                results[i] *= riskWeights[i]/additionalWeight;
             }
+            // Computation of K_b, see 21.4 for more information
+            double[,] correlationMatrix = { { 1.0, 0.97, 0.914, 0.811, 0.719, 0.566, 0.4, 0.4, 0.4, 0.4 }, { 0.97, 1.0, 0.97, 0.914, 0.861, 0.763, 0.566, 0.419, 0.4, 0.4 },{0.914, 0.97, 1.0, 0.97, 0.942, 0.887, 0.763, 0.657, 0.566, 0.419}
+            ,{0.811, 0.914, 0.97, 1.0, 0.985, 0.956, 0.887, 0.823, 0.763, 0.657},{0.719, 0.861, 0.942, 0.985, 1.0, 0.98, 0.932, 0.887, 0.844, 0.763},{0.566, 0.763, 0.887, 0.956, 0.98, 1.0, 0.97, 0.942, 0.914, 0.861},
+            {0.4, 0.566, 0.763, 0.887, 0.932, 0.97, 1.0, 0.985, 0.97, 0.942},{0.4, 0.419, 0.657, 0.823, 0.887, 0.942, 0.985, 1.0, 0.99, 0.97},{0.4, 0.4, 0.566, 0.763, 0.844, 0.914, 0.97, 0.99, 1.0, 0.985},
+            {0.4, 0.4, 0.419, 0.657, 0.763, 0.861, 0.942, 0.97, 0.985, 1.0}};
+            double Kb = 0;
+            for(int i = 0; i< tenors.Length; i++)
+            {
+                Kb += Math.Pow(results[i], 2);
+                double s = 0;
+                for(int j = 0; j < tenors.Length && j!=i; j++)
+                {
+                    s += correlationMatrix[i, j] * results[i] * results[j];
+                }
+                Kb += s;
+            }
+            Kb = Math.Sqrt(Math.Max(0,Kb));
+            results[10] = Kb;
 
             return results;
         }
         public static double[,] CDSDeltaGIRR(string[] issuerName, double[] standardSpread, double[] recovery, double[] nominal,string cpnPeriod,
             string cpnConvention, string cpnLastSettle, string pricingCurrency, double[] hedgingCds, string integrationPeriod)
         {
+            double additionalWeight = 1;
+            if (pricingCurrency == "EUR" || pricingCurrency == "USD" || pricingCurrency == "GPB" || pricingCurrency == "AUD" || pricingCurrency == "JPY" || pricingCurrency == "SEK" || pricingCurrency == "CAD")//see 21.44
+            {
+                additionalWeight = Math.Sqrt(2);
+            }
             double[] riskWeights = { 0.017, 0.017, 0.016, 0.013, 0.012, 0.011, 0.011, 0.011, 0.011, 0.011 };
-            double[,] results = new double[issuerName.Length,10];
+            double[,] results = new double[issuerName.Length,11];
             string[] tenors = { "3M", "6M", "1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
             int[] months = { 3, 6, 12, 24, 36, 60, 120, 180, 240, 360 };
             double shockedGIRR = 0.0001;
@@ -1140,8 +1173,31 @@ namespace ValoLibrary
                     results[i,j] = -Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod,1,0)[0,0]);
                     results[i, j] += Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod, 1,months[j])[0, 0]);
                     results[i, j] /= shockedGIRR;
+                    results[i, j] *= riskWeights[j] / additionalWeight;
                 }
             }
+            // Computation of K_b, see 21.4 for more information
+            double[,] correlationMatrix = { { 1.0, 0.97, 0.914, 0.811, 0.719, 0.566, 0.4, 0.4, 0.4, 0.4 }, { 0.97, 1.0, 0.97, 0.914, 0.861, 0.763, 0.566, 0.419, 0.4, 0.4 },{0.914, 0.97, 1.0, 0.97, 0.942, 0.887, 0.763, 0.657, 0.566, 0.419}
+            ,{0.811, 0.914, 0.97, 1.0, 0.985, 0.956, 0.887, 0.823, 0.763, 0.657},{0.719, 0.861, 0.942, 0.985, 1.0, 0.98, 0.932, 0.887, 0.844, 0.763},{0.566, 0.763, 0.887, 0.956, 0.98, 1.0, 0.97, 0.942, 0.914, 0.861},
+            {0.4, 0.566, 0.763, 0.887, 0.932, 0.97, 1.0, 0.985, 0.97, 0.942},{0.4, 0.419, 0.657, 0.823, 0.887, 0.942, 0.985, 1.0, 0.99, 0.97},{0.4, 0.4, 0.566, 0.763, 0.844, 0.914, 0.97, 0.99, 1.0, 0.985},
+            {0.4, 0.4, 0.419, 0.657, 0.763, 0.861, 0.942, 0.97, 0.985, 1.0}};
+            for(int k = 0; k < issuerName.Length; k++)
+            {
+                double Kb = 0;
+                for (int i = 0; i < tenors.Length; i++)
+                {
+                    Kb += Math.Pow(results[k,i], 2);
+                    double s = 0;
+                    for (int j = 0; j < tenors.Length && j != i; j++)
+                    {
+                        s += correlationMatrix[i, j] * results[k,i] * results[k,j];
+                    }
+                    Kb += s;
+                }
+                Kb = Math.Sqrt(Math.Max(0, Kb));
+                results[k, 10] = Kb;
+            }
+
 
             return results;
         }
