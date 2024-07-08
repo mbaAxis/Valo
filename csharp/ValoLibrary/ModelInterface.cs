@@ -1052,37 +1052,34 @@ namespace ValoLibrary
                 string[] spreadCurveMaturity = { "3m", "6m", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };//MODIF JTD, temporaire
                 string intensity = "Curvepoint";//MODIF JTD, temporaire
                 double[] curve;
-                string[] issuerList = new string[numberOfIssuer];
                 string[,] hedging_cds;
                 withJTD = false;
                 Leverage = 0;
-                for (i = 0; i < numberOfIssuer; i++)
-                {
-                    issuerList[i] = StrippingCDS.CreditDefaultSwapCurves.Curves[i + 1].CDSName;
-                }
                 for (i = 1; i <= numberOfIssuer; i++)
                 {
-                    curve = StrippingCDS.CreditDefaultSwapCurves.Curves[i].CDSSpread;
+                    cdsID = ((int[])CDSListID)[i - 1];
+                    curve = StrippingCDS.CreditDefaultSwapCurves.Curves[cdsID].CDSSpread;
 
                     for (j = 0; j < curve.Length; j++)
                     {
-                        if (curve[j] != 0)
-                        {
-                            shockedCurve[j] = defaultSpread;
-                        }
-                        else
-                        {
-                            shockedCurve[j] = 0;
-                        }
+                        shockedCurve[j] = defaultSpread;//MODIF ITRAXX 
+                        //if (curve[j] != 0)
+                        //{
+                        //    shockedCurve[j] = defaultSpread;
+                        //}
+                        //else
+                        //{
+                        //    shockedCurve[j] = 0;
+                        //}
                     }
-                    StrippingCDS.StripDefaultProbability(i, CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, CreditDefaultSwapCurves.Curves[i].Currency, 0.4, false, intensity);
-                    hedging_cds = AmericanSwap(maturity, 1, i, 1.0, 0.25,
-                            0, val1, cpnLastSettle, cpnPeriod, cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, 0.0, 0.0, 0.0, 0.0,
+                    StrippingCDS.StripDefaultProbability(cdsID, CreditDefaultSwapCurves.Curves[cdsID].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
+                    hedging_cds = AmericanSwap(maturity, 1, cdsID, 1.0, 0.25,
+                            0, val1, cpnLastSettle, cpnPeriod, cpnConvention, pricingCurrency, 0.0, 0.0, 0.0, 0.0,
                            betaAdder, val2, val3, 0, 0, 0, null, lossUnitAmount,
                             integrationPeriod, schedule, probMultiplier);//Recovery fixed at 0.25%, see MAR 22.12 (same as non tranched MBS ?)
                     double oldRecovery = recovery[i-1];
                     recovery[i - 1] = 0.0;//Recovery fixed at 0, see MAR 22.11 for the DRC
-                    string[,] test = AmericanSwap(maturity, numberOfIssuer, IssuerID, nominalIssuer, recovery, standardSpread, inputSpread, cpnLastSettle, cpnPeriod, cpnConvention, CreditDefaultSwapCurves.Curves[i].Currency, fxCorrel,
+                    string[,] test = AmericanSwap(maturity, numberOfIssuer, IssuerID, nominalIssuer, recovery, standardSpread, inputSpread, cpnLastSettle, cpnPeriod, cpnConvention, pricingCurrency, fxCorrel,
                         fxVol, strikes, correl, betaAdder, isAmericanFloatLegVal, isAmericanFixedLegVal, 0,0,0, HedgingCDS, lossUnitAmount, integrationPeriod, cpnSchedule, probMultiplier, dBeta);
                     recovery[i - 1] = oldRecovery;
                     x[6 + i, 6] =  double.Parse(test[0, 0])- double.Parse(x[0, 0]) + "";
@@ -1091,9 +1088,9 @@ namespace ValoLibrary
                     x[6 + i, 9] = "" + (Double.Parse(x[6 + i, 6]) / Double.Parse(x[6 + i, 7]));
 
                     // Hedge in CDS currency (delta CDO is in CDO currency unit => it has to be converted)
-                    x[6 + i, 8] = "" + ((Double.Parse(x[6 + i, 9]) / StrippingIRS.GetFXSpot(pricingCurrency)) * StrippingIRS.GetFXSpot(CreditDefaultSwapCurves.Curves[i].Currency));
+                    x[6 + i, 8] = "" + ((Double.Parse(x[6 + i, 9]) / StrippingIRS.GetFXSpot(pricingCurrency)) * StrippingIRS.GetFXSpot(CreditDefaultSwapCurves.Curves[cdsID].Currency));
                     Leverage += double.Parse(x[6 + i, 9]);
-                    StrippingCDS.StripDefaultProbability(i, StrippingCDS.CreditDefaultSwapCurves.Curves[i].CDSName, ParamDate, CDSRollDate, curve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
+                    StrippingCDS.StripDefaultProbability(cdsID, StrippingCDS.CreditDefaultSwapCurves.Curves[cdsID].CDSName, ParamDate, CDSRollDate, curve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
                 }
                 x[5, 8] = Leverage / TrancheWidth + "";
                 // Computation time
@@ -1156,17 +1153,26 @@ namespace ValoLibrary
         public static double[,] CDSDeltaGIRR(string[] issuerName, double[] standardSpread, double[] recovery, double[] nominal,string cpnPeriod,
             string cpnConvention, string cpnLastSettle, string pricingCurrency, double[] hedgingCds, string integrationPeriod)
         {
+            int lastIndice=issuerName.Length;
+            for(int i = 0; i < issuerName.Length; i++)
+            {
+                if (issuerName[i]==""|| String.IsNullOrEmpty(issuerName[i]))
+                {
+                    lastIndice = i;
+                    break;
+                }
+            }
             double additionalWeight = 1;
             if (pricingCurrency == "EUR" || pricingCurrency == "USD" || pricingCurrency == "GPB" || pricingCurrency == "AUD" || pricingCurrency == "JPY" || pricingCurrency == "SEK" || pricingCurrency == "CAD")//see 21.44
             {
                 additionalWeight = Math.Sqrt(2);
             }
             double[] riskWeights = { 0.017, 0.017, 0.016, 0.013, 0.012, 0.011, 0.011, 0.011, 0.011, 0.011 };
-            double[,] results = new double[issuerName.Length,11];
+            double[,] results = new double[lastIndice,11];
             string[] tenors = { "3M", "6M", "1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
             int[] months = { 3, 6, 12, 24, 36, 60, 120, 180, 240, 360 };
             double shockedGIRR = 0.0001;
-            for (int i =  0; i < issuerName.Length; i++)
+            for (int i =  0; i < lastIndice; i++)
             {
                 for(int j = 0; j < tenors.Length; j++)
                 {
@@ -1181,7 +1187,7 @@ namespace ValoLibrary
             ,{0.811, 0.914, 0.97, 1.0, 0.985, 0.956, 0.887, 0.823, 0.763, 0.657},{0.719, 0.861, 0.942, 0.985, 1.0, 0.98, 0.932, 0.887, 0.844, 0.763},{0.566, 0.763, 0.887, 0.956, 0.98, 1.0, 0.97, 0.942, 0.914, 0.861},
             {0.4, 0.566, 0.763, 0.887, 0.932, 0.97, 1.0, 0.985, 0.97, 0.942},{0.4, 0.419, 0.657, 0.823, 0.887, 0.942, 0.985, 1.0, 0.99, 0.97},{0.4, 0.4, 0.566, 0.763, 0.844, 0.914, 0.97, 0.99, 1.0, 0.985},
             {0.4, 0.4, 0.419, 0.657, 0.763, 0.861, 0.942, 0.97, 0.985, 1.0}};
-            for(int k = 0; k < issuerName.Length; k++)
+            for(int k = 0; k < lastIndice; k++)
             {
                 double Kb = 0;
                 for (int i = 0; i < tenors.Length; i++)

@@ -12,7 +12,7 @@ namespace ValoLibrary
     public interface IUDF
     {
         // function test 
-        string GetWelcome();
+        string GetWelcome(string s);
         // using user data
         double GetBSOptionPrice(double quantity, string optionFlag, string position, double s, double sigma,
             double r, double k, double T, double? q = null);
@@ -82,6 +82,7 @@ namespace ValoLibrary
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
         double[,] GetCDSDeltaGIRR(string[] issuerName, double[] standardSpread, double[] recovery, double[] nominal, string cpnPeriod,
         string cpnConvention, string cpnLastSettle, string pricingCurrency, double[] hedgingCds, string integrationPeriod);
+
     }
 
 
@@ -93,9 +94,13 @@ namespace ValoLibrary
     [ClassInterface(ClassInterfaceType.None)]
     public class UDF : IUDF
     {
-        public string GetWelcome()
+        public string GetWelcome(string s)
         {
-            return "Welcome JorOIJGREZdan";
+            if(String.Equals(s,"")|| String.IsNullOrEmpty(s))
+            {
+                return "ok";
+            }
+            return s;
         }  
 
         // using user data

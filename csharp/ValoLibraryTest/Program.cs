@@ -537,7 +537,7 @@ double[] betaAdder = { 0.0, 0.0 };
 double[] recoveryIssuer = { 0.4, 0.4 };
 double isAmericanFloatLeg = -1;
 double isAmericanFixedLeg = -1;
-double withGreeks = 0;
+double withGreeks = 1;
 double[] hedgingCDS = { 0.0, -1.0, -1.0 };
 //double lossUnitAmount = null;
 string integrationPeriod = "1m";
@@ -556,9 +556,9 @@ for (int i = 0; i < t.GetLength(0); i++)
         Console.WriteLine(t[i, j]);
     }
 }
-//string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
-//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-//    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
+string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
 
 
 //Console.WriteLine("------------------------------CDO-------------------");
