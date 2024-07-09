@@ -277,6 +277,21 @@ namespace ValoLibrary
         {
             return ModelInterface.CDSDeltaGIRR(issuerName, standardSpread, recovery, nominal, cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, hedgingCds, integrationPeriod);
         }
+        public double GetImpliedCorrelation(double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            lossUnitAmount = null;
+            return ModelInterface.ImpliedCorrelation(trancheSpread,maturity, strikes, lowCorrel, spreadStandard, pricingCurrency,
+    numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
+     cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder,
+     recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg,
+    withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount,
+    integrationPeriod, probMultiplier, dBeta);
+        }
 
     }
 }

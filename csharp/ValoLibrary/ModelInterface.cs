@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Core;
+﻿using MathNet.Numerics.Financial;
+using Microsoft.Office.Core;
 using Microsoft.Office.Interop.Excel;
 using Microsoft.VisualBasic;
 using System;
@@ -1172,6 +1173,7 @@ namespace ValoLibrary
             string[] tenors = { "3M", "6M", "1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
             int[] months = { 3, 6, 12, 24, 36, 60, 120, 180, 240, 360 };
             double shockedGIRR = 0.0001;
+            double[] sumSensitivities = new double[10];
             for (int i =  0; i < lastIndice; i++)
             {
                 for(int j = 0; j < tenors.Length; j++)
@@ -1180,6 +1182,7 @@ namespace ValoLibrary
                     results[i, j] += Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod, 1,months[j])[0, 0]);
                     results[i, j] /= shockedGIRR;
                     results[i, j] *= riskWeights[j] / additionalWeight;
+                    sumSensitivities[j] += results[i, j];
                 }
             }
             // Computation of K_b, see 21.4 for more information
@@ -1187,25 +1190,56 @@ namespace ValoLibrary
             ,{0.811, 0.914, 0.97, 1.0, 0.985, 0.956, 0.887, 0.823, 0.763, 0.657},{0.719, 0.861, 0.942, 0.985, 1.0, 0.98, 0.932, 0.887, 0.844, 0.763},{0.566, 0.763, 0.887, 0.956, 0.98, 1.0, 0.97, 0.942, 0.914, 0.861},
             {0.4, 0.566, 0.763, 0.887, 0.932, 0.97, 1.0, 0.985, 0.97, 0.942},{0.4, 0.419, 0.657, 0.823, 0.887, 0.942, 0.985, 1.0, 0.99, 0.97},{0.4, 0.4, 0.566, 0.763, 0.844, 0.914, 0.97, 0.99, 1.0, 0.985},
             {0.4, 0.4, 0.419, 0.657, 0.763, 0.861, 0.942, 0.97, 0.985, 1.0}};
-            for(int k = 0; k < lastIndice; k++)
+            double Kb = 0;
+            for (int i = 0; i < tenors.Length; i++)
             {
-                double Kb = 0;
-                for (int i = 0; i < tenors.Length; i++)
+                Kb += Math.Pow(sumSensitivities[i], 2);
+                double s = 0;
+                for (int j = 0; j < tenors.Length && j != i; j++)
                 {
-                    Kb += Math.Pow(results[k,i], 2);
-                    double s = 0;
-                    for (int j = 0; j < tenors.Length && j != i; j++)
-                    {
-                        s += correlationMatrix[i, j] * results[k,i] * results[k,j];
-                    }
-                    Kb += s;
+                    s += correlationMatrix[i, j] * sumSensitivities[i] * sumSensitivities[j];
                 }
-                Kb = Math.Sqrt(Math.Max(0, Kb));
-                results[k, 10] = Kb;
+                Kb += s;
             }
-
-
+            Kb = Math.Sqrt(Math.Max(0, Kb));
+            results[0, 10] = Kb;
             return results;
+        }
+        public static double ImpliedCorrelation(double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)// Find the base correlation of the high strike tranche given the base correlation of the low strike tranche, with the spread given
+        {
+            int k = 0;
+            double impliedHighCorrel = lowCorrel;
+            double epsilon = 0.000001;
+            double b = 1.0;
+            double objectiveFunction = 0;
+            double[] correl = { lowCorrel, (lowCorrel+b)/2 };
+            do
+            {
+                k += 1;
+                objectiveFunction = Double.Parse(CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
+                    cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,
+                    withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, 0)[3, 0]);
+                if(objectiveFunction>= trancheSpread)
+                {
+                    impliedHighCorrel = (impliedHighCorrel + b) / 2;
+                }
+                else
+                {
+                    b = (impliedHighCorrel + b)/2;
+                }
+                correl[1] = (impliedHighCorrel + b) / 2;
+            }
+            while (Math.Abs(objectiveFunction-trancheSpread)>epsilon || k==5000 );
+            //Dichotomie
+
+
+
+            return impliedHighCorrel;
         }
     }
 }

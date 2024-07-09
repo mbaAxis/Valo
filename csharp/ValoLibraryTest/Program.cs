@@ -561,15 +561,15 @@ string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, p
     isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
 
 
-//Console.WriteLine("------------------------------CDO-------------------");
-//for (int i = 0; i < cdot.GetLength(0); i++)
-//{
-//    for (int j = 0; j < cdot.GetLength(1); j++)
-//    {
-//        Console.Write(cdot[i, j] + " | ");
-//    }
-//    Console.WriteLine(" ");
-//}
+Console.WriteLine("------------------------------CDO-------------------");
+for (int i = 0; i < cdot.GetLength(0); i++)
+{
+    for (int j = 0; j < cdot.GetLength(1); j++)
+    {
+        Console.Write(cdot[i, j] + " | ");
+    }
+    Console.WriteLine(" ");
+}
 //double[] s = ModelInterface.CDODeltaGIRR(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
 //    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
 //    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
