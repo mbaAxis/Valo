@@ -523,7 +523,7 @@ string maturity = "5Y";
 //double[] strikes = { 0.0, 3.0 };
 double[] strikes = { 0, 3.0 };
 double[] correl = { 0.4, 0.5 };
-string pricingCurrency = "JPY";
+string pricingCurrency = "EUR";
 int numberOfIssuer = 3;
 string[] issuerList = { "ABNAMRO_MMR.EUR.SU", "Accor_MMR.EUR.SU" };
 double[] nominalIssuer = { 1.0, 1.0 };
@@ -545,17 +545,17 @@ double dBeta = 0.01;
 double[] spreadStandard = { 100, 100 };
 double withJtd = 0;
 double withStochasticRecovery = 0;
-double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c1, CurveMaturity, pricingCurrency, 0.4, false, intensity);
+double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c1, CurveMaturity, "JPY", 0.4, false, intensity);
 double[] test = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsRollDate, c2, curveMaturity, pricingCurrency, 0.4, false, intensity);
-double[,] t = ModelInterface.CDSDeltaGIRR(issuerList, spreadStandard, recoveryIssuer, nominalIssuer, cpnPeriod, cpnConvention, cpnLastSettle, "EUR", hedgingCDS, integrationPeriod);
-Console.WriteLine("Delta GIRR");
-for (int i = 0; i < t.GetLength(0); i++)
-{
-    for (int j = 0; j < t.GetLength(1); j++)
-    {
-        Console.WriteLine(t[i, j]);
-    }
-}
+//double[,] t = ModelInterface.CDSDeltaGIRR(issuerList, spreadStandard, recoveryIssuer, nominalIssuer, cpnPeriod, cpnConvention, cpnLastSettle, "EUR", hedgingCDS, integrationPeriod);
+//Console.WriteLine("Delta GIRR");
+//for (int i = 0; i < t.GetLength(0); i++)
+//{
+//    for (int j = 0; j < t.GetLength(1); j++)
+//    {
+//        Console.WriteLine(t[i, j]);
+//    }
+//}
 string[,] cdot = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
@@ -579,3 +579,15 @@ for (int i = 0; i < cdot.GetLength(0); i++)
 //}
 //Console.WriteLine("FIN");
 
+string[] currencyName = { "EUR", "EUR", "USD"};
+int[] swapBasist = { 4, 4, 3 };
+double[] FXRatet = { 1, 1, 1.0865 };
+int[] swapPeriodt = { 6, 3, 1 };
+string[] curveNamest = { "1", "2", "3" };
+string[] typeOfCurve = { "IBOR", "IBOR", "OIS" };
+double[,] swapRatest = { { 0.03418, 0.03039, 0.02857, 0.02708, 0.02665, 0.02672, 0.02704, 0.02436 }, { 0.03307, 0.02955, 0.02784, 0.02650, 0.02617, 0.02641, 0.02695, 0.02473 }, { 0.04756, 0.04253, 0.03998, 0.03779, 0.03714, 0.03700, 0.03733, 0.03556 } };
+string[] datest = { "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "15Y", "30Y" };
+StrippingIRS.StoreCurve(currencyName, swapBasist, FXRatet, swapPeriodt, curveNamest, swapRatest, datest, typeOfCurve);
+ModelInterface.Girr(paramDate,maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);

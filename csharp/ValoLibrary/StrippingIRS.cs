@@ -43,7 +43,18 @@ namespace ValoLibrary
             public bool LastError;
             public IRCurve[] Curves;
         }
-
+        public struct IRCurveStore
+        {
+            public string Currency;
+            public int SwapBasis;
+            public double FXRate;
+            public int SwapPeriod;
+            public string CurveNames;
+            public double[] SwapRates;
+            public string[] CurveDates;
+            public string TypeOfCurve;
+        }
+        public static IRCurveStore[] CurveList;
         public static IRCurveList InterestRateCurves = new IRCurveList();
 
         public static int GetCurveId(object curveName)
@@ -461,9 +472,10 @@ namespace ValoLibrary
                     {
                         nextRiskFreeZC = Math.Pow(riskFreeZC[previousCurvePoint], (nextDate - paramDate).Days / (double) (previousDate - paramDate).Days);
                     }
-
+                    int compteur = 0;
                     do
                     {
+                        compteur += 1;
                         riskFreeZC[curvePointCounter+1] = nextRiskFreeZC;
                         var swapPvAndDerivatives = VbaGetSwapPVandDerivatives(paramDate, floatingLeg, fixedLeg, riskFreeZC,
                             previousCurvePoint, curvePointCounter+1, rate, previousCalcMonth, nextCalcMonth, swapPeriod, swapBasis, wsf
@@ -475,7 +487,7 @@ namespace ValoLibrary
                         {
                             break;
                         }
-                    } while (true);
+                    } while (true && compteur <20);
                     riskFreeZC[curvePointCounter+1] = nextRiskFreeZC;
 
                     if (nextRiskFreeZC > riskFreeZC[previousCurvePoint])
@@ -548,6 +560,27 @@ namespace ValoLibrary
             }
         }
 
+        public static void StoreCurve(string[] currency, int[] swapBasis, double[] FXRate, int[] swapPeriod, string[] curveNames, double[,] swapRates,
+            string[] curveDates, string[] typeOfCurve)
+        {
+            CurveList = new IRCurveStore[currency.Length];
+            for(int i = 0;i < currency.Length; i++)
+            {
+                CurveList[i].Currency = currency[i];
+                CurveList[i].SwapBasis= swapBasis[i];
+                CurveList[i].FXRate= FXRate[i];
+                CurveList[i].SwapPeriod= swapPeriod[i];
+                CurveList[i].CurveNames= curveNames[i];
+                CurveList[i].CurveDates = curveDates;
+                CurveList[i].TypeOfCurve = typeOfCurve[i];
+                double[] swapRatesValues = new double[swapRates.GetLength(1)];
+                for(int j = 0; j < swapRates.GetLength(1); j++)
+                {
+                    swapRatesValues[j] = swapRates[i, j];
+                }
+                CurveList[i].SwapRates = swapRatesValues;
+            }
+        }
 
     }
 }

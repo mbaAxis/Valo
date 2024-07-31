@@ -166,7 +166,7 @@ namespace ValoLibrary
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
     double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0)
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, string girrCurrency = null)
         {
             int i;
             double[] recoveryRate;
@@ -280,12 +280,12 @@ namespace ValoLibrary
                 pricingCurrency, fxCorrel, fxVol,
                 strikes, correl, betaAdder,
                 isAmericanFloatLeg, isAmericanFixedLeg,
-                withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta, girrMonth);
+                withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, (double)lossUnitAmount, integrationPeriod, null, probMultiplier, dBeta, girrMonth, girrCurrency);
         }
         public static string[,] CDS(string issuerIdParam, string maturity, double spread, double recoveryRate,double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1 , int girrMonth = 0)
+        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1 , int girrMonth = 0 , string girrCurrency = null)
         {
 
             int issuerId;
@@ -334,7 +334,7 @@ namespace ValoLibrary
 
             return AmericanSwap(maturity, 1, issuerId, notional, recoveryRate, 0,spread, cpnLastSettle , cpnPeriod, cpnConvention,
                 pricingCurrency, fxCorrel, fxVol, 0.0, 0.0, 0.0, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,0,0, hedgingCds, 1,
-                integrationPeriod,null, probMultiplier,0.1,girrMonth);
+                integrationPeriod,null, probMultiplier,0.1,girrMonth, girrCurrency);
         }
         public static string[,] AmericanSwap(object maturity, int numberOfIssuer, object IssuerID, object nominalIssuer, object recoveryIssuer, object standardSpread,
     double inputSpread, object cpnLastSettle, string cpnPeriod, string cpnConvention,
@@ -342,7 +342,7 @@ namespace ValoLibrary
     object strikes, object correl, object betaAdder,
     double isAmericanFloatLegVal, double isAmericanFixedLegVal,
        double withGreeksVal, double withJtdVAl,double withStochasticRecoveryVAL, double[] HedgingCDS, double lossUnitAmount = 0.0, string integrationPeriod = "1m",
-    DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0)
+    DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, string girrCurrency = null)
         {
             int i, j, k;
 
@@ -504,7 +504,7 @@ namespace ValoLibrary
             {
                 CurrentDate = ScheduleIntegration[i];
                 RiskFreeZC[i] = StrippingIRS.VbaGetRiskFreeZCVersion2(ParamDate, CurrentDate + "", ZC, ZCDate, false);
-                if(i == girrMonth)
+                if(i == girrMonth && String.Equals(pricingCurrency,girrCurrency))
                 {
                     RiskFreeZC[i] = StrippingIRS.VbaGetRiskFreeZCVersion2(ParamDate, CurrentDate + "", ZC, ZCDate, true);
                 }
@@ -1100,57 +1100,6 @@ namespace ValoLibrary
             x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
             return x;
         }
-        public static double[] CDODeltaGIRR(string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
-        {
-            double additionalWeight = 1;
-            if(pricingCurrency == "EUR" || pricingCurrency == "USD" || pricingCurrency == "GPB" || pricingCurrency == "AUD" || pricingCurrency == "JPY" || pricingCurrency == "SEK" || pricingCurrency == "CAD")//see 21.44
-            {
-                additionalWeight = Math.Sqrt(2);
-            }
-            double shockedGIRR = 0.0001;
-            string[] tenors = { "3M", "6M","1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
-            int[] months = {3,6,12,24,36,60,120,180,240,360 };
-            double[] riskWeights = { 0.017, 0.017, 0.016, 0.013, 0.012, 0.011, 0.011, 0.011, 0.011, 0.011 };
-            double[] results = new double[11];
-            double[] nonShocked = new double[10];
-            double[] shocked = new double[10];
-            for(int i = 0; i < tenors.Length; i++)
-            {
-                nonShocked[i] = Double.Parse(CDO(tenors[i], strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
-                    cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,
-                    withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, 0)[0,0]);
-                shocked[i] = Double.Parse(CDO(tenors[i], strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
-                    cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,
-                    withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, months[i])[0, 0]);
-                results[i] = (shocked[i] - nonShocked[i]) / shockedGIRR;
-                results[i] *= riskWeights[i]/additionalWeight;
-            }
-            // Computation of K_b, see 21.4 for more information
-            double[,] correlationMatrix = { { 1.0, 0.97, 0.914, 0.811, 0.719, 0.566, 0.4, 0.4, 0.4, 0.4 }, { 0.97, 1.0, 0.97, 0.914, 0.861, 0.763, 0.566, 0.419, 0.4, 0.4 },{0.914, 0.97, 1.0, 0.97, 0.942, 0.887, 0.763, 0.657, 0.566, 0.419}
-            ,{0.811, 0.914, 0.97, 1.0, 0.985, 0.956, 0.887, 0.823, 0.763, 0.657},{0.719, 0.861, 0.942, 0.985, 1.0, 0.98, 0.932, 0.887, 0.844, 0.763},{0.566, 0.763, 0.887, 0.956, 0.98, 1.0, 0.97, 0.942, 0.914, 0.861},
-            {0.4, 0.566, 0.763, 0.887, 0.932, 0.97, 1.0, 0.985, 0.97, 0.942},{0.4, 0.419, 0.657, 0.823, 0.887, 0.942, 0.985, 1.0, 0.99, 0.97},{0.4, 0.4, 0.566, 0.763, 0.844, 0.914, 0.97, 0.99, 1.0, 0.985},
-            {0.4, 0.4, 0.419, 0.657, 0.763, 0.861, 0.942, 0.97, 0.985, 1.0}};
-            double Kb = 0;
-            for(int i = 0; i< tenors.Length; i++)
-            {
-                Kb += Math.Pow(results[i], 2);
-                double s = 0;
-                for(int j = 0; j < tenors.Length && j!=i; j++)
-                {
-                    s += correlationMatrix[i, j] * results[i] * results[j];
-                }
-                Kb += s;
-            }
-            Kb = Math.Sqrt(Math.Max(0,Kb));
-            results[10] = Kb;
-
-            return results;
-        }
         public static double[,] CDSDeltaGIRR(string[] issuerName, double[] standardSpread, double[] recovery, double[] nominal,string cpnPeriod,
             string cpnConvention, string cpnLastSettle, string pricingCurrency, double[] hedgingCds, string integrationPeriod)
         {
@@ -1169,8 +1118,8 @@ namespace ValoLibrary
                 additionalWeight = Math.Sqrt(2);
             }
             double[] riskWeights = { 0.017, 0.017, 0.016, 0.013, 0.012, 0.011, 0.011, 0.011, 0.011, 0.011 };
-            double[,] results = new double[lastIndice,11];
             string[] tenors = { "3M", "6M", "1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
+            double[,] results = new double[lastIndice, tenors.Length + 1];
             int[] months = { 3, 6, 12, 24, 36, 60, 120, 180, 240, 360 };
             double shockedGIRR = 0.0001;
             double[] sumSensitivities = new double[10];
@@ -1240,6 +1189,150 @@ namespace ValoLibrary
 
 
             return impliedHighCorrel;
+        }
+        public static double[] DeltaGIRR(string girrCurrency, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            int lastIndice = issuerList.Length;
+            for (int i = 0; i < issuerList.Length; i++)//Au cas où dans la sélection de noms serait plus grande que les noms implémentés
+            {
+                if (issuerList[i] == "" || String.IsNullOrEmpty(issuerList[i]))
+                {
+                    lastIndice = i;
+                    break;
+                }
+            }
+            double additionalWeight = 1;
+            if (pricingCurrency == "EUR" || pricingCurrency == "USD" || pricingCurrency == "GPB" || pricingCurrency == "AUD" || pricingCurrency == "JPY" || pricingCurrency == "SEK" || pricingCurrency == "CAD")//see 21.44
+            {
+                additionalWeight = Math.Sqrt(2);
+            }
+            double shockedGIRR = 0.0001;
+            string[] tenors = { "3M", "6M", "1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
+            int[] months = { 3, 6, 12, 24, 36, 60, 120, 180, 240, 360 };
+            double[] riskWeights = { 0.017, 0.017, 0.016, 0.013, 0.012, 0.011, 0.011, 0.011, 0.011, 0.011 };
+            double[] CDOresults = new double[tenors.Length];
+            double[,] CDSresults = new double[lastIndice, tenors.Length];
+            double[] nonShocked = new double[10];
+            double[] shocked = new double[10];
+            double[] results = new double[tenors.Length];
+            for (int i = 0; i < tenors.Length; i++)
+            {
+                for (int j = 0; j < lastIndice; j++)
+                {
+                    CDSresults[j, i] = -Double.Parse(CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, 0, girrCurrency)[0, 0]);
+                    CDSresults[j, i] += Double.Parse(CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, months[i], girrCurrency)[0, 0]);
+                    CDSresults[j, i] /= shockedGIRR;
+                    CDSresults[j, i] *= riskWeights[j] / additionalWeight;
+                    results[i] -= CDSresults[j, i];
+                }
+                nonShocked[i] = Double.Parse(CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
+                    cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,
+                    withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, 0, girrCurrency)[0, 0]);
+                shocked[i] = Double.Parse(CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
+                    cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,
+                    withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, months[i],girrCurrency)[0, 0]);
+                CDOresults[i] = (shocked[i] - nonShocked[i]) / shockedGIRR;
+                CDOresults[i] *= riskWeights[i] / additionalWeight;
+                results[i] += CDOresults[i];
+            }
+            return results;
+        }
+        public static double[,] Girr(DateTime paramDate,string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            StrippingIRS.IRCurveStore[] curvesList = StrippingIRS.CurveList;
+            int lastIndice = 0;
+            for(int i = 1;i< curvesList.Length;i++)
+            {
+                if (!String.Equals(curvesList[i].Currency, curvesList[i - 1].Currency))
+                {
+                    lastIndice++;
+                }
+            }
+            int[] indice = new int[lastIndice+1];
+            indice[0] = 0;
+            lastIndice = 0;
+            for (int i = 1; i < curvesList.Length; i++)
+            {
+                if (!String.Equals(curvesList[i].Currency, curvesList[i - 1].Currency))
+                {
+                    lastIndice++;
+                    indice[lastIndice] = i;
+                }
+            }
+            double[,] girrSensitivities = new double[curvesList.Length, 10];
+            for(int i = 1;i<indice.Length;i++)
+            {
+                StrippingIRS.StripZC(paramDate, curvesList[indice[i]].Currency, curvesList[indice[i]].SwapRates, curvesList[indice[i]].CurveDates,
+                    curvesList[indice[i]].SwapPeriod, curvesList[indice[i]].SwapBasis, curvesList[indice[i]].FXRate) ;//Strip toutes les autres courbes autre que la première currency
+            }
+            for (int i = 0; i < curvesList.Length; i++)
+            {
+                StrippingIRS.StripZC(paramDate, curvesList[i].Currency, curvesList[i].SwapRates, curvesList[i].CurveDates,
+                    curvesList[i].SwapPeriod, curvesList[i].SwapBasis, curvesList[i].FXRate);
+                for(int j = 1; j < indice.Length; j++)//on considère juste que les premières courbes de chaque currency sont celle de base qu'on veut tjrs
+                {
+                    if (i == indice[j])
+                    {
+                        StrippingIRS.StripZC(paramDate, curvesList[indice[j-1]].Currency, curvesList[indice[j-1]].SwapRates, curvesList[indice[j-1]].CurveDates,
+                    curvesList[indice[j-1]].SwapPeriod, curvesList[indice[j-1]].SwapBasis, curvesList[indice[j-1]].FXRate);
+                        break;
+                    }
+                }
+                double[] results = DeltaGIRR(curvesList[i].Currency, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread,
+                    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL,
+                    hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
+                for(int j = 0; j < results.Length; j++)
+                {
+                    girrSensitivities[i, j] = results[j];
+                }
+            }
+            double[] tenors = { 0.25, 0.5, 1, 2, 3, 5, 10, 15, 20, 30 };
+            double[] Kb = new double[indice.Length];
+            for(int b = 0; b < indice.Length; b++)
+            {
+                Kb[b] = 0;
+                int limit = (b == indice.Length - 1) ? curvesList.Length : indice[b + 1];
+                for (int j = 0; j < 10; j++)
+                {
+                    for(int i = indice[b];i< limit; i++)
+                    {
+                        for (int k = 0; k < 10; k++)
+                        {
+                            for (int l = indice[b]; l < limit; l++)
+                            {
+                                Kb[b] += girrSensitivities[i, j] * girrSensitivities[l, k];
+                                Console.WriteLine("bucket: "+b+", curve: "+i+"vs curve: "+l+", tenor: " + tenors[j]+"vs tenor: " + tenors[k]);
+                                if (l==i & k != j)//same bucket with different tenor and same curve
+                                {
+                                    Kb[b] *= Math.Max(Math.Exp(-0.03 * Math.Abs(tenors[k] - tenors[j]) / Math.Min(tenors[k], tenors[j])),0.4);
+                                    Console.WriteLine(Math.Max(Math.Exp(-0.03 * Math.Abs(tenors[k] - tenors[j]) / Math.Min(tenors[k], tenors[j])), 0.4));
+                                }
+                                else if(l!=i & k != j)//same bucket with different tenor and different curve
+                                {
+                                    Kb[b] *= Math.Max(Math.Exp(-0.03 * Math.Abs(tenors[k] - tenors[j]) / Math.Min(tenors[k], tenors[j])), 0.4)*0.999;
+                                    Console.WriteLine(Math.Max(Math.Exp(-0.03 * Math.Abs(tenors[k] - tenors[j]) / Math.Min(tenors[k], tenors[j])), 0.4));
+                                }
+                                else if(l!=i & k == j)//same bucket with same tenor and different curve
+                                {
+                                    Kb[b] *= 0.999;
+                                }
+                            }
+                        }
+                    }
+                    Kb[b] = Math.Sqrt(Math.Max(0, Kb[b]));
+                }
+            }
+            return girrSensitivities;
         }
     }
 }
