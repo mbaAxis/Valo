@@ -564,17 +564,17 @@ namespace ValoLibrary
             string[] curveDates, string[] typeOfCurve)
         {
             CurveList = new IRCurveStore[currency.Length];
-            for(int i = 0;i < currency.Length; i++)
+            for (int i = 0; i < currency.Length; i++)
             {
                 CurveList[i].Currency = currency[i];
-                CurveList[i].SwapBasis= swapBasis[i];
-                CurveList[i].FXRate= FXRate[i];
-                CurveList[i].SwapPeriod= swapPeriod[i];
-                CurveList[i].CurveNames= curveNames[i];
+                CurveList[i].SwapBasis = swapBasis[i];
+                CurveList[i].FXRate = FXRate[i];
+                CurveList[i].SwapPeriod = swapPeriod[i];
+                CurveList[i].CurveNames = curveNames[i];
                 CurveList[i].CurveDates = curveDates;
                 CurveList[i].TypeOfCurve = typeOfCurve[i];
                 double[] swapRatesValues = new double[swapRates.GetLength(1)];
-                for(int j = 0; j < swapRates.GetLength(1); j++)
+                for (int j = 0; j < swapRates.GetLength(1); j++)
                 {
                     swapRatesValues[j] = swapRates[i, j];
                 }

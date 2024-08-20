@@ -588,6 +588,7 @@ string[] typeOfCurve = { "IBOR", "IBOR", "OIS" };
 double[,] swapRatest = { { 0.03418, 0.03039, 0.02857, 0.02708, 0.02665, 0.02672, 0.02704, 0.02436 }, { 0.03307, 0.02955, 0.02784, 0.02650, 0.02617, 0.02641, 0.02695, 0.02473 }, { 0.04756, 0.04253, 0.03998, 0.03779, 0.03714, 0.03700, 0.03733, 0.03556 } };
 string[] datest = { "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "15Y", "30Y" };
 StrippingIRS.StoreCurve(currencyName, swapBasist, FXRatet, swapPeriodt, curveNamest, swapRatest, datest, typeOfCurve);
-ModelInterface.Girr(paramDate,maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+Console.WriteLine(ModelInterface.testGIRR());
+ModelInterface.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.Runtime.InteropServices;
@@ -74,6 +75,21 @@ namespace ValoLibrary
         double withGreeks = 0,double withJtdVAL = 0,double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, string girrCurrency = null);
 
+        //////======================================Stripping IRS====================================
+        void GetStoreCurve(string[] currency, double[] swapBasis, double[] FXRate, double[] swapPeriod, string[] curveNames, double[,] swapRates,
+            string[] curveDates, string[] typeOfCurve);
+        double[,] GetGirr(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+            int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+            double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+            string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+        double[] GetTestGIRR(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+            int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+            double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+            string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
     }
 
 
@@ -220,7 +236,7 @@ namespace ValoLibrary
             return StrippingCDS.GetDefaultProb(issuer, maturityDate, scenario = 0, probMultiplier = 1);
         }
 
-        // ===================================MOdel Interface========================================,
+        // ===================================Model Interface========================================,
 
         public string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate, double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
@@ -235,16 +251,50 @@ namespace ValoLibrary
         }
 
         public string[,] GetCDO(string maturity, double[] strikes, double[] correl,double[] spreadStandard, string pricingCurrency,
-   int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-   string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-   double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-   double withGreeks = 0, double withJtdVAL = 0,double withStochasticRecoveryVAL= 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-   string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, string girrCurrency = null)
+           int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+           string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+           double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+           double withGreeks = 0, double withJtdVAL = 0,double withStochasticRecoveryVAL= 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+           string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, string girrCurrency = null)
         {
             lossUnitAmount=null;
             return ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
     spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
     isAmericanFixedLeg, withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, girrMonth,girrCurrency);
+        }
+
+        public double[,] GetGirr(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+            int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+            double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+            string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            lossUnitAmount = null;
+            return ModelInterface.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
+                cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL,hedgingCDS, lossUnitAmount, integrationPeriod,
+                probMultiplier, dBeta);
+        }
+
+        // ===================================Stripping IRS========================================,
+        public void GetStoreCurve(string[] currency, double[] swapBasis, double[] FXRate, double[] swapPeriod, string[] curveNames, double[,] swapRates,
+            string[] curveDates, string[] typeOfCurve)
+        {
+            int[] intswapBasis = swapBasis.Select(d => (int)d).ToArray();
+            int[] intswapPeriod = swapPeriod.Select(d => (int)d).ToArray();
+            StrippingIRS.StoreCurve(currency, intswapBasis, FXRate, intswapPeriod,curveNames,swapRates,curveDates,typeOfCurve);
+        }
+        public double[] GetTestGIRR(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+            int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+            double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+            string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            lossUnitAmount = null;
+            return ModelInterface.testGIRR(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
+                cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod,
+                probMultiplier, dBeta);
         }
     }
 }
