@@ -1249,6 +1249,7 @@ namespace ValoLibrary
     double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
     string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
+            //Computation of all sensitivities with respect to all curves stored
             StrippingIRS.IRCurveStore[] curvesList = StrippingIRS.CurveList;
             int lastIndice = 0;
             for (int i = 1; i < curvesList.Length; i++)
@@ -1269,7 +1270,7 @@ namespace ValoLibrary
                     indice[lastIndice] = i;
                 }
             }
-            double[,] girrSensitivities = new double[curvesList.Length, 10];
+            double[,] girrSensitivities = new double[curvesList.Length, 11];
             for (int i = 1; i < indice.Length; i++)
             {
                 StrippingIRS.StripZC(paramDate, curvesList[indice[i]].Currency, curvesList[indice[i]].SwapRates, curvesList[indice[i]].CurveDates,
@@ -1296,16 +1297,21 @@ namespace ValoLibrary
                     girrSensitivities[i, j] = results[j];
                 }
             }
+            //Computation of Kb across all buckets (currency)
             double[] tenors = { 0.25, 0.5, 1, 2, 3, 5, 10, 15, 20, 30 };
             double[] Kb = new double[indice.Length];
+            double[] Sb = new double[indice.Length];
+            double gamma = 0.5;// see 21.50
             for (int b = 0; b < indice.Length; b++)
             {
+                Sb[b] = 0;
                 Kb[b] = 0;
                 int limit = (b == indice.Length - 1) ? curvesList.Length : indice[b + 1];
                 for (int j = 0; j < 10; j++)
                 {
                     for (int i = indice[b]; i < limit; i++)
                     {
+                        Sb[b] += girrSensitivities[i, j];
                         for (int k = 0; k < 10; k++)
                         {
                             for (int l = indice[b]; l < limit; l++)
@@ -1329,48 +1335,114 @@ namespace ValoLibrary
                             }
                         }
                     }
-                    Kb[b] = Math.Sqrt(Math.Max(0, Kb[b]));
+                }
+                Kb[b] = Math.Sqrt(Math.Max(0, Kb[b]));
+            }
+            // Computation of Delta if needed (i.e. if the result is <0, see 21.4)
+            double delta = 0;
+            for (int b = 0; b < indice.Length;b++)
+            {
+                delta += Kb[b] * Kb[b];
+                for (int c = 0;c<indice.Length && c!= b; c++)
+                {
+                    delta += gamma * Sb[b] * Sb[c];
                 }
             }
+            if (delta < 0)
+            {
+                delta = 0;
+                for(int b = 0;b < indice.Length;b++)
+                {
+                    Sb[b] = Math.Max(Math.Min(Sb[b], Kb[b]), -Kb[b]);
+                }
+                for (int b = 0; b < indice.Length; b++)
+                {
+                    delta += Kb[b] * Kb[b];
+                    for (int c = 0; c < indice.Length && c != b; c++)
+                    {
+                        delta += gamma * Sb[b] * Sb[c];
+                    }
+                }
+                delta = Math.Sqrt(delta);
+                girrSensitivities[0, 10] = delta;
+            }
+
             return girrSensitivities;
         }
-        public static double[] testGIRR(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-            int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-            double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-            string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        public static void Fill(DateTime paramDate, string[] issuerList, DateTime CDSRollDate, bool alterMode,string intensity,string cpnPeriod,string cpnConvention )
         {
-            StrippingIRS.IRCurveStore[] curvesList = StrippingIRS.CurveList;
-            int lastIndice = 0;
-            for (int i = 1; i < curvesList.Length; i++)
+            StrippingCDS.CDSCurveList curveList = StrippingCDS.CreditDefaultSwapCurves;
+            string[] curveMaturity = curveList.Curves[1].CurveDates;
+            string[] tenors = { "6M", "1Y", "3Y", "5Y", "10Y" };
+            int[] indices = new int[tenors.Length];
+            int k = 0;
+            for(int i = 0; i < tenors.Length; i++)
             {
-                if (!String.Equals(curvesList[i].Currency, curvesList[i - 1].Currency))
+                for(int j = 0; j < curveMaturity.Length; j++)
                 {
-                    lastIndice++;
+                    if (String.Equals(curveMaturity[j], tenors[i]))
+                    {
+                        indices[k] = j;
+                        k++;
+                        break;
+                    }
                 }
             }
-            int[] indice = new int[lastIndice + 1];
-            indice[0] = 0;
-            lastIndice = 0;
-            for (int i = 1; i < curvesList.Length; i++)
+            double[] curve = new double[curveMaturity.Length];
+            StrippingCDS.CDSCurve CDScurve;
+            bool isDone = false;
+            for(int i = 0; i < issuerList.Length; i++)
             {
-                if (!String.Equals(curvesList[i].Currency, curvesList[i - 1].Currency))
+                CDScurve = curveList.Curves[StrippingCDS.GetCDSCurveId(issuerList[i])];
+                curve = CDScurve.CDSSpread;
+                for(int j = 0; j < tenors.Length; j++)
                 {
-                    lastIndice++;
-                    indice[lastIndice] = i;
+                    if (curve[indices[j]] == 0)
+                    {
+                        curve[indices[j]] = Double.Parse(CDS(issuerList[i], tenors[j], 0, CDScurve.Recovery, 1, cpnPeriod, cpnConvention, "",CDScurve.Currency,0,0,1,1,0)[3,0]);
+                        isDone = true;
+                    }
+                }
+                if (isDone)
+                {
+                    isDone = false;
+                    StrippingCDS.StripDefaultProbability(StrippingCDS.GetCDSCurveId(issuerList[i]), issuerList[i], paramDate,CDSRollDate,curve,curveMaturity,CDScurve.Currency,CDScurve.Recovery,alterMode,intensity);
                 }
             }
-            double[,] girrSensitivities = new double[curvesList.Length, 10];
-            for (int i = 1; i < indice.Length; i++)
-            {
-                StrippingIRS.StripZC(paramDate, curvesList[indice[i]].Currency, curvesList[indice[i]].SwapRates, curvesList[indice[i]].CurveDates,
-                    curvesList[indice[i]].SwapPeriod, curvesList[indice[i]].SwapBasis, curvesList[indice[i]].FXRate);//Strip toutes les autres courbes autre que la première currency
-            }
-            double[] a = { 1, 2, 3 };
-            return DeltaGIRR("EUR", maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread,
-                    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL,
-                    hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
         }
+        public static void ShockedCurveCSR(DateTime paramDate, string cdsName, DateTime CDSRollDate, bool alterMode, string intensity, string cpnPeriod, string cpnConvention, int shockTenor)
+        {
+            StrippingCDS.CDSCurveList curveList = StrippingCDS.CreditDefaultSwapCurves;
+            StrippingCDS.CDSCurve CDScurve;
+            CDScurve = curveList.Curves[StrippingCDS.GetCDSCurveId(cdsName)];
+            double[] curveSpread = CDScurve.CDSSpread;
+            
+
+        }
+        public static double DeltaCSR(DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            Fill(paramDate, issuerList, CDSRollDate, alterMode, intensity, cpnPeriod, cpnConvention);
+            string[] tenors = { "6M", "1Y", "3Y", "5Y", "10Y" };
+            double[] results = new double[tenors.Length * 2];
+
+            StrippingCDS.CDSCurveList curveList = StrippingCDS.CreditDefaultSwapCurves;
+            StrippingCDS.CDSCurve CDScurve;
+            for (int i = 0; i < issuerList.Length; i++)
+            {
+                CDScurve = curveList.Curves[StrippingCDS.GetCDSCurveId(issuerList[i])];
+                
+                for (int j = 0;j<tenors.Length; j++)
+                {
+
+                }
+            }
+            return 0;
+        }
+
     }
 }
