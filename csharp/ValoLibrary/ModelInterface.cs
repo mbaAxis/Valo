@@ -1154,13 +1154,16 @@ namespace ValoLibrary
             results[0, 10] = Kb;
             return results;
         }
-        public static double ImpliedCorrelation(double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
+        public static double ImpliedCorrelation(double upfront, double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)// Find the base correlation of the high strike tranche given the base correlation of the low strike tranche, with the spread given
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0)// Find the base correlation of the high strike tranche given the base correlation of the low strike tranche, with the spread given
         {
+            int valuepricing = 3;
+            if (upfront!=0)
+            {
+                valuepricing = 0;
+            }
             int k = 0;
             double impliedHighCorrel = lowCorrel;
             double epsilon = 0.000001;
@@ -1171,23 +1174,19 @@ namespace ValoLibrary
             {
                 k += 1;
                 objectiveFunction = Double.Parse(CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
-                    cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks,
-                    withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, 0)[3, 0]);
+                    cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg)[valuepricing, 1]);
                 if(objectiveFunction>= trancheSpread)
                 {
-                    impliedHighCorrel = (impliedHighCorrel + b) / 2;
+                    impliedHighCorrel = (lowCorrel + b) / 2;
                 }
                 else
                 {
-                    b = (impliedHighCorrel + b)/2;
+                    impliedHighCorrel = (impliedHighCorrel + b)/2;
                 }
-                correl[1] = (impliedHighCorrel + b) / 2;
+                correl[1] = impliedHighCorrel;
             }
-            while (Math.Abs(objectiveFunction-trancheSpread)>epsilon || k==5000 );
+            while (Math.Abs(objectiveFunction-trancheSpread)>epsilon || k>2 );
             //Dichotomie
-
-
-
             return impliedHighCorrel;
         }
         public static double[] DeltaGIRR(int lastIndice, string girrCurrency, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,

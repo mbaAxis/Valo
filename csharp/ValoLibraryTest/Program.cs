@@ -521,7 +521,7 @@ double[] c2 = { 0.0, 0.0, 0.0, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
 string maturity = "5Y";
 //double[] strikes = { 0.0, 3.0 };
 double[] strikes = { 0, 3.0 };
-double[] correl = { 0.4, 0.5 };
+double[] correl = { 0, 0.5 };
 string pricingCurrency = "EUR";
 int numberOfIssuer = 3;
 string[] issuerList = { "test", "Accor_MMR.EUR.SU" };
@@ -569,14 +569,24 @@ double[] test3 = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsR
 //    }
 //    Console.WriteLine(" ");
 //}
+ModelInterface.ImpliedCorrelation(0, 0, maturity,strikes,0.0, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg);
 //double[] s = ModelInterface.CDODeltaGIRR(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
 //    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
 //    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
-//for( int i = 0; i < s.Length; i++)
+//for (int i = 0; i < s.Length; i++)
 //{
 //    Console.WriteLine(s[i]);
 //}
 //Console.WriteLine("FIN");
+
+
+
+
+
+
+
+
 
 //string[] currencyName = { "EUR", "EUR", "USD"};
 //int[] swapBasist = { 4, 4, 3 };
@@ -594,36 +604,58 @@ double[] test3 = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsR
 //ModelInterface.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
 //    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
 //    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
-string[] noms = {
-    "Airbus SE", "Airbus SE", "Airbus SE",
-    "Aktiebolaget Volvo", "Aktiebolaget Volvo", "Aktiebolaget Volvo",
-    "Akzo Nobel N.V.", "Akzo Nobel N.V.", "Akzo Nobel N.V.",
-    "ALSTOM", "ALSTOM", "ALSTOM",
-    "Anglo American plc", "Anglo American plc", "Anglo American plc",
-    "ArcelorMittal", "ArcelorMittal", "ArcelorMittal",
-    "ASTRAZENECA PLC", "ASTRAZENECA PLC", "ASTRAZENECA PLC",
-    "BAE SYSTEMS PLC", "BAE SYSTEMS PLC", "BAE SYSTEMS PLC",
-    "BASF SE", "BASF SE", "BASF SE",
-    "Bayer Aktiengesellschaft", "Bayer Aktiengesellschaft", "Bayer Aktiengesellschaft",
-    "Bayerische Motoren Werke Aktiengesellschaft", "Bayerische Motoren Werke Aktiengesellschaft", "Bayerische Motoren Werke Aktiengesellschaft"
-};
-string[] ratings = {
-    "A", "A", "A", "A", "A", "A",
-    "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB",
-    "A", "A", "A",
-    "BBB", "BBB", "BBB",
-    "A", "A", "A",
-    "BBB", "BBB", "BBB",
-    "A", "A", "A"
-};
-double[] numbers = {
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-    7, 7, 7,
-    4, 4, 4, 4, 4, 4,
-    7, 7, 7,
-    5, 5, 5
-};
 
 
-ModelInterface.BucketCompute(11, noms, ratings, numbers);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//string[] noms = {
+//    "Airbus SE", "Airbus SE", "Airbus SE",
+//    "Aktiebolaget Volvo", "Aktiebolaget Volvo", "Aktiebolaget Volvo",
+//    "Akzo Nobel N.V.", "Akzo Nobel N.V.", "Akzo Nobel N.V.",
+//    "ALSTOM", "ALSTOM", "ALSTOM",
+//    "Anglo American plc", "Anglo American plc", "Anglo American plc",
+//    "ArcelorMittal", "ArcelorMittal", "ArcelorMittal",
+//    "ASTRAZENECA PLC", "ASTRAZENECA PLC", "ASTRAZENECA PLC",
+//    "BAE SYSTEMS PLC", "BAE SYSTEMS PLC", "BAE SYSTEMS PLC",
+//    "BASF SE", "BASF SE", "BASF SE",
+//    "Bayer Aktiengesellschaft", "Bayer Aktiengesellschaft", "Bayer Aktiengesellschaft",
+//    "Bayerische Motoren Werke Aktiengesellschaft", "Bayerische Motoren Werke Aktiengesellschaft", "Bayerische Motoren Werke Aktiengesellschaft"
+//};
+//string[] ratings = {
+//    "A", "A", "A", "A", "A", "A",
+//    "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB",
+//    "A", "A", "A",
+//    "BBB", "BBB", "BBB",
+//    "A", "A", "A",
+//    "BBB", "BBB", "BBB",
+//    "A", "A", "A"
+//};
+//double[] numbers = {
+//    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+//    7, 7, 7,
+//    4, 4, 4, 4, 4, 4,
+//    7, 7, 7,
+//    5, 5, 5
+//};
+
+
+//ModelInterface.BucketCompute(11, noms, ratings, numbers);
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Runtime.InteropServices;
 using Excel = Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Core;
 
 namespace ValoLibrary
 {
@@ -81,6 +82,11 @@ namespace ValoLibrary
         double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
         double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+
+        double GetImpliedCorrelation(double upfront, double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0);
 
         //////======================================Stripping IRS====================================
         void GetStoreCurve(string[] currency, double[] swapBasis, double[] FXRate, double[] swapPeriod, string[] curveNames, double[,] swapRates,
@@ -289,7 +295,14 @@ namespace ValoLibrary
                 cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod,
                 probMultiplier, dBeta);
         }
-
+        public double GetImpliedCorrelation(double upfront, double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0)
+        {
+            return ModelInterface.ImpliedCorrelation(upfront, trancheSpread,maturity,strikes,lowCorrel,spreadStandard,pricingCurrency,numberOfIssuer,issuerList,
+                nominalIssuer,spread,cpnPeriod,cpnConvention,cpnLastSettle,fxCorrel,fxVol,betaAdder,recoveryIssuer,isAmericanFloatLeg,isAmericanFixedLeg);
+        }
         // ===================================Stripping IRS========================================,
         public void GetStoreCurve(string[] currency, double[] swapBasis, double[] FXRate, double[] swapPeriod, string[] curveNames, double[,] swapRates,
             string[] curveDates, string[] typeOfCurve)
