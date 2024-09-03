@@ -578,18 +578,52 @@ double[] test3 = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsR
 //}
 //Console.WriteLine("FIN");
 
-string[] currencyName = { "EUR", "EUR", "USD"};
-int[] swapBasist = { 4, 4, 3 };
-double[] FXRatet = { 1, 1, 1.0865 };
-int[] swapPeriodt = { 6, 3, 1 };
-string[] curveNamest = { "1", "2", "3" };
-string[] typeOfCurve = { "IBOR", "IBOR", "OIS" };
-double[,] swapRatest = { { 0.03418, 0.03039, 0.02857, 0.02708, 0.02665, 0.02672, 0.02704, 0.02436 }, { 0.03307, 0.02955, 0.02784, 0.02650, 0.02617, 0.02641, 0.02695, 0.02473 }, { 0.04756, 0.04253, 0.03998, 0.03779, 0.03714, 0.03700, 0.03733, 0.03556 } };
-string[] datest = { "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "15Y", "30Y" };
-
-ModelInterface.Fill(paramDate,issuerList,cdsRollDate,alterMode,intensity,cpnPeriod,cpnConvention);
+//string[] currencyName = { "EUR", "EUR", "USD"};
+//int[] swapBasist = { 4, 4, 3 };
+//double[] FXRatet = { 1, 1, 1.0865 };
+//int[] swapPeriodt = { 6, 3, 1 };
+//string[] curveNamest = { "1", "2", "3" };
+//string[] typeOfCurve = { "IBOR", "IBOR", "OIS" };
+//double[,] swapRatest = { { 0.03418, 0.03039, 0.02857, 0.02708, 0.02665, 0.02672, 0.02704, 0.02436 }, { 0.03307, 0.02955, 0.02784, 0.02650, 0.02617, 0.02641, 0.02695, 0.02473 }, { 0.04756, 0.04253, 0.03998, 0.03779, 0.03714, 0.03700, 0.03733, 0.03556 } };
+//string[] datest = { "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "15Y", "30Y" };
+//ModelInterface.DeltaCSR(paramDate,cdsRollDate,alterMode,intensity,maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+//    isAmericanFixedLeg, 0, 0, 0, hedgingCDS, null, integrationPeriod, 1, dBeta) ;
 
 //StrippingIRS.StoreCurve(currencyName, swapBasist, FXRatet, swapPeriodt, curveNamest, swapRatest, datest, typeOfCurve);
 //ModelInterface.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
 //    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
 //    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
+string[] noms = {
+    "Airbus SE", "Airbus SE", "Airbus SE",
+    "Aktiebolaget Volvo", "Aktiebolaget Volvo", "Aktiebolaget Volvo",
+    "Akzo Nobel N.V.", "Akzo Nobel N.V.", "Akzo Nobel N.V.",
+    "ALSTOM", "ALSTOM", "ALSTOM",
+    "Anglo American plc", "Anglo American plc", "Anglo American plc",
+    "ArcelorMittal", "ArcelorMittal", "ArcelorMittal",
+    "ASTRAZENECA PLC", "ASTRAZENECA PLC", "ASTRAZENECA PLC",
+    "BAE SYSTEMS PLC", "BAE SYSTEMS PLC", "BAE SYSTEMS PLC",
+    "BASF SE", "BASF SE", "BASF SE",
+    "Bayer Aktiengesellschaft", "Bayer Aktiengesellschaft", "Bayer Aktiengesellschaft",
+    "Bayerische Motoren Werke Aktiengesellschaft", "Bayerische Motoren Werke Aktiengesellschaft", "Bayerische Motoren Werke Aktiengesellschaft"
+};
+string[] ratings = {
+    "A", "A", "A", "A", "A", "A",
+    "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB", "BBB",
+    "A", "A", "A",
+    "BBB", "BBB", "BBB",
+    "A", "A", "A",
+    "BBB", "BBB", "BBB",
+    "A", "A", "A"
+};
+double[] numbers = {
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    7, 7, 7,
+    4, 4, 4, 4, 4, 4,
+    7, 7, 7,
+    5, 5, 5
+};
+
+
+ModelInterface.BucketCompute(11, noms, ratings, numbers);
+

@@ -75,6 +75,13 @@ namespace ValoLibrary
         double withGreeks = 0,double withJtdVAL = 0,double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, string girrCurrency = null);
 
+         double[,] GetDeltaCSR(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+        int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+        string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+        double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+        double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+
         //////======================================Stripping IRS====================================
         void GetStoreCurve(string[] currency, double[] swapBasis, double[] FXRate, double[] swapPeriod, string[] curveNames, double[,] swapRates,
             string[] curveDates, string[] typeOfCurve);
@@ -84,6 +91,7 @@ namespace ValoLibrary
             double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
             double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
             string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+        int[] GetBucketCompute(int numberOfIssuer, string[] issuerName, string[] ratings, double[] sectors);
     }
 
 
@@ -269,6 +277,18 @@ namespace ValoLibrary
                 cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL,hedgingCDS, lossUnitAmount, integrationPeriod,
                 probMultiplier, dBeta);
         }
+        public double[,] GetDeltaCSR(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
+    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            lossUnitAmount = null;
+            return ModelInterface.DeltaCSR(names, ratings,sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
+                cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod,
+                probMultiplier, dBeta);
+        }
 
         // ===================================Stripping IRS========================================,
         public void GetStoreCurve(string[] currency, double[] swapBasis, double[] FXRate, double[] swapPeriod, string[] curveNames, double[,] swapRates,
@@ -277,6 +297,11 @@ namespace ValoLibrary
             int[] intswapBasis = swapBasis.Select(d => (int)d).ToArray();
             int[] intswapPeriod = swapPeriod.Select(d => (int)d).ToArray();
             StrippingIRS.StoreCurve(currency, intswapBasis, FXRate, intswapPeriod,curveNames,swapRates,curveDates,typeOfCurve);
+        }
+        //--
+        public int[] GetBucketCompute(int numberOfIssuer, string[] issuerName, string[] ratings, double[] sectors)
+        {
+            return ModelInterface.BucketCompute(numberOfIssuer,issuerName, ratings, sectors);
         }
     }
 }

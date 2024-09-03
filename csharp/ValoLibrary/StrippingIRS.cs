@@ -580,6 +580,7 @@ namespace ValoLibrary
                 }
                 CurveList[i].SwapRates = swapRatesValues;
             }
+
         }
 
     }
