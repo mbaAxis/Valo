@@ -659,3 +659,7 @@ ModelInterface.ImpliedCorrelation(0, 0, maturity,strikes,0.0, spreadStandard, pr
 
 //ModelInterface.BucketCompute(11, noms, ratings, numbers);
 
+
+
+int[] list = { 1, 1, 2, 5, 15, 16, 12, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 18, 18, 18, 18, 14, 12, 8, 13,18, 15, 10 };
+ModelInterface.CDOBucket(list);

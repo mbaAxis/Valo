@@ -1165,29 +1165,32 @@ namespace ValoLibrary
                 valuepricing = 0;
             }
             int k = 0;
-            double impliedHighCorrel = lowCorrel;
-            double epsilon = 0.000001;
+            double a = lowCorrel;
             double b = 1.0;
+            double c = (lowCorrel+b)/2;
+            double epsilon = 0.0001;
             double objectiveFunction = 0;
-            double[] correl = { lowCorrel, (lowCorrel+b)/2 };
+            double[] correl = { lowCorrel, lowCorrel };
             do
             {
                 k += 1;
                 objectiveFunction = Double.Parse(CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
                     cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg)[valuepricing, 1]);
-                if(objectiveFunction>= trancheSpread)
+                if(objectiveFunction>= trancheSpread)//The correlation is too low
                 {
-                    impliedHighCorrel = (lowCorrel + b) / 2;
+                    a = c;
+                    c = (a + b) / 2;
                 }
                 else
                 {
-                    impliedHighCorrel = (impliedHighCorrel + b)/2;
+                    b = c;
+                    c = (a + b) / 2;
                 }
-                correl[1] = impliedHighCorrel;
+                correl[1] = c;
             }
-            while (Math.Abs(objectiveFunction-trancheSpread)>epsilon || k>2 );
+            while (Math.Abs(objectiveFunction-trancheSpread)>epsilon && k<10 );
             //Dichotomie
-            return impliedHighCorrel;
+            return c;
         }
         public static double[] DeltaGIRR(int lastIndice, string girrCurrency, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
@@ -1371,6 +1374,24 @@ namespace ValoLibrary
 
             return girrSensitivities;
         }
+
+        //Delta CSR PART
+
+        public static int CDOBucket(int[] bucket)//Function which return the bucket for the cdo's tranche
+        {
+            int[] list = new int[18];
+            int indiceMax = bucket[0] - 1;
+            for (int i = 0; i < bucket.Length; i++)
+            {
+                list[bucket[i] - 1]++;
+                if (list[bucket[i] - 1] > list[indiceMax])
+                {
+                    indiceMax = bucket[i] - 1;
+                }
+            }
+            return indiceMax;
+        }
+
         public static int[] Fill(DateTime paramDate, string[] issuerList, DateTime CDSRollDate, bool alterMode,string intensity,string cpnPeriod,string cpnConvention )
         {
             StrippingCDS.CDSCurveList curveList = StrippingCDS.CreditDefaultSwapCurves;
@@ -1423,7 +1444,7 @@ namespace ValoLibrary
             double shockedCSR = 0.0001;
             int[] indices = Fill(paramDate, issuerList, CDSRollDate, alterMode, intensity, cpnPeriod, cpnConvention);
             string[] tenors = { "6M", "1Y", "3Y", "5Y", "10Y" };
-            double[,] results = new double[issuerList.Length,tenors.Length * 2] ;
+            double[,] weightedDeltaRisk = new double[issuerList.Length,tenors.Length * 2] ;
             double nonShockedCDS;
             double shockedCDS;
             double nonShockedCDO;
@@ -1435,6 +1456,8 @@ namespace ValoLibrary
                 betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta)[0, 0]);//CDO tranche's NPV non shocked
 
             int[] bucket = BucketCompute(numberOfIssuer, names, ratings, sectors);
+            int CDOBucketRW = CDOBucket(bucket);
+
             double[] riskWeightsCDS = { 0.005, 0.01, 0.05, 0.03, 0.03, 0.02, 0.015, 0.025, 0.02, 0.04, 0.12, 0.07, 0.085, 0.055, 0.05, 0.12, 0.015, 0.05 };
             double[] riskWeightsCDO = { 0.04, 0.04, 0.08, 0.05, 0.04, 0.03, 0.02, 0.06, 0.13, 0.13, 0.16, 0.1, 0.12, 0.12, 0.12, 0.13 };// CAUTION Exception for Indices, HAS TO BE DONE
 
@@ -1458,69 +1481,77 @@ namespace ValoLibrary
                     shockedCDS = Double.Parse(CDS(issuerList[i], maturity, spreadStandard[i]*shockedCSR, recoveryIssuer[i], nominalIssuer[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1)[0, 0]);
                     shockedCDO = Double.Parse(CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
                         betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta)[0, 0]);
-                    results[i,j] = (shockedCDO - nonShockedCDO) / shockedCSR;
-                    results[i,j+tenors.Length] = (shockedCDS-nonShockedCDS)/ shockedCSR;
+                    weightedDeltaRisk[i,j] = (shockedCDO - nonShockedCDO) / shockedCSR;
+                    weightedDeltaRisk[i,j+tenors.Length] = (shockedCDS-nonShockedCDS)/ shockedCSR;
                     //riskWeight adding
-                    results[i, j] *= riskWeightsCDO[bucket[i] - 1];
-                    results[i, j + tenors.Length] *= riskWeightsCDS[bucket[i] - 1];
+                    weightedDeltaRisk[i, j] *= riskWeightsCDO[CDOBucketRW];
+                    weightedDeltaRisk[i, j + tenors.Length] *= riskWeightsCDS[bucket[i] - 1];
                 }
                 curve[indices[tenors.Length - 1]] -= shockedCSR;
                 StrippingCDS.StripDefaultProbability(StrippingCDS.GetCDSCurveId(issuerList[i]), issuerList[i], paramDate, CDSRollDate, curve, CDScurve.CurveDates, CDScurve.Currency, CDScurve.Recovery, alterMode, intensity);//Reset all changes after shocking 10Y
             }
 
             // Correlation and aggregation CDS
-            double[] KbCDS = new double[18];
-            double[] KbCDO = new double[18];
+            double[] KbNonSec = new double[18];
+            double[] KbSecCtp = new double[18];
+
+            double[] SbNonSec = new double[18];//See 21.4 (5.b)
+            double[] SbSecCtp = new double[18];
             for(int bucketNumber = 0;bucketNumber< 18; bucketNumber++)
             {
-                KbCDS[bucketNumber] = 0;
-                KbCDO[bucketNumber] = 0;
+                SbNonSec[0] = 0;
+                SbSecCtp[0] = 0;
+
+                KbNonSec[bucketNumber] = 0;
+                KbSecCtp[bucketNumber] = 0;
                 for (int row1 = 0; row1 < numberOfIssuer; row1++)
                 {
                     if (bucket[row1] == bucketNumber + 1)//We make sure that the current name has the correct bucket
                     {
-                        for (int col1 = 0; col1 < tenors.Length; col1++)//If yes, we look for the values
+                        for (int column1 = 0; column1 < tenors.Length; column1++)//If yes, we look for the values
                         {
+                            SbNonSec[bucketNumber] += weightedDeltaRisk[row1, column1 + tenors.Length];
+                            SbSecCtp[bucketNumber] += weightedDeltaRisk[row1, column1];
                             for (int row2 = 0; row2 < numberOfIssuer; row2++)
                             {
                                 if (bucket[row2] == bucketNumber + 1)//We make sure that the current name has the correct bucket
                                 {
                                     if (bucketNumber + 1 == 16)//See 21.56
                                     {
-                                        KbCDS[bucketNumber] += Math.Abs(results[row1, col1 + tenors.Length]);
-                                        KbCDO[bucketNumber] += Math.Abs(results[row1, col1 + tenors.Length]);
+                                        KbNonSec[bucketNumber] += Math.Abs(weightedDeltaRisk[row1, column1 + tenors.Length]);
+                                        KbSecCtp[bucketNumber] += Math.Abs(weightedDeltaRisk[row1, column1]);
                                         break;
                                     }
-                                    for (int col2 = 0; col2 < numberOfIssuer; col2++)
+                                    for (int column2 = 0; column2 < numberOfIssuer; column2++)
                                     {
-                                        double weightCDS = 1.0;
-                                        double weightCDO = 1.0;// see 21.60
+                                        double correlationNonSec = 1.0;
+                                        double correlationSecCtp = 1.0;// see 21.60
                                         if (bucketNumber+1 <= 15)//see 21.54
                                         {
                                             if (row1 != row2)//If names are differents, 35% is applied and 99.90% because curve and name are not differentiated here (for CDS), 99.00% if CDO (see 21.60)
                                             {
-                                                weightCDS *= 0.35*0.999;
-                                                weightCDO *= 0.35 * 0.99;
+                                                correlationNonSec *= 0.35*0.999;
+                                                correlationSecCtp *= 0.35 * 0.99;
                                             }
-                                            if (col1 != col2)//If tenor are differents, 65% is applied
+                                            if (column1 != column2)//If tenor are differents, 65% is applied
                                             {
-                                                weightCDS *= 0.65;
-                                                weightCDO *= 0.65;
+                                                correlationNonSec *= 0.65;
+                                                correlationSecCtp *= 0.65;
                                             }
                                         }
                                         if(bucketNumber+1 > 16)//see 21.55 (if indices, CAUTION, not made yet)
                                         {
                                             if (row1 != row2)//If names are differents, 80% is applied and 99.90% because curve and name are not differentiated here
                                             {
-                                                weightCDS *= 0.80 * 0.999;
+                                                correlationNonSec *= 0.80 * 0.999;
                                             }
-                                            if (col1 != col2)//If tenor are differents, 65% is applied
+                                            if (column1 != column2)//If tenor are differents, 65% is applied
                                             {
-                                                weightCDS *= 0.65;
+                                                correlationNonSec *= 0.65;
                                             }
                                         }
-                                        KbCDS[bucketNumber] += results[row1, col1 + tenors.Length] * results[row2, col2 + tenors.Length]*weightCDS;
-                                        KbCDO[bucketNumber] += results[row1, col1 + tenors.Length] * results[row2, col2 + tenors.Length]*weightCDO;
+                                        KbNonSec[bucketNumber] += weightedDeltaRisk[row1, column1 + tenors.Length] * weightedDeltaRisk[row2, column2 + tenors.Length]*correlationNonSec;
+                                        KbSecCtp[bucketNumber] += weightedDeltaRisk[row1, column1] * weightedDeltaRisk[row2, column2]*correlationSecCtp;
                                     }
                                 }
                             }
@@ -1529,7 +1560,99 @@ namespace ValoLibrary
                 }
             }
 
-            return results;
+            //Across bucket aggregation, delta part
+            double[,] correlationMatrixSector = 
+                {{1   ,0.75,0.10,0.20,0.25,0.20,0.15,0.10,0   ,0.45,0.45},
+                 {0.75,1   ,0.05,0.15,0.20,0.15,0.10,0.10,0   ,0.45,0.45},
+                 {0.10,0.05,1   ,0.05,0.15,0.20,0.05,0.20,0   ,0.45,0.45},
+                 {0.20,0.15,0.05,1   ,0.20,0.25,0.05,0.05,0   ,0.45,0.45},
+                 {0.25,0.20,0.15,0.20,1   ,0.25,0.05,0.15,0   ,0.45,0.45},
+                 {0.20,0.15,0.20,0.25,0.25,1   ,0.05,0.20,0   ,0.45,0.45},
+                 {0.15,0.10,0.05,0.05,0.05,0.05,1   ,0.05,0   ,0.45,0.45},
+                 {0.10,0.10,0.20,0.05,0.15,0.20,0.05,1   ,0   ,0.45,0.45},
+                 {0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,0   ,0   },
+                 {0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0   ,1   ,0.75},
+                 {0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0   ,0.75,1   }
+            };//See 21.57 (2) table 5
+
+            double deltaSecCtp = 0;
+            double deltaNonSec = 0;
+            double ratingCorrel=0;
+            double sectorCorrel=0;
+
+            int k;
+            int l;
+
+            double[] SbSecCtpDelta = new double[18];//in case we need to compute the delta risk
+            double[] SbNonSecDelta = new double[18];
+            double dSecCtp = 0;
+            double dNonSec = 0;
+
+            for (int b = 0; b < 18; b++)
+            {
+                deltaSecCtp += KbSecCtp[b] * KbSecCtp[b];
+                deltaNonSec += KbNonSec[b] * KbNonSec[b];
+
+                dSecCtp += KbSecCtp[b] * KbSecCtp[b];
+                dNonSec += KbNonSec[b] * KbNonSec[b];
+
+                SbSecCtpDelta[b] = Math.Max(Math.Min(SbSecCtp[b], KbSecCtp[b]), -KbSecCtp[b]);//21.4 (5.b)
+                SbNonSecDelta[b] = Math.Max(Math.Min(SbNonSec[b], KbNonSec[b]), -KbNonSec[b]);
+
+                if (b+1>=9 && b+1 <= 15)
+                {
+                    k = b - 8;
+                }
+                else
+                {
+                    k = b;
+                }
+                for(int c = 0; c<18 && c!= b; c++)
+                {
+                    SbSecCtpDelta[c] = Math.Max(Math.Min(SbSecCtp[c], KbSecCtp[c]), -KbSecCtp[c]);//21.4 (5.b)
+                    SbNonSecDelta[c] = Math.Max(Math.Min(SbNonSec[c], KbNonSec[c]), -KbNonSec[c]); 
+
+                    if (c + 1 >= 9 && c + 1 <= 15)
+                    {
+                        l = c - 8;
+                    }
+                    else
+                    {
+                        l = c;
+                    }
+
+                    if ( (b+1<=15 && c+1<=15) && ((b+1>=9 && c+1<=8) || (b + 1 <= 8 && c + 1 >= 9)) ) //See 21.57
+                    {
+                        ratingCorrel = 0.5;
+                    }
+                    else
+                    {
+                        ratingCorrel = 1.0;
+                    }
+
+                    sectorCorrel = correlationMatrixSector[k, l];
+
+                    deltaNonSec += SbNonSec[b] * SbNonSec[c] * ratingCorrel * sectorCorrel;
+                    deltaSecCtp += SbSecCtp[b] * SbSecCtp[c] * ratingCorrel * sectorCorrel;
+
+                    dNonSec += SbNonSecDelta[b] * SbNonSecDelta[c] * ratingCorrel * sectorCorrel;
+                    dSecCtp += SbSecCtpDelta[b] * SbSecCtpDelta[c] * ratingCorrel * sectorCorrel;
+
+                }
+            }
+            dNonSec = Math.Sqrt(dNonSec);
+            dSecCtp = Math.Sqrt(dSecCtp);
+
+            if (deltaNonSec < 0)
+            {
+                deltaNonSec = dNonSec;
+            }
+            if (deltaSecCtp < 0)
+            {
+                deltaSecCtp = dSecCtp;
+            }
+
+            return weightedDeltaRisk;
         }
 
         //Bucket Computation functions
@@ -1599,5 +1722,6 @@ namespace ValoLibrary
             }
             return bucket;
         }
+
     }
 }
