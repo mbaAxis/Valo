@@ -208,24 +208,24 @@ using ValoLibrary;
 //Console.WriteLine("===================End Stripping IRS====================");
 
 
-Console.WriteLine("===================Test Stripping CDS====================");
+//Console.WriteLine("===================Test Stripping CDS====================");
 
 
-string curveName = "EUR";
-DateTime paramDate = new(2024, 4, 30);
-double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
-double[] values = { 0.0098, 0.0103, 0.0110, 0.0121, 0.0131, 0.0141, 0.0151, 0.0160, 0.0170, 0.0179, 0.0212, 0.0234 };
-string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
-int swapPeriod = 12;
-int swapBasis = 3;
-double fxSpot = 1;
-StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
-StrippingIRS.StripZC(paramDate, "JPY", values, curveMaturity, 6, 4, 165.5616);
-int cdsID = 1;
-string CDSName = "ABNAMRO_MMR.EUR.SU";
+//string curveName = "EUR";
+//DateTime paramDate = new(2024, 4, 30);
+//double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
+//double[] values = { 0.0098, 0.0103, 0.0110, 0.0121, 0.0131, 0.0141, 0.0151, 0.0160, 0.0170, 0.0179, 0.0212, 0.0234 };
+//string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
+//int swapPeriod = 12;
+//int swapBasis = 3;
+//double fxSpot = 1;
+//StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
+//StrippingIRS.StripZC(paramDate, "JPY", values, curveMaturity, 6, 4, 165.5616);
+//int cdsID = 1;
+//string CDSName = "ABNAMRO_MMR.EUR.SU";
 //DateTime ParamDate = new(2024, 03, 03);
-DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
-double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
+//DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
+//double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
 //double[] CDSCurve = { 0, 1.0, 1.0, 1.0, 1.0,0, 1.0, 1.0, 1.0 };
 //double[] CDSCurve = { 0, 0.8, 0.8, 0.8, 0.8, 0, 0.8, 0.8, 0.8 };
 //bool vbaMontlyZC = StrippingIRS.VbaComputeMonthlyRiskyZC(curveName, paramDate, CDSRollDate);
@@ -233,15 +233,15 @@ double[] CDSCurve = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.00
 //Console.WriteLine("id vbaMontlyZC = " + vbaMontlyZC);
 
 
-string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
-string CDSCurrency = "EUR";
-double RecoveryRate = 0.4; // Par exemple, 40%
-bool alterMode = false;
-string intensity = "Curvepoint";//"3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+//string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+//string CDSCurrency = "EUR";
+//double RecoveryRate = 0.4; // Par exemple, 40%
+//bool alterMode = false;
+//string intensity = "Curvepoint";//"3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
 
 
 // Appel de la fonction à tester
-double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, paramDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+//double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, paramDate, CDSRollDate, CDSCurve, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
 
 // Vérification du résultat
 //if (result != null)
@@ -256,12 +256,12 @@ double[] result = StrippingCDS.StripDefaultProbability(cdsID, CDSName, paramDate
 //{
 //    Console.WriteLine("La fonction StripDefaultProbability a renvoyé null. Vérifiez la console pour les détails d'erreur.");
 //}
-string getname = StrippingCDS.GetCDSName(cdsID);
+//string getname = StrippingCDS.GetCDSName(cdsID);
 //string getname2 = StrippingCDS.GetCDSName(CDSName);
 
-Console.WriteLine("getname = " + getname);
+//Console.WriteLine("getname = " + getname);
 //Console.WriteLine("getname = " + getname2);
-Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
+//Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 //Console.WriteLine("GETDPRO2 = " + StrippingCDS.GetDefaultProb(getname, "1M"));
 
 //Console.WriteLine("===================End Stripping CDS====================");
@@ -511,41 +511,41 @@ Console.WriteLine("GETDPRO = " + StrippingCDS.GetDefaultProb(cdsID, "1M"));
 
 
 
-DateTime cdsRollDate = new DateTime(2024, 6, 20);
-int[] issuer = { 1, 2, 3 };
-string[] spreadCurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
-double[] c1 = { 0.0, 0.00133, 0.0020, 0.0026, 0.00316, 0.0, 0.004, 0.0044, 0.0048 };
-//double[] c2 = { 0.0, 1.98, 1.98, 1.98, 1.98, 0.0, 1.98, 1.98, 1.98 };
-double[] c2 = { 0.0, 0.0, 0.0, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
+//DateTime cdsRollDate = new DateTime(2024, 6, 20);
+//int[] issuer = { 1, 2, 3 };
+//string[] spreadCurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+//double[] c1 = { 0.0, 0.00133, 0.0020, 0.0026, 0.00316, 0.0, 0.004, 0.0044, 0.0048 };
+////double[] c2 = { 0.0, 1.98, 1.98, 1.98, 1.98, 0.0, 1.98, 1.98, 1.98 };
+//double[] c2 = { 0.0, 0.0, 0.0, 0.0016, 0.0023, 0.0, 0.0036, 0.0043, 0.0053 };
 
-string maturity = "5Y";
-//double[] strikes = { 0.0, 3.0 };
-double[] strikes = { 0, 3.0 };
-double[] correl = { 0, 0.5 };
-string pricingCurrency = "EUR";
-int numberOfIssuer = 3;
-string[] issuerList = { "test", "Accor_MMR.EUR.SU" };
-double[] nominalIssuer = { 1.0, 1.0 };
-double spread = 0.05;
-string cpnPeriod = "3m";
-string cpnConvention = "LongFirst";
-string cpnLastSettle = "";
-double fxCorrel = -0.05;
-double fxVol = 0.1;
-double[] betaAdder = { 0.0, 0.0 };
-double[] recoveryIssuer = { 0.4, 0.4 };
-double isAmericanFloatLeg = -1;
-double isAmericanFixedLeg = -1;
-double withGreeks = 1;
-double[] hedgingCDS = { 0.0, -1.0, -1.0 };
-//double lossUnitAmount = null;
-string integrationPeriod = "1m";
-double dBeta = 0.01;
-double[] spreadStandard = { 100, 100 };
-double withJtd = 0;
-double withStochasticRecovery = 0;
-double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c1, CurveMaturity, "JPY", 0.4, false, intensity);
-double[] test3 = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
+//string maturity = "5Y";
+////double[] strikes = { 0.0, 3.0 };
+//double[] strikes = { 0, 3.0 };
+//double[] correl = { 0, 0.5 };
+//string pricingCurrency = "EUR";
+//int numberOfIssuer = 3;
+//string[] issuerList = { "test", "Accor_MMR.EUR.SU" };
+//double[] nominalIssuer = { 1.0, 1.0 };
+//double spread = 0.05;
+//string cpnPeriod = "3m";
+//string cpnConvention = "LongFirst";
+//string cpnLastSettle = "";
+//double fxCorrel = -0.05;
+//double fxVol = 0.1;
+//double[] betaAdder = { 0.0, 0.0 };
+//double[] recoveryIssuer = { 0.4, 0.4 };
+//double isAmericanFloatLeg = -1;
+//double isAmericanFixedLeg = -1;
+//double withGreeks = 1;
+//double[] hedgingCDS = { 0.0, -1.0, -1.0 };
+////double lossUnitAmount = null;
+//string integrationPeriod = "1m";
+//double dBeta = 0.01;
+//double[] spreadStandard = { 100, 100 };
+//double withJtd = 0;
+//double withStochasticRecovery = 0;
+//double[] test1 = StrippingCDS.StripDefaultProbability(2, issuerList[1], paramDate, cdsRollDate, c1, CurveMaturity, "JPY", 0.4, false, intensity);
+//double[] test3 = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsRollDate, c2, CurveMaturity, pricingCurrency, 0.4, false, intensity);
 //double[,] t = ModelInterface.CDSDeltaGIRR(issuerList, spreadStandard, recoveryIssuer, nominalIssuer, cpnPeriod, cpnConvention, cpnLastSettle, "EUR", hedgingCDS, integrationPeriod);
 //Console.WriteLine("Delta GIRR");
 //for (int i = 0; i < t.GetLength(0); i++)
@@ -569,8 +569,8 @@ double[] test3 = StrippingCDS.StripDefaultProbability(3, "test", paramDate, cdsR
 //    }
 //    Console.WriteLine(" ");
 //}
-ModelInterface.ImpliedCorrelation(0, 0, maturity,strikes,0.0, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
-    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg);
+//ModelInterface.ImpliedCorrelation(0, 0, maturity,strikes,0.0, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg);
 //double[] s = ModelInterface.CDODeltaGIRR(maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
 //    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
 //    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
@@ -582,13 +582,7 @@ ModelInterface.ImpliedCorrelation(0, 0, maturity,strikes,0.0, spreadStandard, pr
 
 
 
-
-
-
-
-
-
-//string[] currencyName = { "EUR", "EUR", "USD"};
+//string[] currencyName = { "EUR", "EUR", "USD" };
 //int[] swapBasist = { 4, 4, 3 };
 //double[] FXRatet = { 1, 1, 1.0865 };
 //int[] swapPeriodt = { 6, 3, 1 };
@@ -596,9 +590,9 @@ ModelInterface.ImpliedCorrelation(0, 0, maturity,strikes,0.0, spreadStandard, pr
 //string[] typeOfCurve = { "IBOR", "IBOR", "OIS" };
 //double[,] swapRatest = { { 0.03418, 0.03039, 0.02857, 0.02708, 0.02665, 0.02672, 0.02704, 0.02436 }, { 0.03307, 0.02955, 0.02784, 0.02650, 0.02617, 0.02641, 0.02695, 0.02473 }, { 0.04756, 0.04253, 0.03998, 0.03779, 0.03714, 0.03700, 0.03733, 0.03556 } };
 //string[] datest = { "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "15Y", "30Y" };
-//ModelInterface.DeltaCSR(paramDate,cdsRollDate,alterMode,intensity,maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
+//ModelInterface.DeltaCSR(paramDate, cdsRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
 //    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-//    isAmericanFixedLeg, 0, 0, 0, hedgingCDS, null, integrationPeriod, 1, dBeta) ;
+//    isAmericanFixedLeg, 0, 0, 0, hedgingCDS, null, integrationPeriod, 1, dBeta);
 
 //StrippingIRS.StoreCurve(currencyName, swapBasist, FXRatet, swapPeriodt, curveNamest, swapRatest, datest, typeOfCurve);
 //ModelInterface.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
@@ -612,13 +606,116 @@ ModelInterface.ImpliedCorrelation(0, 0, maturity,strikes,0.0, spreadStandard, pr
 
 
 
+Console.WriteLine("Delta CSR test");
+
+DateTime paramDate = new(2023, 12, 1);
+DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
+//string maturity = "5Y";
+string maturity = "2028/12/01";
 
 
+string curveName = "EUR";
+double[] curve = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
+string[] curveMaturity = { "1Y", "2Y", "3Y", "4Y", "5Y", "6Y", "7Y", "8Y", "9Y", "10Y", "15Y", "20Y" };  // Exemple de maturités de courbe
+int swapPeriod = 12;
+int swapBasis = 3;
+double fxSpot = 1;
+StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
 
 
+string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
+string CDSCurrency = "EUR";
+double RecoveryRate = 0.4; // Par exemple, 40%
+bool alterMode = false;
+string intensity = "Curvepoint";//"3M"; // Vous pouvez ajuster cette valeur en fonction de vos besoins
+
+string n1 = "ABNAMRO_MMR.EUR.SU";
+double[] c1 = { 0, 0.00133, 0.002, 0.0026, 0.00316, 0, 0.004, 0.0044, 0.0048 };
+string n2 = "Accor_MMR.EUR.SU";
+double[] c2 = { 0, 0.0023, 0.003, 0.0025, 0.00426, 0, 0.0045, 0.0046, 0.0058 };
+string n3 = "Adecco_MMR.EUR.SU";
+double[] c3 = { 0, 0.00433, 0.004, 0.0056, 0.00416, 0, 0.0042, 0.0064, 0.00128 };
+string n4 = "Aegon_MMR.EUR.SU";
+double[] c4 = { 0, 0.0013, 0.001, 0.0012, 0.00126, 0, 0.0015, 0.0016, 0.0018 };
+string n5 = "AirFrance_MMR.EUR.SU";
+double[] c5 = { 0, 0.0025, 0.0032, 0.0028, 0.0040, 0, 0.0043, 0.0047, 0.0051 };
+string n6 = "Alstom_MMR.EUR.SU";
+double[] c6 = { 0, 0.0017, 0.0021, 0.0019, 0.0036, 0, 0.0039, 0.0042, 0.0048 };
+string n7 = "ArcelorMittal_MMR.EUR.SU";
+double[] c7 = { 0, 0.0034, 0.0039, 0.0042, 0.0045, 0, 0.0052, 0.0056, 0.0061 };
+string n8 = "AXA_MMR.EUR.SU";
+double[] c8 = { 0, 0.0011, 0.0015, 0.0013, 0.0021, 0, 0.0024, 0.0027, 0.0030 };
+string n9 = "BNPPARIBAS_MMR.EUR.SU";
+double[] c9 = { 0, 0.0018, 0.0024, 0.0026, 0.0031, 0, 0.0036, 0.0039, 0.0044 };
+string n10 = "Carrefour_MMR.EUR.SU";
+double[] c10 = { 0, 0.0026, 0.0030, 0.0034, 0.0038, 0, 0.0043, 0.0046, 0.0050 };
+string n11 = "Danone_MMR.EUR.SU";
+double[] c11 = { 0, 0.0019, 0.0023, 0.0027, 0.0030, 0, 0.0034, 0.0037, 0.0042 };
+string n12 = "ENGIE_MMR.EUR.SU";
+double[] c12 = { 0, 0.0022, 0.0027, 0.0031, 0.0035, 0, 0.0038, 0.0042, 0.0045 };
+string n13 = "LVMH_MMR.EUR.SU";
+double[] c13 = { 0, 0.0015, 0.0019, 0.0021, 0.0026, 0, 0.0030, 0.0033, 0.0037 };
+string n14 = "Michelin_MMR.EUR.SU";
+double[] c14 = { 0, 0.0020, 0.0024, 0.0028, 0.0033, 0, 0.0036, 0.0040, 0.0043 };
+
+StrippingCDS.StripDefaultProbability(1, n1, paramDate, CDSRollDate, c1, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(2, n2, paramDate, CDSRollDate, c2, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(3, n3, paramDate, CDSRollDate, c3, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(4, n4, paramDate, CDSRollDate, c4, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(5, n5, paramDate, CDSRollDate, c5, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(6, n6, paramDate, CDSRollDate, c6, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(7, n7, paramDate, CDSRollDate, c7, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(8, n8, paramDate, CDSRollDate, c8, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(9, n9, paramDate, CDSRollDate, c9, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(10, n10, paramDate, CDSRollDate, c10, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(11, n11, paramDate, CDSRollDate, c11, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(12, n12, paramDate, CDSRollDate, c12, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(13, n13, paramDate, CDSRollDate, c13, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+StrippingCDS.StripDefaultProbability(14, n14, paramDate, CDSRollDate, c14, CurveMaturity, CDSCurrency, RecoveryRate, alterMode, intensity);
+
+//Param CDO
+double[] strikes = { 0.0, 3.0 };
+double[] correl = { 0, 0.5 };
+double spread = 0.05;
+string cpnPeriod = "3m";
+string cpnConvention = "LongFirst";
+string cpnLastSettle = "";
+double fxCorrel = -0.05;
+double fxVol = 0.1;
+double isAmericanFloatLeg = -1;
+double isAmericanFixedLeg = -1;
+string[] names = { n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14 };
+
+double[] betaAdder = new double[names.Length];
+double[] recoveryIssuer = new double[names.Length];
+double[] nominalIssuer = new double[names.Length];
+double[] spreadStandard = new double[names.Length];
+for (int i = 0; i < names.Length; i++)
+{
+    betaAdder[i] = 0;
+    recoveryIssuer[i] = 0.4;
+    nominalIssuer[i] = 1.0;
+    spreadStandard[i] = 100;
+}
 
 
+string[] ratings = { "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB" };
+double[] sector = { 1, 3, 3, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };
+double[,] result = ModelInterface.DeltaCSR(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
 
+double[,] deltaSensitivities = new double[names.Length,5];
+for(int i = 0; i < names.Length; i++)
+{
+    for(int j = 0;j< 5; j++)
+    {
+        deltaSensitivities[i, j] = result[i, j];
+    }
+}
+
+double floor = 0.0001;
+ModelInterface.curvatureCSR(floor,"SECCTP",deltaSensitivities,names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg) ;
 
 
 
@@ -661,5 +758,5 @@ ModelInterface.ImpliedCorrelation(0, 0, maturity,strikes,0.0, spreadStandard, pr
 
 
 
-int[] list = { 1, 1, 2, 5, 15, 16, 12, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 18, 18, 18, 18, 14, 12, 8, 13,18, 15, 10 };
-ModelInterface.CDOBucket(list);
+//int[] list = { 1, 1, 2, 5, 15, 16, 12, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 18, 18, 18, 18, 14, 12, 8, 13,18, 15, 10 };
+//ModelInterface.CDOBucket(list);
