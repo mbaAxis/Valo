@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="29781b8f-9884-4a50-a2df-d95b7570cbf6" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../.vs/VSWorkspaceState.json" beforeDir="false" afterPath="$PROJECT_DIR$/../.vs/VSWorkspaceState.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.vs/Valo/FileContentIndex/6d866b38-741a-4d63-b74a-b2af26dacbe1.vsidx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.vs/Valo/FileContentIndex/b9451fa6-35ff-43de-b126-f1e0ea61c5ed.vsidx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.vs/Valo/FileContentIndex/c14ef6e7-fcdc-4b30-a6b3-5ba4e37c0b71.vsidx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.vs/Valo/FileContentIndex/eb6586e1-3076-4167-ad14-57085d5a1291.vsidx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.vs/Valo/v17/.wsuo" beforeDir="false" afterPath="$PROJECT_DIR$/../.vs/Valo/v17/.wsuo" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 8
+}]]></component>
+  <component name="ProjectId" id="2lgzXZEVNWs469c3Vi1B26VSfNN" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "CDO#4",
+    "last_opened_file_path": "C:/Users/m.ben-el-ghoul/PycharmProjects/Valo/csharp"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-0509580d9d50-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.14494.241" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="29781b8f-9884-4a50-a2df-d95b7570cbf6" name="Changes" comment="" />
+      <created>1725616547674</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1725616547674</updated>
+    </task>
+    <servers />
+  </component>
+</project>
