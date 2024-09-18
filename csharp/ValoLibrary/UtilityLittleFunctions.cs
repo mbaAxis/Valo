@@ -55,5 +55,24 @@ namespace ValoLibrary
 
             return maxVal;
         }
+        public static int[] PositionElement(int[] array, int target)
+        {
+            int[] tab = new int[array.Length];
+            int k = 0;
+            for(int i = 0; i< array.Length; i++)
+            {
+                if (array[i] == target)
+                {
+                    tab[k] = i;
+                    k++;
+                }
+            }
+            int[] result = new int[k];
+            for(int i =0; i< result.Length; i++)
+            {
+                result[i] = tab[i];
+            }
+            return result;
+        } 
     }
 }

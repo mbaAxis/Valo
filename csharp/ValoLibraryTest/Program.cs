@@ -699,23 +699,24 @@ for (int i = 0; i < names.Length; i++)
 }
 
 
+
 string[] ratings = { "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB" };
-double[] sector = { 1, 3, 3, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };
+double[] sector = { 16, 16, 16, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };
 double[,] result = ModelInterface.DeltaCSR(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
     cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
 
-double[,] deltaSensitivities = new double[names.Length,5];
-for(int i = 0; i < names.Length; i++)
+double[,] deltaSensitivities = new double[names.Length, 5];
+for (int i = 0; i < names.Length; i++)
 {
-    for(int j = 0;j< 5; j++)
+    for (int j = 0; j < 5; j++)
     {
         deltaSensitivities[i, j] = result[i, j];
     }
 }
 
 double floor = 0.0001;
-ModelInterface.curvatureCSR(floor,"SECCTP",deltaSensitivities,names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
-    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg) ;
+ModelInterface.curvatureCSR(floor, "e", deltaSensitivities, names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, "high", isAmericanFloatLeg, isAmericanFixedLeg);
 
 
 
