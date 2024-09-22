@@ -142,12 +142,12 @@ namespace ValoLibrary
             // Extrapoler à un taux constant
             return Math.Pow((double)lastZC, ((maturityDateX - paramDate).Days / (double)(lastDate - paramDate).Days));
         }
-        public static double VbaGetRiskFreeZCVersion2(DateTime paramDate, string maturityDate, double[] ZC, string[] ZCDate, bool isShocked)//linear interpolation
+        public static double VbaGetRiskFreeZCVersion2(DateTime paramDate, string maturityDate, double[] ZC, string[] ZCDate, bool isShocked, double shock = 0)//linear interpolation
         {
             double shockedGirr=0;
             if (isShocked)
             {
-                shockedGirr = 0.0001;
+                shockedGirr = shock;
             }
             double r;
             DateTime maturityDateX = UtilityDates.ConvertDate(paramDate, maturityDate);
@@ -181,7 +181,7 @@ namespace ValoLibrary
                         double r1 = -Math.Log(lastZC) / t1;
                         double r2 = -Math.Log(ZC[dateCounter]) / t2;
                         double ri = (r2 - r1) * (ti - t1) / (t2 - t1) + r1;
-                        ri += shockedGirr;
+                        ri = Math.Max(0,ri+shockedGirr);
                         return Math.Exp(-ri * ti);
                         //return lastZC * Math.Pow((ZC[dateCounter ] / (double)lastZC), (maturityDateX - lastDate).Days / (double)(nextDate - lastDate).Days);
                     }
@@ -195,7 +195,7 @@ namespace ValoLibrary
             }
             // Extrapoler à un taux constant
             r = -Math.Log(lastZC)/UtilityDates.DurationYear(lastDate,paramDate);
-            r += shockedGirr;
+            r = Math.Max(0, r + shockedGirr);
             return Math.Exp(-r * UtilityDates.DurationYear(maturityDateX,paramDate));
             //return Math.Pow((double) lastZC,  ((maturityDateX - paramDate).Days / (double) (lastDate - paramDate).Days));
         }

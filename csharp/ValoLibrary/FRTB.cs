@@ -33,18 +33,18 @@ namespace ValoLibrary
             {
                 for (int j = 0; j < lastIndice; j++)
                 {
-                    CDSresults[j, i] = -Double.Parse(ModelInterface.CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, 0, girrCurrency)[0, 0]);
-                    CDSresults[j, i] += Double.Parse(ModelInterface.CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, months[i], girrCurrency)[0, 0]);
+                    CDSresults[j, i] = -Double.Parse(ModelInterface.CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, 0, 0, girrCurrency)[0, 0]);
+                    CDSresults[j, i] += Double.Parse(ModelInterface.CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, months[i], 0.0001, girrCurrency)[0, 0]);
                     CDSresults[j, i] /= shockedGIRR;
                     CDSresults[j, i] *= riskWeights[i] / additionalWeight;
                     results[i] -= CDSresults[j, i];
                 }
                 nonShocked[i] = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
                     cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0,
-                    0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, 0, girrCurrency)[0, 0]);
+                    0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, 0, 0,girrCurrency)[0, 0]);
                 shocked[i] = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod,
                     cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0,
-                    0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, months[i], girrCurrency)[0, 0]);
+                    0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, months[i], 0.0001, girrCurrency)[0, 0]);
                 CDOresults[i] = (shocked[i] - nonShocked[i]) / shockedGIRR;
                 CDOresults[i] *= riskWeights[i] / additionalWeight;
                 results[i] += CDOresults[i];
@@ -214,7 +214,7 @@ namespace ValoLibrary
             {
                 double shocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
                 betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier,
-                dBeta, months[i],pricingCurrency)[0, 0]);//CDO tranche's NPV non shocked
+                dBeta, months[i],0,pricingCurrency)[0, 0]);//CDO tranche's NPV non shocked
                 deltaSensitivities[i] = (shocked - nonShocked) / 0.0001;
                 weightedSensitivities[i] = deltaSensitivities[i] * riskWeightsCDO[CDOBucketRW - 1];
             }
