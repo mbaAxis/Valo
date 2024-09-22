@@ -285,7 +285,7 @@ namespace ValoLibrary
             string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             lossUnitAmount = null;
-            return ModelInterface.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
+            return FRTB.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
                 cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL,hedgingCDS, lossUnitAmount, integrationPeriod,
                 probMultiplier, dBeta);
         }
@@ -297,7 +297,7 @@ namespace ValoLibrary
     string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             lossUnitAmount = null;
-            return ModelInterface.DeltaCSR(names, ratings,sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
+            return FRTB.DeltaCSRCDO(names, ratings,sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
                 cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod,
                 probMultiplier, dBeta);
         }
@@ -316,7 +316,7 @@ namespace ValoLibrary
     double[] hedgingCDS = null, double? lossUnitAmount = null, string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
             lossUnitAmount = null;
-            return ModelInterface.curvatureCSR(floor, riskClass, deltaSensitivities, names, ratings, sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard,
+            return FRTB.curvatureCSR(floor, riskClass, deltaSensitivities, names, ratings, sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard,
                 pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, correlationScenario,
                 isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
         }
@@ -331,7 +331,7 @@ namespace ValoLibrary
         //--
         public int[] GetBucketCompute(int numberOfIssuer, string[] issuerName, string[] ratings, double[] sectors)
         {
-            return ModelInterface.BucketCompute(numberOfIssuer,issuerName, ratings, sectors);
+            return FRTB.BucketCompute(numberOfIssuer,issuerName, ratings, sectors);
         }
     }
 }

@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FRTB.cs" />
     <Compile Include="MonteCarlo.cs" />
     <Compile Include="StatisticFomulas.cs" />
     <Compile Include="GetData.cs" />
