@@ -169,7 +169,7 @@ namespace ValoLibrary
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
     double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0,double shock = 0, string girrCurrency = null)
+    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int[] girrMonth = null,double shock = 0, string girrCurrency = null)
         {
             int i;
             double[] recoveryRate;
@@ -288,7 +288,7 @@ namespace ValoLibrary
         public static string[,] CDS(string issuerIdParam, string maturity, double spread, double recoveryRate, double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1, int girrMonth = 0, double shock = 0, string girrCurrency = null)
+        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1, int[] girrMonth = null, double shock = 0, string girrCurrency = null)
         {
 
             int issuerId;
@@ -345,8 +345,13 @@ namespace ValoLibrary
     object strikes, object correl, object betaAdder,
     double isAmericanFloatLegVal, double isAmericanFixedLegVal,
        double withGreeksVal, double withJtdVAl, double withStochasticRecoveryVAL, double[] HedgingCDS, double lossUnitAmount = 0.0, string integrationPeriod = "1m",
-    DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, double shock = 0,string girrCurrency = null)
+    DateTime[] cpnSchedule = null, double probMultiplier = 1, double dBeta = 0.1, int[] girrMonth = null, double shock = 0,string girrCurrency = null)
         {
+            string[,] a= { { "pl" } };
+            if (girrMonth == null)
+            {
+                girrMonth = new int[] { 0 };
+            }
             int i, j, k;
 
             double LossRate;
@@ -507,7 +512,7 @@ namespace ValoLibrary
             {
                 CurrentDate = ScheduleIntegration[i];
                 RiskFreeZC[i] = StrippingIRS.VbaGetRiskFreeZCVersion2(ParamDate, CurrentDate + "", ZC, ZCDate, false);
-                if (i == girrMonth && String.Equals(pricingCurrency, girrCurrency))
+                if(girrMonth.Contains(i) && String.Equals(pricingCurrency, girrCurrency))
                 {
                     RiskFreeZC[i] = StrippingIRS.VbaGetRiskFreeZCVersion2(ParamDate, CurrentDate + "", ZC, ZCDate, true, shock);
                 }
@@ -971,7 +976,7 @@ namespace ValoLibrary
                                                         0, val1, cpnLastSettle, cpnPeriod,
                                                         cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
                                                        betaAdder, val2, val3, withGreeksVal, 0, 0, null, lossUnitAmount,
-                                                        integrationPeriod, schedule, probMultiplier);
+                                                        integrationPeriod, schedule, probMultiplier,dBeta,girrMonth,shock,girrCurrency);
                         }
                         else
                         {
@@ -979,7 +984,7 @@ namespace ValoLibrary
                                            val1, cpnLastSettle, cpnPeriod,
                                            cpnConvention, CreditDefaultSwapCurves.Curves[j].Currency, 0.0, 0.0, 0.0, 0.0,
                                             betaAdder, val2, val3, withGreeksVal, 0, 0, null, 1.0,
-                                           integrationPeriod, schedule, probMultiplier);
+                                           integrationPeriod, schedule, probMultiplier, dBeta, girrMonth, shock, girrCurrency);
 
                         }
 
@@ -1130,8 +1135,8 @@ namespace ValoLibrary
             {
                 for (int j = 0; j < tenors.Length; j++)
                 {
-                    results[i, j] = -Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod, 1, 0)[0, 0]);
-                    results[i, j] += Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod, 1, months[j])[0, 0]);
+                    results[i, j] = -Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod, 1)[0, 0]);
+                    results[i, j] += Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod, 1, new int[]{ months[j]})[0, 0]);
                     results[i, j] /= shockedGIRR;
                     results[i, j] *= riskWeights[j] / additionalWeight;
                     sumSensitivities[j] += results[i, j];

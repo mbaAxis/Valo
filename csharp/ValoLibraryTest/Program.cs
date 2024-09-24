@@ -582,31 +582,8 @@ using ValoLibrary;
 
 
 
-//string[] currencyName = { "EUR", "EUR", "USD" };
-//int[] swapBasist = { 4, 4, 3 };
-//double[] FXRatet = { 1, 1, 1.0865 };
-//int[] swapPeriodt = { 6, 3, 1 };
-//string[] curveNamest = { "1", "2", "3" };
-//string[] typeOfCurve = { "IBOR", "IBOR", "OIS" };
-//double[,] swapRatest = { { 0.03418, 0.03039, 0.02857, 0.02708, 0.02665, 0.02672, 0.02704, 0.02436 }, { 0.03307, 0.02955, 0.02784, 0.02650, 0.02617, 0.02641, 0.02695, 0.02473 }, { 0.04756, 0.04253, 0.03998, 0.03779, 0.03714, 0.03700, 0.03733, 0.03556 } };
-//string[] datest = { "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "15Y", "30Y" };
-//ModelInterface.DeltaCSR(paramDate, cdsRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
-//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-//    isAmericanFixedLeg, 0, 0, 0, hedgingCDS, null, integrationPeriod, 1, dBeta);
-
-//StrippingIRS.StoreCurve(currencyName, swapBasist, FXRatet, swapPeriodt, curveNamest, swapRatest, datest, typeOfCurve);
-//ModelInterface.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, 2, issuerList, nominalIssuer,
-//    spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
-//    isAmericanFixedLeg, withGreeks, withJtd, withStochasticRecovery, hedgingCDS, null, integrationPeriod, 1, dBeta);
 
 
-
-
-
-
-
-
-Console.WriteLine("Delta CSR test");
 
 DateTime paramDate = new(2023, 12, 1);
 DateTime CDSRollDate = StrippingCDS.CDSRefDate(paramDate);
@@ -621,6 +598,11 @@ int swapPeriod = 12;
 int swapBasis = 3;
 double fxSpot = 1;
 StrippingIRS.StripZC(paramDate, curveName, curve, curveMaturity, swapPeriod, swapBasis, fxSpot);
+
+string curveName1 = "USD";
+double[] curve1 = { 0.02626, 0.02511, 0.02472, 0.024595, 0.0246379, 0.02479, 0.025035, 0.02529, 0.0255901, 0.0258856, 0.0271141, 0.02758 };// Exemple de taux de courbe
+double fxSpot1 = 1.44;
+StrippingIRS.StripZC(paramDate, curveName1, curve1, curveMaturity, swapPeriod, swapBasis, fxSpot1);
 
 
 string[] CurveMaturity = { "3M", "6M", "1Y", "2Y", "3Y", "4Y", "5Y", "7Y", "10Y" };
@@ -684,12 +666,14 @@ double fxCorrel = -0.05;
 double fxVol = 0.1;
 double isAmericanFloatLeg = -1;
 double isAmericanFixedLeg = -1;
+double[] hedgingCDS = { 0.01, 1, 1 };
 string[] names = { n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14 };
 
 double[] betaAdder = new double[names.Length];
 double[] recoveryIssuer = new double[names.Length];
 double[] nominalIssuer = new double[names.Length];
 double[] spreadStandard = new double[names.Length];
+
 for (int i = 0; i < names.Length; i++)
 {
     betaAdder[i] = 0;
@@ -697,17 +681,20 @@ for (int i = 0; i < names.Length; i++)
     nominalIssuer[i] = 1.0;
     spreadStandard[i] = 100;
 }
-
-
+int[] months = { 1, 2, 3 };
+string[,] s = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, "EUR", names.Length, names, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
+    betaAdder,recoveryIssuer,isAmericanFloatLeg,isAmericanFixedLeg,0,0,0,null,null,"1m",1,0.1,months,0.001,"EUR");
 
 string[] ratings = { "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB" };
-//double[] sector = { 16, 16, 16, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };
-double[] sector = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-double[,] result = FRTB.DeltaCSRCDO(names,ratings, sector,paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+double[] sector = { 16, 16, 16, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };
+
+//double[,] result = FRTB.DeltaCSRCDO(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+//    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
+//double[,] results = FRTB.DeltaCSRCDS(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, spreadStandard, names.Length, names, nominalIssuer, cpnPeriod, cpnConvention, cpnLastSettle);
+
+double[,] r = FRTB.DeltaCSRCDOProxy(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
     cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
-double[,] results = FRTB.DeltaCSRCDS(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, spreadStandard, names.Length, names, nominalIssuer, cpnPeriod, cpnConvention, cpnLastSettle);
-double[] r = FRTB.DeltaCSRCDOProxy(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
-    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
+
 //double[,] deltaSensitivities = new double[names.Length, 5];
 //for (int i = 0; i < names.Length; i++)
 //{

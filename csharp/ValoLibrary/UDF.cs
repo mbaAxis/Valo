@@ -67,14 +67,14 @@ namespace ValoLibrary
         string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate,double notional,
        string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
        double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-       double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1, int girrMonth = 0, double shock = 0,string girrCurrency = null);
+       double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1, int[] girrMonth = null, double shock = 0,string girrCurrency = null);
 
         string[,] GetCDO(string maturity, double[] strikes, double[] correl,double[] spreadStandard, string pricingCurrency,
         int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
         string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
         double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
         double withGreeks = 0,double withJtdVAL = 0,double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, double shock = 0, string girrCurrency = null);
+        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int[] girrMonth = null, double shock = 0, string girrCurrency = null);
 
          double[,] GetDeltaCSR(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
         int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
@@ -104,6 +104,8 @@ namespace ValoLibrary
             double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
             string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
         int[] GetBucketCompute(int numberOfIssuer, string[] issuerName, string[] ratings, double[] sectors);
+        //===========================================TEST========================================================
+        int[] GetTest(int[] k);
     }
 
 
@@ -255,7 +257,7 @@ namespace ValoLibrary
         public string[,] GetCDS(string issuerIdParam, string maturity, double spread, double recoveryRate, double notional,
         string cpnPeriod, string cpnConvention, string cpnLastSettle, string pricingCurrency = null,
         double fxCorrel = 0, double fxVol = 0, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1,int girrMonth = 0, double shock = 0, string girrCurrency = null)
+        double withGreeks = 0, double[] hedgingCds = null, string integrationPeriod = "1m", double probMultiplier = 1,int[] girrMonth =null, double shock = 0, string girrCurrency = null)
         {
             return ModelInterface.CDS(issuerIdParam, maturity, spread, recoveryRate,notional,
              cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency,
@@ -269,7 +271,7 @@ namespace ValoLibrary
            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
            double withGreeks = 0, double withJtdVAL = 0,double withStochasticRecoveryVAL= 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-           string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int girrMonth = 0, double shock = 0,string girrCurrency = null)
+           string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int[] girrMonth = null, double shock = 0,string girrCurrency = null)
         {
             lossUnitAmount=null;
             return ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
@@ -328,10 +330,15 @@ namespace ValoLibrary
             int[] intswapPeriod = swapPeriod.Select(d => (int)d).ToArray();
             StrippingIRS.StoreCurve(currency, intswapBasis, FXRate, intswapPeriod,curveNames,swapRates,curveDates,typeOfCurve);
         }
-        //--
         public int[] GetBucketCompute(int numberOfIssuer, string[] issuerName, string[] ratings, double[] sectors)
         {
             return FRTB.BucketCompute(numberOfIssuer,issuerName, ratings, sectors);
+        }
+
+        //============================================TEST==============================================
+        public int[] GetTest(int[] k)
+        {
+            return k;
         }
     }
 }
