@@ -170,7 +170,7 @@ namespace ValoLibrary
                     if (nextDate >= maturityDateX && j == 0)
                     {
                         r = -Math.Log(ZC[0]) / UtilityDates.DurationYear(nextDate, lastDate);
-                        r += shockedGirr;
+                        r = Math.Max(0, r + shockedGirr);
                         return Math.Exp(-r * UtilityDates.DurationYear(maturityDateX, paramDate));
                     }
                     if (nextDate >= maturityDateX)

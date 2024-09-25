@@ -688,27 +688,32 @@ string[,] s = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, "EUR
 string[] ratings = { "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB" };
 double[] sector = { 16, 16, 16, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };
 
-//double[,] result = FRTB.DeltaCSRCDO(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
-//    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
-//double[,] results = FRTB.DeltaCSRCDS(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, spreadStandard, names.Length, names, nominalIssuer, cpnPeriod, cpnConvention, cpnLastSettle);
-
-double[,] r = FRTB.DeltaCSRCDOProxy(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+double[,] result = FRTB.DeltaCSRCDO(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
     cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
+double[,] results = FRTB.DeltaCSRCDS(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, spreadStandard, names.Length, names, nominalIssuer,recoveryIssuer, cpnPeriod, cpnConvention, cpnLastSettle);
+double[] r = FRTB.DeltaCSRCDOProxy(names,ratings,sector,maturity,strikes,correl,spreadStandard,"EUR",names.Length,names,nominalIssuer,spread,cpnPeriod,cpnConvention,
+    cpnLastSettle,fxCorrel,fxVol,betaAdder);
 
-//double[,] deltaSensitivities = new double[names.Length, 5];
-//for (int i = 0; i < names.Length; i++)
-//{
-//    for (int j = 0; j < 5; j++)
-//    {
-//        deltaSensitivities[i, j] = result[i, j];
-//    }
-//}
+double[,] deltaSensitivities = new double[names.Length, 5];
+for (int i = 0; i < names.Length; i++)
+{
+    for (int j = 0; j < 5; j++)
+    {
+        deltaSensitivities[i, j] = result[i, j];
+    }
+}
 
-//double floor = 0.0001;
-//ModelInterface.curvatureCSR(floor, "e", deltaSensitivities, names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
-//    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, "high", isAmericanFloatLeg, isAmericanFixedLeg);
+double floor = 0.0001;
+FRTB.curvatureCSR(floor, "e", deltaSensitivities, names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, "high", isAmericanFloatLeg, isAmericanFixedLeg);
 
-
+double[] deltaSensi = new double[5];
+for(int i = 0;i < r.Length - 1; i++)
+{
+    deltaSensi[i] = r[i];
+}
+FRTB.curvatureCSRPROXY(deltaSensi, names, ratings, sector, maturity, strikes, correl, spreadStandard, "EUR", names.Length, names, nominalIssuer, spread, cpnPeriod, cpnConvention,
+    cpnLastSettle, fxCorrel, fxVol, betaAdder);
 
 
 

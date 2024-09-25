@@ -196,17 +196,16 @@ namespace ValoLibrary
         //Delta CSR PART
 
 //-------------------------------------------------------------------------------------- DELTA CSR PART ----------------------------------------------------------------------------------
-        public static double[,] DeltaCSRCDOProxy(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
+        public static double[] DeltaCSRCDOProxy(string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
             string pricingCurrency, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-           double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-           double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+           double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
            string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)// PV01 used as proxy for CSO1, prohibiting look-through process
         {
             string[] tenors = { "6M", "1Y", "3Y", "5Y", "10Y" };
             int[] months = {6, 12, 36, 60, 120};
-            double[,] deltaSensitivities = new double[1,tenors.Length+1];
-            double[,] weightedSensitivities = new double[1,tenors.Length];
+            double[] deltaSensitivities = new double[tenors.Length+1];
+            double[] weightedSensitivities = new double[tenors.Length];
             int CDOBucketRW = CDOBucket(BucketCompute(numberOfIssuer, names, ratings, sectors));
             double[] riskWeightsCDO = { 0.04, 0.04, 0.08, 0.05, 0.04, 0.03, 0.02, 0.06, 0.13, 0.13, 0.16, 0.1, 0.12, 0.12, 0.12, 0.13 };// CAUTION Exception for Indices, HAS TO BE DONE
 
@@ -217,8 +216,8 @@ namespace ValoLibrary
                 double shocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
                 betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier,
                 dBeta, new int[] { months[i] },0.0001,pricingCurrency)[0, 0]);
-                deltaSensitivities[0,i] = (shocked - nonShocked) / 0.0001;
-                weightedSensitivities[0,i] = deltaSensitivities[0,i] * riskWeightsCDO[CDOBucketRW - 1];
+                deltaSensitivities[i] = (shocked - nonShocked) / 0.0001;
+                weightedSensitivities[i] = deltaSensitivities[i] * riskWeightsCDO[CDOBucketRW - 1];
             }
 
             double KbSecCtp = 0;
@@ -227,7 +226,7 @@ namespace ValoLibrary
             {
                 if (CDOBucketRW == 16)
                 {
-                    KbSecCtp += Math.Abs(weightedSensitivities[1, col1]);
+                    KbSecCtp += Math.Abs(weightedSensitivities[col1]);
                     break;
                 }
                 for (int col2 = 0; col2 < tenors.Length; col2++)
@@ -237,22 +236,20 @@ namespace ValoLibrary
                     {
                         correlationParameterSECCTP *= 0.65;
                     }
-                    KbSecCtp += weightedSensitivities[0, col1] * weightedSensitivities[0, col2] * correlationParameterSECCTP;
+                    KbSecCtp += weightedSensitivities[col1] * weightedSensitivities[col2] * correlationParameterSECCTP;
                 }
             }
 
             KbSecCtp = Math.Sqrt(Math.Max(0, KbSecCtp));//21.4 (4)
             double deltaSECCTP = Math.Abs(KbSecCtp);// 21.4 (4), only one bucket
-            deltaSensitivities[0, tenors.Length] = deltaSECCTP;
+            deltaSensitivities[tenors.Length] = deltaSECCTP;
 
             return deltaSensitivities;
         }
         public static double[,] DeltaCSRCDO(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
             string pricingCurrency, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-           double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-           double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-           string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)//Look-Through Approach
+           double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)//Look-Through Approach
         {
             int[] indices = Fill(paramDate, issuerList, CDSRollDate, alterMode, intensity, cpnPeriod, cpnConvention);
             string[] tenors = { "6M", "1Y", "3Y", "5Y", "10Y" };
@@ -330,7 +327,7 @@ namespace ValoLibrary
             return deltaSensitivities;
         }
         public static double[,] DeltaCSRCDS(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity,
-        double[] spreadStandard, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, string cpnPeriod, string cpnConvention, string cpnLastSettle)
+        double[] spreadStandard, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double[] recoveryIssuer, string cpnPeriod, string cpnConvention, string cpnLastSettle)
         {
             int[] indices = Fill(paramDate, issuerList, CDSRollDate, alterMode, intensity, cpnPeriod, cpnConvention);
             string[] tenors = { "6M", "1Y", "3Y", "5Y", "10Y" };
@@ -353,7 +350,7 @@ namespace ValoLibrary
             {
                 CDScurve = curveList.Curves[StrippingCDS.GetCDSCurveId(issuerList[i])];
                 curve = CDScurve.CDSSpread;
-                nonShockedCDS = Double.Parse(ModelInterface.CDS(issuerList[i], maturity, spreadStandard[i] * shockedCSR, CDScurve.Recovery, nominalIssuer[i], cpnPeriod, cpnConvention, cpnLastSettle, CDScurve.Currency, 0, 0, 1, 1)[0, 0]);
+                nonShockedCDS = Double.Parse(ModelInterface.CDS(issuerList[i], maturity, spreadStandard[i] * shockedCSR, recoveryIssuer[i], nominalIssuer[i], cpnPeriod, cpnConvention, cpnLastSettle, CDScurve.Currency, 0, 0, 1, 1)[0, 0]);
                 for (int j = 0; j < tenors.Length; j++)
                 {
                     if (j == 0)//we shock the 6M
@@ -366,7 +363,7 @@ namespace ValoLibrary
                         curve[indices[j]] += shockedCSR;
                     }
                     StrippingCDS.StripDefaultProbability(StrippingCDS.GetCDSCurveId(issuerList[i]), issuerList[i], paramDate, CDSRollDate, curve, CDScurve.CurveDates, CDScurve.Currency, CDScurve.Recovery, alterMode, intensity);
-                    shockedCDS = Double.Parse(ModelInterface.CDS(issuerList[i], maturity, spreadStandard[i] * shockedCSR, CDScurve.Recovery, nominalIssuer[i], cpnPeriod, cpnConvention, cpnLastSettle, CDScurve.Currency, 0, 0, 1, 1)[0, 0]);
+                    shockedCDS = Double.Parse(ModelInterface.CDS(issuerList[i], maturity, spreadStandard[i] * shockedCSR, recoveryIssuer[i], nominalIssuer[i], cpnPeriod, cpnConvention, cpnLastSettle, CDScurve.Currency, 0, 0, 1, 1)[0, 0]);
                     deltaSensitivities[i, j] = (shockedCDS - nonShockedCDS) / shockedCSR;
                     weightedSensitivities[i, j] = deltaSensitivities[i, j] * riskWeightsCDS[bucket[i] - 1];
                 }
@@ -635,8 +632,7 @@ namespace ValoLibrary
         public static double curvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
     bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
     double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0,
-    double[] hedgingCDS = null, double? lossUnitAmount = null, string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+    double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
         {
             double curvatureRisk = 0;
             int[] indices = Fill(paramDate, issuerList, CDSRollDate, alterMode, intensity, cpnPeriod, cpnConvention);
@@ -672,9 +668,9 @@ namespace ValoLibrary
             if (isSECCTP)
             {
                 nonShocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
-                betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta)[0, 0]);//CDO tranche's NPV non shocked
+                betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL)[0, 0]);//CDO tranche's NPV non shocked
             }
-            for (int issuer = 0; issuer < numberOfIssuer; issuer++)
+            for (int issuer = 0; issuer < deltaSensitivities.GetLength(0); issuer++)
             {
                 sik = 0;
                 nonShocked = 0;
@@ -720,12 +716,12 @@ namespace ValoLibrary
                     }
                     StrippingCDS.StripDefaultProbability(StrippingCDS.GetCDSCurveId(issuerList[issuer]), issuerList[issuer], paramDate, CDSRollDate, upWardCurve, CDScurve.CurveDates, CDScurve.Currency, CDScurve.Recovery, alterMode, intensity);
                     upWardShocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
-                    betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta)[0, 0]);
+                    betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL)[0, 0]);
 
 
                     StrippingCDS.StripDefaultProbability(StrippingCDS.GetCDSCurveId(issuerList[issuer]), issuerList[issuer], paramDate, CDSRollDate, downWardCurve, CDScurve.CurveDates, CDScurve.Currency, CDScurve.Recovery, alterMode, intensity);
                     downWardShocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
-                    betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta)[0, 0]);
+                    betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL)[0, 0]);
 
                     StrippingCDS.StripDefaultProbability(StrippingCDS.GetCDSCurveId(issuerList[issuer]), issuerList[issuer], paramDate, CDSRollDate, originalCurve, CDScurve.CurveDates, CDScurve.Currency, CDScurve.Recovery, alterMode, intensity);
 
@@ -803,6 +799,7 @@ namespace ValoLibrary
                     kb[0] = Math.Max(kbDownWard[0], kbUpWard[0]); //only one bucket, no need of determining upWard, downWard scenario
                 }
                 curvatureRisk = Math.Sqrt(Math.Max(kb[0] * kb[0],0));
+                curvatureRisk = kb[0];
             }
             else
             {
@@ -1006,313 +1003,41 @@ namespace ValoLibrary
                 }
                 curvatureRisk = Math.Sqrt(Math.Max(0, curvatureRisk));
             }
+            Console.WriteLine("Curvature :"+curvatureRisk);
+            return curvatureRisk;
+        }
+        public static double curvatureCSRPROXY(double[] deltaSensitivities, string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
+    double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0,
+    double? lossUnitAmount = null, string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)//curvature for proxy CSR SEC CTP
+        {
+            double curvatureRisk = 0;
+            int[] bucket = BucketCompute(numberOfIssuer, names, ratings, sectors);
+            int bucketSECCTP = CDOBucket(bucket);
+
+            int[] months = { 6, 12, 36, 60, 120 };
+            double[] riskWeights = { 0.04, 0.04, 0.08, 0.05, 0.04, 0.03, 0.02, 0.06, 0.13, 0.13, 0.16, 0.1, 0.12, 0.12, 0.12, 0.13 };
+            double[] curvature = new double[2];// 2 for the upward and downward shock
+
+            double nonShocked;
+            double upWardShocked;
+            double downWardShocked;
+
+            nonShocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
+                betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, null, lossUnitAmount, integrationPeriod, probMultiplier, dBeta)[0, 0]);//CDO tranche's NPV non shocked
+            upWardShocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
+                betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, null, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, months, riskWeights[bucketSECCTP - 1],pricingCurrency)[0, 0]);
+            downWardShocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
+                betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, null, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, months, -riskWeights[bucketSECCTP - 1], pricingCurrency)[0, 0]);
+           
+            curvature[0] = -upWardShocked + nonShocked + riskWeights[bucketSECCTP - 1] * deltaSensitivities.Sum();
+            curvature[1] = -downWardShocked+nonShocked- riskWeights[bucketSECCTP - 1] * deltaSensitivities.Sum();
+
+            // Only one bucket, no correlation scenario
+            double kb = Math.Max(Math.Max(curvature[0], 0), Math.Max(curvature[1], 0));
+            curvatureRisk = kb;
             Console.WriteLine(curvatureRisk);
             return curvatureRisk;
         }
-    //    public static double curvatureCSRPROXY(double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
-    //bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
-    //double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    //double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0,
-    //double[] hedgingCDS = null, double? lossUnitAmount = null, string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)//curvature for proxy CSR SEC CTP
-    //    {
-    //        double curvatureRisk = 0;
-    //        int[] bucket = BucketCompute(numberOfIssuer, names, ratings, sectors);
-    //        int bucketSECCTP = CDOBucket(bucket);
-
-    //        string[] tenors = { "6M", "1Y", "3Y", "5Y", "10Y" };
-    //        int[] months = { 6, 12, 36, 60, 120 };
-    //        double[] riskWeights= { 0.04, 0.04, 0.08, 0.05, 0.04, 0.03, 0.02, 0.06, 0.13, 0.13, 0.16, 0.1, 0.12, 0.12, 0.12, 0.13 };
-    //        double[,] curvature = new double[1, 2];// 2 for the upward and downward shock
-
-    //        double sik;
-    //        double nonShocked;
-    //        double upWardShocked;
-    //        double downWardShocked;
-
-    //        nonShocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
-    //            betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta)[0, 0]);//CDO tranche's NPV non shocked
-    //        for(int i = 0; i < tenors.Length; i++)
-    //        {
-    //            upWardShocked = Double.Parse(ModelInterface.CDO(maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
-    //            betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0, 0, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, months[i], riskWeights[bucketSECCTP-1],pricingCurrency)[0, 0]);//CDO tranche's NPV non shocked
-
-    //        }
-
-
-    //        double[] kbUpWard, kbDownWard, kb, sbUpWard, sbDownWard;
-    //        int[] scenario;
-    //        if (isSECCTP)//one bucket
-    //        {
-    //            kbUpWard = new double[1];
-    //            kbDownWard = new double[1];
-    //            kbUpWard[0] = 0;
-    //            kbDownWard[0] = 0;
-    //            double psiUpWard, psiDownWard;
-    //            if (bucketSECCTP == 16)//21.56 (2)
-    //            {
-    //                kb = new double[1];
-    //                double k1 = 0;
-    //                double k2 = 0;
-    //                for (int i = 0; i < numberOfIssuer; i++)
-    //                {
-    //                    k1 += Math.Max(curvature[i, 0], 0);
-    //                    k2 += Math.Max(curvature[i, 1], 0);
-    //                }
-    //                kb[0] = Math.Max(k1, k2);
-    //            }
-    //            else
-    //            {
-    //                for (int row1 = 0; row1 < numberOfIssuer; row1++)//Determining the KB in the upWard scenario and downWard scenario
-    //                {
-    //                    for (int row2 = 0; row2 < numberOfIssuer; row2++)
-    //                    {
-    //                        double correlParameter = 1.0;
-    //                        psiUpWard = 1.0;
-    //                        psiDownWard = 1.0;
-    //                        if (row1 != row2)
-    //                        {
-    //                            if (curvature[row1, 0] < 0 && curvature[row2, 0] < 0)
-    //                            {
-    //                                psiUpWard = 0;
-    //                            }
-    //                            if (curvature[row1, 0] < 0 && curvature[row2, 0] < 0)
-    //                            {
-    //                                psiDownWard = 0;
-    //                            }
-    //                            correlParameter *= 0.35;
-    //                            if (String.Equals(correlationScenario.ToUpper(), "HIGH"))//21.6
-    //                            {
-    //                                correlParameter = Math.Min(1.25 * correlParameter, 1.0);
-    //                            }
-    //                            else if (String.Equals(correlationScenario.ToUpper(), "LOW"))//21.6
-    //                            {
-    //                                correlParameter = Math.Max(2 * correlParameter - 1.0, 0.75 * correlParameter);
-    //                            }
-    //                            correlParameter *= correlParameter;//21.100
-
-    //                            kbUpWard[0] += curvature[row1, 0] * curvature[row2, 0] * correlParameter * psiUpWard;//21.5 (b)
-    //                            kbDownWard[0] += curvature[row1, 1] * curvature[row2, 1] * correlParameter * psiDownWard;
-    //                        }
-    //                        else
-    //                        {
-    //                            kbUpWard[0] += Math.Max(curvature[row1, 0], 0) * Math.Max(curvature[row1, 0], 0);
-    //                            kbDownWard[0] += Math.Max(curvature[row1, 1], 0) * Math.Max(curvature[row1, 1], 0);
-    //                        }
-
-    //                    }
-    //                }
-    //                kbUpWard[0] = Math.Sqrt(Math.Max(kbUpWard[0], 0));
-    //                kbDownWard[0] = Math.Sqrt(Math.Max(kbDownWard[0], 0));
-
-    //                kb = new double[1];//21.5 (a)
-    //                kb[0] = Math.Max(kbDownWard[0], kbUpWard[0]); //only one bucket, no need of determining upWard, downWard scenario
-    //            }
-    //            curvatureRisk = Math.Sqrt(Math.Max(kb[0] * kb[0], 0));
-    //        }
-    //        else
-    //        {
-    //            kbUpWard = new double[18];
-    //            kbDownWard = new double[18];
-    //            sbDownWard = new double[18];
-    //            sbUpWard = new double[18];
-    //            kb = new double[18];
-    //            scenario = new int[18];
-    //            double[] sb = new double[18];
-    //            for (int bucketNumber = 0; bucketNumber < 18; bucketNumber++)//Aggregatin within bucket
-    //            {
-    //                sbDownWard[bucketNumber] = 0;
-    //                sbUpWard[bucketNumber] = 0;
-    //                kbUpWard[bucketNumber] = 0;
-    //                kbDownWard[bucketNumber] = 0;
-    //                int[] bucketIndices = UtilityLittleFunctions.PositionElement(bucket, bucketNumber + 1);
-
-    //                if (bucketNumber != 15)
-    //                {
-    //                    for (int indice1 = 0; indice1 < bucketIndices.Length; indice1++)
-    //                    {
-    //                        sbUpWard[bucketNumber] += curvature[bucketIndices[indice1], 0];
-    //                        sbDownWard[bucketNumber] += curvature[bucketIndices[indice1], 1];
-    //                        for (int indice2 = 0; indice2 < bucketIndices.Length; indice2++)
-    //                        {
-    //                            double correlParameter = 1.0;
-    //                            double psiUpWard = 1.0;//21.5 (b)
-    //                            double psiDownWard = 1.0;
-    //                            if (bucketIndices[indice1] != bucketIndices[indice2])//names are different, (no basis and tenor in correlation)
-    //                            {
-    //                                if (curvature[bucketIndices[indice1], 0] < 0 && curvature[bucketIndices[indice2], 0] < 0)
-    //                                {
-    //                                    psiUpWard = 0;
-    //                                }
-    //                                if (curvature[bucketIndices[indice1], 1] < 0 && curvature[bucketIndices[indice2], 1] < 0)
-    //                                {
-    //                                    psiDownWard = 0;
-    //                                }
-    //                                correlParameter *= 0.35;
-    //                                if (String.Equals(correlationScenario.ToUpper(), "HIGH"))//21.6
-    //                                {
-    //                                    correlParameter = Math.Min(1.25 * correlParameter, 1.0);
-    //                                }
-    //                                else if (String.Equals(correlationScenario.ToUpper(), "LOW"))//21.6
-    //                                {
-    //                                    correlParameter = Math.Max(2 * correlParameter - 1.0, 0.75 * correlParameter);
-    //                                }
-    //                                correlParameter *= correlParameter;//21.100
-
-    //                                kbUpWard[bucketNumber] += curvature[bucketIndices[indice1], 0] * curvature[bucketIndices[indice2], 0] * correlParameter * psiUpWard;//21.5 (b)
-    //                                kbDownWard[bucketNumber] += curvature[bucketIndices[indice1], 1] * curvature[bucketIndices[indice2], 1] * correlParameter * psiDownWard;
-    //                            }
-    //                            else //both names are equal
-    //                            {
-    //                                kbUpWard[bucketNumber] += Math.Max(curvature[bucketIndices[indice1], 0], 0) * Math.Max(curvature[bucketIndices[indice1], 0], 0);
-    //                                kbDownWard[bucketNumber] += Math.Max(curvature[bucketIndices[indice1], 1], 0) * Math.Max(curvature[bucketIndices[indice1], 1], 0);
-    //                            }
-    //                        }
-    //                    }
-    //                    kbUpWard[bucketNumber] = Math.Sqrt(Math.Max(0, kbUpWard[bucketNumber]));
-    //                    kbDownWard[bucketNumber] = Math.Sqrt(Math.Max(0, kbDownWard[bucketNumber]));
-
-    //                    //Determining KB
-    //                    if (kbUpWard[bucketNumber] < kbDownWard[bucketNumber])
-    //                    {
-    //                        kb[bucketNumber] = kbDownWard[bucketNumber];
-    //                        scenario[bucketNumber] = 1;
-    //                        sb[bucketNumber] = sbDownWard[bucketNumber];
-    //                    }
-    //                    else if (kbUpWard[bucketNumber] > kbDownWard[bucketNumber])
-    //                    {
-    //                        kb[bucketNumber] = kbUpWard[bucketNumber];
-    //                        scenario[bucketNumber] = 0;
-    //                        sb[bucketNumber] = sbUpWard[bucketNumber];
-    //                    }
-    //                    else
-    //                    {
-    //                        kb[bucketNumber] = kbUpWard[bucketNumber];
-
-    //                        double s1 = 0;
-    //                        double s2 = 0;
-    //                        for (int i = 0; i < bucketIndices.Length; i++)
-    //                        {
-    //                            s1 += curvature[bucketIndices[i], 0];
-    //                            s2 += curvature[bucketIndices[i], 1];
-    //                        }
-    //                        if (s1 > s2)
-    //                        {
-    //                            scenario[bucketNumber] = 0;
-    //                            sb[bucketNumber] = sbUpWard[bucketNumber];
-    //                        }
-    //                        else
-    //                        {
-    //                            scenario[bucketNumber] = 1;
-    //                            sb[bucketNumber] = sbDownWard[bucketNumber];
-    //                        }
-    //                    }
-    //                }
-    //                else//21.56 (2)
-    //                {
-    //                    double k1 = 0;
-    //                    double k2 = 0;
-    //                    for (int i = 0; i < bucketIndices.Length; i++)
-    //                    {
-    //                        k1 += Math.Max(curvature[bucketIndices[i], 0], 0);
-    //                        k2 += Math.Max(curvature[bucketIndices[i], 1], 0);
-    //                        sbUpWard[bucketNumber] += curvature[bucketIndices[i], 0];
-    //                        sbDownWard[bucketNumber] += curvature[bucketIndices[i], 1];
-    //                    }
-    //                    kb[bucketNumber] = Math.Max(k1, k2);
-    //                    if (k1 > k2)
-    //                    {
-    //                        scenario[bucketNumber] = 0;
-    //                        sb[bucketNumber] = sbUpWard[bucketNumber];
-    //                    }
-    //                    else
-    //                    {
-    //                        scenario[bucketNumber] = 1;
-    //                        sb[bucketNumber] = sbDownWard[bucketNumber];
-    //                    }
-    //                }
-
-    //            }
-    //            //Aggregation across bucket
-    //            double[,] correlationMatrixSector =
-    //                 {{1   ,0.75,0.10,0.20,0.25,0.20,0.15,0.10,0   ,0.45,0.45},
-    //                 {0.75,1   ,0.05,0.15,0.20,0.15,0.10,0.10,0   ,0.45,0.45},
-    //                 {0.10,0.05,1   ,0.05,0.15,0.20,0.05,0.20,0   ,0.45,0.45},
-    //                 {0.20,0.15,0.05,1   ,0.20,0.25,0.05,0.05,0   ,0.45,0.45},
-    //                 {0.25,0.20,0.15,0.20,1   ,0.25,0.05,0.15,0   ,0.45,0.45},
-    //                 {0.20,0.15,0.20,0.25,0.25,1   ,0.05,0.20,0   ,0.45,0.45},
-    //                 {0.15,0.10,0.05,0.05,0.05,0.05,1   ,0.05,0   ,0.45,0.45},
-    //                 {0.10,0.10,0.20,0.05,0.15,0.20,0.05,1   ,0   ,0.45,0.45},
-    //                 {0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,0   ,0   },
-    //                 {0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0   ,1   ,0.75},
-    //                 {0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0   ,0.75,1   }
-    //             };//See 21.57 (2) table 5
-    //            for (int i = 0; i < 18; i++)
-    //            {
-    //                int k, l;
-    //                if (i + 1 >= 9 && i + 1 <= 15)//determining sector
-    //                {
-    //                    k = i - 8;
-    //                }
-    //                else if (i + 1 >= 16)
-    //                {
-    //                    k = i - 7;
-    //                }
-    //                else
-    //                {
-    //                    k = i;
-    //                }
-    //                for (int j = 0; j < 18; j++)
-    //                {
-    //                    if (j + 1 >= 9 && j + 1 <= 15)//determining sector
-    //                    {
-    //                        l = j - 8;
-    //                    }
-    //                    else if (j + 1 >= 16)
-    //                    {
-    //                        l = j - 7;
-    //                    }
-    //                    else
-    //                    {
-    //                        l = j;
-    //                    }
-
-
-    //                    if (i == j)
-    //                    {
-    //                        curvatureRisk += kb[i] * kb[i];
-    //                    }
-    //                    else
-    //                    {
-    //                        double psiCurvature = 1.0;
-    //                        double correlParameter = correlationMatrixSector[k, l];
-    //                        if (sbUpWard[i] < 0 && sbDownWard[j] < 0)
-    //                        {
-    //                            psiCurvature = 0;
-    //                        }
-    //                        if ((i + 1 <= 15 && j + 1 <= 15) && ((i + 1 >= 9 && j + 1 <= 8) || (i + 1 <= 8 && j + 1 >= 9))) //See 21.57 (rating correlation)
-    //                        {
-    //                            correlParameter *= 0.5;
-    //                        }
-
-    //                        if (String.Equals(correlationScenario.ToUpper(), "HIGH"))//21.6
-    //                        {
-    //                            correlParameter = Math.Min(1.25 * correlParameter, 1.0);
-    //                        }
-    //                        else if (String.Equals(correlationScenario.ToUpper(), "LOW"))//21.6
-    //                        {
-    //                            correlParameter = Math.Max(2 * correlParameter - 1.0, 0.75 * correlParameter);
-    //                        }
-
-    //                        correlParameter *= correlParameter;//21.101
-
-    //                        curvatureRisk += sb[i] * sb[j] * psiCurvature * correlParameter;
-    //                    }
-    //                }
-    //            }
-    //            curvatureRisk = Math.Sqrt(Math.Max(0, curvatureRisk));
-    //        }
-    //        Console.WriteLine(curvatureRisk);
-    //        return curvatureRisk;
-    //    }
     }
 }

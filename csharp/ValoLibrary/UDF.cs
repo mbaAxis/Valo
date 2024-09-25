@@ -76,36 +76,36 @@ namespace ValoLibrary
         double withGreeks = 0,double withJtdVAL = 0,double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
         string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1, int[] girrMonth = null, double shock = 0, string girrCurrency = null);
 
-         double[,] GetDeltaCSR(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-        int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-        string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-        double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-        double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-        string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
-
         double GetImpliedCorrelation(double upfront, double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0);
+        //============================================== FRTB ===========================================
 
-        double GetCurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
-    bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
-    double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0,
-    double[] hedgingCDS = null, double? lossUnitAmount = null, string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
-
-        //////======================================Stripping IRS====================================
+        double[] GetDeltaCSRCDOProxy(string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
+          string pricingCurrency, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+          string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+          double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+          string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+        double[,] GetDeltaCSRCDO(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
+           string pricingCurrency, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+           string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+           double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0);
+        double[,] GetDeltaCSRCDS(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity,
+            double[] spreadStandard, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double[] recoveryIssuer,string cpnPeriod, string cpnConvention, string cpnLastSettle);
+        double GetcurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
+            bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
+            double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+            double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0);
+        double GetcurvatureCSRPROXY(double[] deltaSensitivities, string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
+            double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0,
+            double? lossUnitAmount = null, string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
+        //======================================Stripping IRS====================================
         void GetStoreCurve(string[] currency, double[] swapBasis, double[] FXRate, double[] swapPeriod, string[] curveNames, double[,] swapRates,
             string[] curveDates, string[] typeOfCurve);
-        double[,] GetGirr(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-            int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-            double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-            string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1);
         int[] GetBucketCompute(int numberOfIssuer, string[] issuerName, string[] ratings, double[] sectors);
-        //===========================================TEST========================================================
-        int[] GetTest(int[] k);
+
     }
 
 
@@ -279,30 +279,6 @@ namespace ValoLibrary
     isAmericanFixedLeg, withGreeks,withJtdVAL,withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta, girrMonth,shock,girrCurrency);
         }
 
-        public double[,] GetGirr(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-            int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-            string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-            double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-            string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
-        {
-            lossUnitAmount = null;
-            return FRTB.Girr(paramDate, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
-                cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL,hedgingCDS, lossUnitAmount, integrationPeriod,
-                probMultiplier, dBeta);
-        }
-        public double[,] GetDeltaCSR(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
-    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
-    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
-        {
-            lossUnitAmount = null;
-            return FRTB.DeltaCSRCDO(names, ratings,sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention,
-                cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod,
-                probMultiplier, dBeta);
-        }
         public double GetImpliedCorrelation(double upfront, double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
@@ -310,17 +286,6 @@ namespace ValoLibrary
         {
             return ModelInterface.ImpliedCorrelation(upfront, trancheSpread,maturity,strikes,lowCorrel,spreadStandard,pricingCurrency,numberOfIssuer,issuerList,
                 nominalIssuer,spread,cpnPeriod,cpnConvention,cpnLastSettle,fxCorrel,fxVol,betaAdder,recoveryIssuer,isAmericanFloatLeg,isAmericanFixedLeg);
-        }
-        public double GetCurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
-    bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
-    double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0,
-    double[] hedgingCDS = null, double? lossUnitAmount = null, string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
-        {
-            lossUnitAmount = null;
-            return FRTB.curvatureCSR(floor, riskClass, deltaSensitivities, names, ratings, sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard,
-                pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, correlationScenario,
-                isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL, hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
         }
         // ===================================Stripping IRS========================================
         public void GetStoreCurve(string[] currency, double[] swapBasis, double[] FXRate, double[] swapPeriod, string[] curveNames, double[,] swapRates,
@@ -335,10 +300,51 @@ namespace ValoLibrary
             return FRTB.BucketCompute(numberOfIssuer,issuerName, ratings, sectors);
         }
 
-        //============================================TEST==============================================
-        public int[] GetTest(int[] k)
+        //============================================FRTB==============================================
+        public double[] GetDeltaCSRCDOProxy(string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
+  string pricingCurrency, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+  string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+  double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
+  string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
         {
-            return k;
+            lossUnitAmount = null;
+            return FRTB.DeltaCSRCDOProxy(names, ratings, sectors, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer,
+                spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withStochasticRecoveryVAL,
+                hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
+        }
+        public double[,] GetDeltaCSRCDO(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
+           string pricingCurrency, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+           string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+           double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
+        {
+            return FRTB.DeltaCSRCDO(names, ratings, sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, pricingCurrency,
+                numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg,
+                isAmericanFixedLeg, withStochasticRecoveryVAL);
+        }
+        public double[,] GetDeltaCSRCDS(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity,
+            double[] spreadStandard, int numberOfIssuer, string[] issuerList, double[] nominalIssuer,double[] recoveryIssuer, string cpnPeriod, string cpnConvention, string cpnLastSettle)
+        {
+            return FRTB.DeltaCSRCDS(names, ratings, sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, spreadStandard,
+                numberOfIssuer, issuerList, nominalIssuer, recoveryIssuer,cpnPeriod, cpnConvention, cpnLastSettle);
+        }
+        public double GetcurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
+            bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
+            double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+            double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
+        {
+            return FRTB.curvatureCSR(floor, riskClass, deltaSensitivities, names, ratings, sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl,
+                spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder,
+                recoveryIssuer, correlationScenario, isAmericanFloatLeg, isAmericanFixedLeg, withStochasticRecoveryVAL);
+        }
+        public double GetcurvatureCSRPROXY(double[] deltaSensitivities, string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
+            double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0,
+            double? lossUnitAmount = null, string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+        {
+            lossUnitAmount = null;
+            return FRTB.curvatureCSRPROXY(deltaSensitivities, names, ratings, sectors, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList,
+                nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg,
+                withStochasticRecoveryVAL, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
         }
     }
 }
