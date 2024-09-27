@@ -49,44 +49,76 @@ namespace AutocallPricerFHC
             //{
             //    Console.WriteLine($"Arg {i}: {args[i]}");
             //}
-            //int n = int.Parse(args[0]);
-            //int N = int.Parse(args[1]);
-            //double T = double.Parse(args[2]);
-            //int freqObs = int.Parse(args[3]);
-            //double BP = double.Parse(args[4]);
-            //double AT = double.Parse(args[5]);
-            //double coupon = double.Parse(args[6]);
-            //int nbrHedges = int.Parse(args[7]);
-            //string hedgeType = args[8];
-            //double notional = double.Parse(args[10]);
+            int n = int.Parse(args[0]);
+            int N = int.Parse(args[1]);
+            double T = double.Parse(args[2]);
+            int freqObs = int.Parse(args[3]);
+            double BP = double.Parse(args[4]);
+            double AT = double.Parse(args[5]);
+            double coupon = double.Parse(args[6]);
+            int nbrHedges = int.Parse(args[7]);
+            string hedgeType = args[8];
+            double notional = double.Parse(args[10]);
             string stockname = args[11];
             string volType = args[9];
-            double notional = double.Parse(args[10], CultureInfo.InvariantCulture);
-            string hedgeType = args[8];
-            int n = int.Parse(args[0], CultureInfo.InvariantCulture);
-            int N = int.Parse(args[1], CultureInfo.InvariantCulture);
-            double T = double.Parse(args[2], CultureInfo.InvariantCulture);
-            int freqObs = int.Parse(args[3], CultureInfo.InvariantCulture);
-            double BP = double.Parse(args[4], CultureInfo.InvariantCulture);
-            double AT = double.Parse(args[5], CultureInfo.InvariantCulture);
-            double coupon = double.Parse(args[6], CultureInfo.InvariantCulture);
-            int nbrHedges = int.Parse(args[7], CultureInfo.InvariantCulture);
+            //double notional = double.Parse(args[10], CultureInfo.InvariantCulture);
+            //string hedgeType = args[8];
+            //int n = int.Parse(args[0], CultureInfo.InvariantCulture);
+            //int N = int.Parse(args[1], CultureInfo.InvariantCulture);                                                 
+            //double T = double.Parse(args[2], CultureInfo.InvariantCulture);                                           
+            //int freqObs = int.Parse(args[3], CultureInfo.InvariantCulture);
+            //double BP = double.Parse(args[4], CultureInfo.InvariantCulture);
+            //double AT = double.Parse(args[5], CultureInfo.InvariantCulture);
+            //double coupon = double.Parse(args[6], CultureInfo.InvariantCulture);
+            //int nbrHedges = int.Parse(args[7], CultureInfo.InvariantCulture);
             //string stockname = "AIRBUS";
-
+           
             Console.WriteLine($"Parsed Values: n={n}, N={N}, T={T}, freqObs={freqObs}, BP={BP}, AT={AT}, coupon={coupon}, nbrHedges={nbrHedges}, hedgeType={hedgeType}, volType = {volType}");
-            string pathRatesKeys = @"C:\Users\m.ben-el-ghoul\OneDrive - AXIS ALTERNATIVES\Documents\Valo\python\Autocall pricer and FHC computations\Autocall pricer V3\data_and_keys\short term keys.xlsx";
+            // string projectDirectory = Directory.GetCurrentDirectory()  // for Visual Stu dio test
+
+            string projectDirectory0 = Directory.GetCurrentDirectory(); // Get the current project directory
+            string projectDirectory1 = Directory.GetParent(projectDirectory0).FullName;
+            string projectDirectory2 = Directory.GetParent(projectDirectory1).FullName;
+
+            //string projectDirectory = Path.GetFullPath(Path.Combine(projectDirectory2, @"..\.."));
+            string projectDirectory = Path.Combine(projectDirectory2, @"PycharmProjects\Valo\csharp\Autocall Pricer\NewAutocallPricerFHC\bin\Debug");
+
+            Console.WriteLine(projectDirectory);
+
+
+
+
+
+            string pathRatesKeys = @"common\dataAutocall\data_and_keys";
+
+            string prDirectory = Directory.GetParent(projectDirectory).FullName;
+
+            string grDirectory = Directory.GetParent(prDirectory).FullName;
+            
+            string ggrDirectory = Directory.GetParent(grDirectory).FullName;
+            
+            string gggrDirectory = Directory.GetParent(ggrDirectory).FullName;
+            //Console.WriteLine(grDirectory);
+            Console.WriteLine(projectDirectory);
+            string ggggrDirectory = Directory.GetParent(gggrDirectory).FullName;
+            string dataPath = Path.Combine(ggggrDirectory,pathRatesKeys, "short term keys.xlsx");
+            
             var ratesFetcher = new RatesFetcher();
-            (List<double> maturities, List<double> rates) = await ratesFetcher.ProcessRatesKeys(pathRatesKeys);
+            (List<double> maturities, List<double> rates) = await ratesFetcher.ProcessRatesKeys(dataPath);
             var nssModel = new NelsonSiegelSvenssonModel(maturities.ToArray(), rates.ToArray());
+            Console.WriteLine($"the rate for 10 years is , {nssModel.GetRate(0.021)}");
             List<string> pathsList = new List<string>();
             if (n == 1)
             {
-                pathsList.Add(@"C:\Users\m.ben-el-ghoul\PycharmProjects\Autocall pricer V2\data and keys\" + stockname + "_25_04_2024.xlsx" );
+                string pathData = @"common\dataAutocall\data_and_keys\" + stockname + "_25_04_2024.xlsx";
+                pathsList.Add(Path.Combine(ggggrDirectory, pathData));
             }
             else
             {
-                pathsList.Add(@"C:\Users\m.ben-el-ghoul\PycharmProjects\Autocall pricer V2\data and keys\AXA_25_04_2024.xlsx");
-                pathsList.Add(@"C:\Users\m.ben-el-ghoul\PycharmProjects\Autocall pricer V2\data and keys\AIRBUS_25_04_2024.xlsx");
+                string pathData1 = @"common\dataAutocall\data_and_keys\AXA_25_04_2024.xlsx";
+                string pathData2 = @"common\dataAutocall\data_and_keys\AIRBUS_25_04_2024.xlsx";
+                pathsList.Add(Path.Combine(ggggrDirectory, pathData1));
+                pathsList.Add(Path.Combine(ggggrDirectory, pathData2));
             }
             
             var result = Utility.RetrieveMarketData(pathsList, nssModel).GetAwaiter().GetResult();
@@ -189,25 +221,30 @@ namespace AutocallPricerFHC
                 Vega = vega,
                 Gamma = gamma
             };
-            
 
+            
             //----------------------------------------------------------------------------
             List<string> historicalDataPaths = new List<string>();
             if (n == 1)
             {
-                historicalDataPaths.Add(@"C:\Users\m.ben-el-ghoul\OneDrive - AXIS ALTERNATIVES\Documents\Valo\python\Autocall pricer and FHC computations\Autocall pricer V3\data_and_keys\Historical"+stockname+".xlsx");
+                
+                //Console.WriteLine(Path.Combine(ggggrDirectory,pathRatesKeys, "Historical" + stockname+ ".xlsx"));
+                //historicalDataPaths.Add(Path.Combine(ggggrDirectory, pathRatesKeys, "Historical" + stockname + ".xlsx"));
+                historicalDataPaths.Add(@"C:\Users\m.ben-el-ghoul\OneDrive - AXIS ALTERNATIVES\Documents\Valo\python\Autocall pricer and FHC computations\Autocall pricer V3\data_and_keys\HistoricalAIRBUS.xlsx");      
+
             }
             else
             {
-                historicalDataPaths.Add(@"C:\Users\m.ben-el-ghoul\OneDrive - AXIS ALTERNATIVES\Documents\Valo\python\Autocall pricer and FHC computations\Autocall pricer V3\data_and_keys\HistoricalAxa.xlsx");
-                historicalDataPaths.Add(@"C:\Users\m.ben-el-ghoul\OneDrive - AXIS ALTERNATIVES\Documents\Valo\python\Autocall pricer and FHC computations\Autocall pricer V3\data_and_keys\HistoricalAIRBUS.xlsx");
+                historicalDataPaths.Add(Path.Combine(ggggrDirectory, pathRatesKeys, "HistoricalAXA.xlsx"));
+                historicalDataPaths.Add(Path.Combine(ggggrDirectory, pathRatesKeys, "HistoricalAIRBUS.xlsx"));
             }
-            
             int nbrValues = (int)Math.Ceiling(252 * T);
             List<double[]> closingpricesList = new List<double[]>();
             for (int i = 0; i < n; i++)
             {
+                Console.WriteLine(historicalDataPaths[i]);
                 var historicalData = Utility.LoadDataTableFromExcel(historicalDataPaths[i]);
+             
                 Console.WriteLine(historicalDataPaths[i]);
                 double[] closeValues = new double[nbrValues];
                 closeValues = OptionDataProcessor.GetHistPricesFromDataTable(historicalData, "Close", nbrValues);  
@@ -241,7 +278,7 @@ namespace AutocallPricerFHC
                         { "LevelBasedDeltaVegaHedging",MoveBasedDeltaVegaHedging}
                     };
             Console.WriteLine("finished Testing Move Based FHC for Delta and Vega");
-            Utility.ExportToOpenExcel(dataTables, @"C:\Users\m.ben-el-ghoul\source\repos\NewAutocallPricerFHC\bin\debug\AutocallPricerFHC.xlsm");
+            Utility.ExportToOpenExcel(dataTables, Path.Combine(projectDirectory, "AutocallPricerFHC.xlsm"));
             Console.WriteLine("Finished exporting datatables");
             double sumLevelBasedTransCosts = Utility.ComputeFHCSum(hedgeType, null , MoveBasedDeltaVegaHedging);
 
@@ -259,7 +296,9 @@ namespace AutocallPricerFHC
             var resultsClosedFHC = closedFormulae.ComputeFHCDeltaVega(T, closingpricesList, ks);
             Console.WriteLine("finishing 3rd approach");
             Console.WriteLine("starting writing in the txt file");
-            string textFilePath = @"C:\Users\m.ben-el-ghoul\source\repos\NewAutocallPricerFHC\bin\Debug\results.txt";
+
+            string textFilePathResults = Path.Combine(projectDirectory, "results.txt");
+            Console.WriteLine(textFilePathResults);
             string textOutput = $"Price: {price}\nDelta: {delta}\nVega: {vega}\nGamma: {gamma}\nDeltaFHCClosed: {resultsClosedFHC.Item1}\nVegaFHCClosed: {resultsClosedFHC.Item2}";
             //string textOutput = $"Price: {price}\nDelta: {delta}\nVega: {vega}\nGamma: {gamma}";
             if (n == 1)
@@ -279,7 +318,7 @@ namespace AutocallPricerFHC
             textOutput += $"\nLast Value of the traded security in Fixed: {fhcFixedHedging.lastBinValue}";
             textOutput += $"\nLast Value of the traded security in Move Based: {fhcMoveBasedHedging.lastBinValue}";
             textOutput += $"\nLast Payoff: {fhcMoveBasedHedging.lastFinalPayoff}";
-            File.WriteAllText(textFilePath, textOutput);
+            File.WriteAllText(textFilePathResults, textOutput);
             ////"-------------------------------------------------------------------------------------------------------------------"
 
             Environment.Exit(0);
