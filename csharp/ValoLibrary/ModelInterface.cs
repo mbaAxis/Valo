@@ -1081,7 +1081,8 @@ namespace ValoLibrary
                         //    shockedCurve[j] = 0;
                         //}
                     }
-                    StrippingCDS.StripDefaultProbability(cdsID, CreditDefaultSwapCurves.Curves[cdsID].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
+                    //StrippingCDS.StripDefaultProbability(cdsID, CreditDefaultSwapCurves.Curves[cdsID].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, pricingCurrency, 0.4, false, intensity);
+                    StrippingCDS.StripDefaultProbability(cdsID, CreditDefaultSwapCurves.Curves[cdsID].CDSName, ParamDate, CDSRollDate, shockedCurve, spreadCurveMaturity, pricingCurrency, 0, false, intensity);//Change for DRC
                     hedging_cds = AmericanSwap(maturity, 1, cdsID, 1.0, 0.25,
                             0, val1, cpnLastSettle, cpnPeriod, cpnConvention, pricingCurrency, 0.0, 0.0, 0.0, 0.0,
                            betaAdder, val2, val3, 0, 0, 0, null, lossUnitAmount,

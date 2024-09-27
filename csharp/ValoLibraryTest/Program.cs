@@ -683,7 +683,7 @@ for (int i = 0; i < names.Length; i++)
 }
 int[] months = { 1, 2, 3 };
 string[,] s = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, "EUR", names.Length, names, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
-    betaAdder,recoveryIssuer,isAmericanFloatLeg,isAmericanFixedLeg,0,0,0,null,null,"1m",1,0.1,months,0.001,"EUR");
+    betaAdder,recoveryIssuer,isAmericanFloatLeg,isAmericanFixedLeg,1,1,0,null,null,"1m",1,0.1,months,0.001,"EUR");
 
 string[] ratings = { "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB" };
 double[] sector = { 16, 16, 16, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };

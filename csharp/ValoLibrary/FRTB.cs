@@ -629,7 +629,7 @@ namespace ValoLibrary
             return bucket;
         }
 //-------------------------------------------------------------------------- CURVATURE PART --------------------------------------------------------------------------------
-        public static double curvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
+        public static double[,] curvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
     bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
     double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
@@ -658,10 +658,10 @@ namespace ValoLibrary
                 riskWeights = new double[] { 0.005, 0.01, 0.05, 0.03, 0.03, 0.02, 0.015, 0.025, 0.02, 0.04, 0.12, 0.07, 0.085, 0.055, 0.05, 0.12, 0.015, 0.05 };
             }
 
-            double[,] curvature = new double[numberOfIssuer, 2];// 2 for the upward and downward shock
+            double[,] curvature = new double[numberOfIssuer, 3];// 2 for the upward and downward shock, and one for the curvature Risk
 
             double sik;
-            double nonShocked;
+            double nonShocked=0;
             double upWardShocked;
             double downWardShocked;
 
@@ -673,7 +673,6 @@ namespace ValoLibrary
             for (int issuer = 0; issuer < deltaSensitivities.GetLength(0); issuer++)
             {
                 sik = 0;
-                nonShocked = 0;
                 upWardShocked = 0;
                 downWardShocked = 0;
 
@@ -799,7 +798,7 @@ namespace ValoLibrary
                     kb[0] = Math.Max(kbDownWard[0], kbUpWard[0]); //only one bucket, no need of determining upWard, downWard scenario
                 }
                 curvatureRisk = Math.Sqrt(Math.Max(kb[0] * kb[0],0));
-                curvatureRisk = kb[0];
+                curvature[0, 2] = curvatureRisk;
             }
             else
             {
@@ -1002,9 +1001,10 @@ namespace ValoLibrary
                     }
                 }
                 curvatureRisk = Math.Sqrt(Math.Max(0, curvatureRisk));
+                curvature[0, 2] = curvatureRisk;
             }
             Console.WriteLine("Curvature :"+curvatureRisk);
-            return curvatureRisk;
+            return curvature;
         }
         public static double curvatureCSRPROXY(double[] deltaSensitivities, string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
     double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,

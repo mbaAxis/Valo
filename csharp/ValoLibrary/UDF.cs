@@ -93,7 +93,7 @@ namespace ValoLibrary
            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0);
         double[,] GetDeltaCSRCDS(string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate, bool alterMode, string intensity, string maturity,
             double[] spreadStandard, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double[] recoveryIssuer,string cpnPeriod, string cpnConvention, string cpnLastSettle);
-        double GetcurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
+        double[,] GetcurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
             bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
             double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
             double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0);
@@ -327,7 +327,7 @@ namespace ValoLibrary
             return FRTB.DeltaCSRCDS(names, ratings, sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, spreadStandard,
                 numberOfIssuer, issuerList, nominalIssuer, recoveryIssuer,cpnPeriod, cpnConvention, cpnLastSettle);
         }
-        public double GetcurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
+        public double[,] GetcurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
             bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
             double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
             double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
