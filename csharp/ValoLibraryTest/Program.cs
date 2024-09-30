@@ -705,7 +705,7 @@ for (int i = 0; i < names.Length; i++)
 
 double floor = 0.0001;
 FRTB.curvatureCSR(floor, "e", deltaSensitivities, names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
-    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, "high", isAmericanFloatLeg, isAmericanFixedLeg);
+    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
 
 //double[] deltaSensi = new double[5];
 //for (int i = 0; i < r.Length - 1; i++)

@@ -101,7 +101,7 @@ namespace ValoLibrary
         double[,] GetcurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
             bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
             double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-            double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0);
+            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0);
         double GetcurvatureCSRPROXY(double[] deltaSensitivities, string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
             double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
             double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0,
@@ -346,11 +346,11 @@ namespace ValoLibrary
         public double[,] GetcurvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
             bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
             double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-            double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
+            double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
         {
             return FRTB.curvatureCSR(floor, riskClass, deltaSensitivities, names, ratings, sectors, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl,
                 spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder,
-                recoveryIssuer, correlationScenario, isAmericanFloatLeg, isAmericanFixedLeg, withStochasticRecoveryVAL);
+                recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withStochasticRecoveryVAL);
         }
         public double GetcurvatureCSRPROXY(double[] deltaSensitivities, string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
             double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,

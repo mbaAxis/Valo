@@ -631,8 +631,9 @@ namespace ValoLibrary
         public static double[,] curvatureCSR(double floor, string riskClass, double[,] deltaSensitivities, string[] names, string[] ratings, double[] sectors, DateTime paramDate, DateTime CDSRollDate,
     bool alterMode, string intensity, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency, int numberOfIssuer, string[] issuerList,
     double[] nominalIssuer, double spread, string cpnPeriod, string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, string correlationScenario = "MEDIUM", double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
         {
+            string correlationScenario;
             double curvatureRisk = 0;
             int[] indices = Fill(paramDate, issuerList, CDSRollDate, alterMode, intensity, cpnPeriod, cpnConvention);
             int[] bucket = BucketCompute(numberOfIssuer, names, ratings, sectors);
