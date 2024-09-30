@@ -1109,60 +1109,6 @@ namespace ValoLibrary
             x[5, 1] = (DateTime.Now - StartTime) + "";//MODIF, AJOUT
             return x;
         }
-        public static double[,] CDSDeltaGIRR(string[] issuerName, double[] standardSpread, double[] recovery, double[] nominal, string cpnPeriod,
-            string cpnConvention, string cpnLastSettle, string pricingCurrency, double[] hedgingCds, string integrationPeriod)
-        {
-            int lastIndice = issuerName.Length;
-            for (int i = 0; i < issuerName.Length; i++)
-            {
-                if (issuerName[i] == "" || String.IsNullOrEmpty(issuerName[i]))
-                {
-                    lastIndice = i;
-                    break;
-                }
-            }
-            double additionalWeight = 1;
-            if (pricingCurrency == "EUR" || pricingCurrency == "USD" || pricingCurrency == "GPB" || pricingCurrency == "AUD" || pricingCurrency == "JPY" || pricingCurrency == "SEK" || pricingCurrency == "CAD")//see 21.44
-            {
-                additionalWeight = Math.Sqrt(2);
-            }
-            double[] riskWeights = { 0.017, 0.017, 0.016, 0.013, 0.012, 0.011, 0.011, 0.011, 0.011, 0.011 };
-            string[] tenors = { "3M", "6M", "1Y", "2Y", "3Y", "5Y", "10Y", "15Y", "20Y", "30Y" };
-            double[,] results = new double[lastIndice, tenors.Length + 1];
-            int[] months = { 3, 6, 12, 24, 36, 60, 120, 180, 240, 360 };
-            double shockedGIRR = 0.0001;
-            double[] sumSensitivities = new double[10];
-            for (int i = 0; i < lastIndice; i++)
-            {
-                for (int j = 0; j < tenors.Length; j++)
-                {
-                    results[i, j] = -Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod, 1)[0, 0]);
-                    results[i, j] += Double.Parse(CDS(issuerName[i], tenors[j], standardSpread[i] * shockedGIRR, recovery[i], nominal[i], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCds, integrationPeriod, 1, new int[]{ months[j]})[0, 0]);
-                    results[i, j] /= shockedGIRR;
-                    results[i, j] *= riskWeights[j] / additionalWeight;
-                    sumSensitivities[j] += results[i, j];
-                }
-            }
-            // Computation of K_b, see 21.4 for more information
-            double[,] correlationMatrix = { { 1.0, 0.97, 0.914, 0.811, 0.719, 0.566, 0.4, 0.4, 0.4, 0.4 }, { 0.97, 1.0, 0.97, 0.914, 0.861, 0.763, 0.566, 0.419, 0.4, 0.4 },{0.914, 0.97, 1.0, 0.97, 0.942, 0.887, 0.763, 0.657, 0.566, 0.419}
-            ,{0.811, 0.914, 0.97, 1.0, 0.985, 0.956, 0.887, 0.823, 0.763, 0.657},{0.719, 0.861, 0.942, 0.985, 1.0, 0.98, 0.932, 0.887, 0.844, 0.763},{0.566, 0.763, 0.887, 0.956, 0.98, 1.0, 0.97, 0.942, 0.914, 0.861},
-            {0.4, 0.566, 0.763, 0.887, 0.932, 0.97, 1.0, 0.985, 0.97, 0.942},{0.4, 0.419, 0.657, 0.823, 0.887, 0.942, 0.985, 1.0, 0.99, 0.97},{0.4, 0.4, 0.566, 0.763, 0.844, 0.914, 0.97, 0.99, 1.0, 0.985},
-            {0.4, 0.4, 0.419, 0.657, 0.763, 0.861, 0.942, 0.97, 0.985, 1.0}};
-            double Kb = 0;
-            for (int i = 0; i < tenors.Length; i++)
-            {
-                Kb += Math.Pow(sumSensitivities[i], 2);
-                double s = 0;
-                for (int j = 0; j < tenors.Length && j != i; j++)
-                {
-                    s += correlationMatrix[i, j] * sumSensitivities[i] * sumSensitivities[j];
-                }
-                Kb += s;
-            }
-            Kb = Math.Sqrt(Math.Max(0, Kb));
-            results[0, 10] = Kb;
-            return results;
-        }
         public static double ImpliedCorrelation(double upfront, double trancheSpread, string maturity, double[] strikes, double lowCorrel, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
