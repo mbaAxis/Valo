@@ -117,7 +117,6 @@ public class FHCMoveBasedHedging
                     double delta = (double)fhcHelpers.ComputePriceAtHedgeDateFixed(gc, pg, pc, T, couponCounter, obsDates, hedgeDate, initSpot, "Delta");
                     double discountFactor = Math.Exp(curve(hedgeDate / 252.0) / 100 * hedgeDate / 252.0);
                     double weightDeltaHedge = delta;
-                    //Console.WriteLine($"Delta {delta}");
                     hedgingDatesList.Add(hedgeDate);
                     deltasList.Add(delta);
                     hedgedSpotsList.Add(initSpot);
@@ -250,15 +249,11 @@ public class FHCMoveBasedHedging
                     var checkBreakHedge = (ValueTuple<List<double>, bool>)fhcHelpers.CheckBreakHedge(closingpricesList, position, obsDates, oldPosition, positionCounter, T, couponCounter, AT, BP, coupon, notional);
                     List<double> finalPayoffsList = checkBreakHedge.Item1;
                     bool breakState = checkBreakHedge.Item2;
-                    
-                    
                     if (breakState)
                     {
                         lastFinalPayoff = finalPayoffsList.Last();
-                        Console.WriteLine($"inside the funct {lastFinalPayoff}");
                         break;
                     }
-                        
                     List<double> spotList = FHCHelpers.ExtractSpotList(this.closingpricesList, i);
                     var result = (ValueTuple<double, double>)fhcHelpers.ComputePriceAtHedgeDateFixed(gc, pg, pc, T, couponCounter, obsDates, hedgeDate, spotList, "Delta-Vega");
                     double deltaArr = result.Item1;

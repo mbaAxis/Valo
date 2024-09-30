@@ -42,13 +42,6 @@ namespace AutocallPricerFHC
                 Console.WriteLine("Error: Not enough arguments provided.");
                 return;
             }
-
-            // Log the raw arguments
-            //Console.WriteLine("Received arguments:");
-            //for (int i = 0; i < args.Length; i++)
-            //{
-            //    Console.WriteLine($"Arg {i}: {args[i]}");
-            //}
             int n = int.Parse(args[0]);
             int N = int.Parse(args[1]);
             double T = double.Parse(args[2]);
@@ -64,73 +57,64 @@ namespace AutocallPricerFHC
             //double notional = double.Parse(args[10], CultureInfo.InvariantCulture);
             //string hedgeType = args[8];
             //int n = int.Parse(args[0], CultureInfo.InvariantCulture);
-            //int N = int.Parse(args[1], CultureInfo.InvariantCulture);                                                 
-            //double T = double.Parse(args[2], CultureInfo.InvariantCulture);                                           
+            //int N = int.Parse(args[1], CultureInfo.InvariantCulture);
+            //double T = double.Parse(args[2], CultureInfo.InvariantCulture);
             //int freqObs = int.Parse(args[3], CultureInfo.InvariantCulture);
             //double BP = double.Parse(args[4], CultureInfo.InvariantCulture);
             //double AT = double.Parse(args[5], CultureInfo.InvariantCulture);
             //double coupon = double.Parse(args[6], CultureInfo.InvariantCulture);
             //int nbrHedges = int.Parse(args[7], CultureInfo.InvariantCulture);
             //string stockname = "AIRBUS";
-           
+
             Console.WriteLine($"Parsed Values: n={n}, N={N}, T={T}, freqObs={freqObs}, BP={BP}, AT={AT}, coupon={coupon}, nbrHedges={nbrHedges}, hedgeType={hedgeType}, volType = {volType}");
-            // string projectDirectory = Directory.GetCurrentDirectory()  // for Visual Stu dio test
 
-            string projectDirectory0 = Directory.GetCurrentDirectory(); // Get the current project directory
-            string projectDirectory1 = Directory.GetParent(projectDirectory0).FullName;
-            string projectDirectory2 = Directory.GetParent(projectDirectory1).FullName;
-
-            //string projectDirectory = Path.GetFullPath(Path.Combine(projectDirectory2, @"..\.."));
-            string projectDirectory = Path.Combine(projectDirectory2, @"PycharmProjects\Valo\csharp\Autocall Pricer\NewAutocallPricerFHC\bin\Debug");
-
-            Console.WriteLine(projectDirectory);
-
-
-
-
-
+            string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string targetFolder = "Valo";
+            int indexOfTargetFolder = currentDirectory.IndexOf(targetFolder, StringComparison.OrdinalIgnoreCase);
+            string targetDirectory = currentDirectory.Substring(0, indexOfTargetFolder + targetFolder.Length);
             string pathRatesKeys = @"common\dataAutocall\data_and_keys";
-
-            string prDirectory = Directory.GetParent(projectDirectory).FullName;
-
-            string grDirectory = Directory.GetParent(prDirectory).FullName;
-            
-            string ggrDirectory = Directory.GetParent(grDirectory).FullName;
-            
-            string gggrDirectory = Directory.GetParent(ggrDirectory).FullName;
-            //Console.WriteLine(grDirectory);
-            Console.WriteLine(projectDirectory);
-            string ggggrDirectory = Directory.GetParent(gggrDirectory).FullName;
-            string dataPath = Path.Combine(ggggrDirectory,pathRatesKeys, "short term keys.xlsx");
-            
+            string dataPath = Path.Combine(targetDirectory, pathRatesKeys, "short term keys.xlsx");
             var ratesFetcher = new RatesFetcher();
             (List<double> maturities, List<double> rates) = await ratesFetcher.ProcessRatesKeys(dataPath);
             var nssModel = new NelsonSiegelSvenssonModel(maturities.ToArray(), rates.ToArray());
-            Console.WriteLine($"the rate for 10 years is , {nssModel.GetRate(0.021)}");
             List<string> pathsList = new List<string>();
             if (n == 1)
             {
                 string pathData = @"common\dataAutocall\data_and_keys\" + stockname + "_25_04_2024.xlsx";
-                pathsList.Add(Path.Combine(ggggrDirectory, pathData));
+                pathsList.Add(Path.Combine(targetDirectory, pathData));
             }
             else
             {
                 string pathData1 = @"common\dataAutocall\data_and_keys\AXA_25_04_2024.xlsx";
                 string pathData2 = @"common\dataAutocall\data_and_keys\AIRBUS_25_04_2024.xlsx";
-                pathsList.Add(Path.Combine(ggggrDirectory, pathData1));
-                pathsList.Add(Path.Combine(ggggrDirectory, pathData2));
+                pathsList.Add(Path.Combine(targetDirectory, pathData1));
+                pathsList.Add(Path.Combine(targetDirectory, pathData2));
             }
             
+
             var result = Utility.RetrieveMarketData(pathsList, nssModel).GetAwaiter().GetResult();
             List<DataTable> dataList = result.DataList;
             List<double> initialSpotList = result.InitialSpotList;
-            //double initDiv = 1;
             List<double> initialDividends = result.InitialDividends;
             List<string> tickers = result.Tickers;
             List<double[,]> listParamsMatrix = new List<double[,]>();
             var constants = new Constants();
             listParamsMatrix = constants.GetDummyParamMatrix(stockname);
-            double[] hestonParams = new double[] { 0.07184024202131313, 1.3182151985788433, 0.11146443297538572, 0.9629448114702667, -0.2668357302189678 };
+            double[] hestonParams = new double[5];
+            if (n == 1)
+            {
+                hestonParams = new double[] { 0.07184024202131313, 1.3182151985788433, 0.11146443297538572, 0.9629448114702667, -0.2668357302189678 };
+
+
+                // Apply Heston only to Airbus stock, because lack of preprocessed data for AXA
+
+                //string preprocessedDataPath = @"common\dataAutocall\data_and_keys\AIRBUS_preprocessed.xlsx"
+                //DataTable marketData = Utility.LoadDataTableFromExcel(Path.Combine(targetDirectory, preprocessedDataPath));
+                //HestonCalibrator calibrator = new HestonCalibrator(marketData);
+                //double[] hestonParams = calibrator.Run();
+            }
+
+
             bool heston = (volType == "SV");
             var qmcgenerator = new QMCGeneration();
             Matrix<double> randomMat = qmcgenerator.GenerateRandomMatrix(n, N, T, heston);
@@ -141,7 +125,7 @@ namespace AutocallPricerFHC
             int k = 0;
             int smoothingFactor = 1000;
             double price = 0;
-            Dictionary<double, double> probabilities = new Dictionary<double, double>();    
+            Dictionary<double, double> probabilities = new Dictionary<double, double>();
             if (n == 1)
             {
                 double[,] SMatrix = (double[,])pathGenerator.GeneratePaths(T, initialSpotList, null, null, -1);
@@ -165,9 +149,9 @@ namespace AutocallPricerFHC
 
             var greekscomputation = new GreeksComputations(n, N, pathsList, nssModel.GetRate, initialDividends, listParamsMatrix, hestonParams, volType,
                           freqObs, BP, AT, coupon, notional);
-            double delta = 0 ;
-            double vega = 0 ;
-            double gamma = 0 ;
+            double delta = 0;
+            double vega = 0;
+            double gamma = 0;
             if (n == 1)
             {
                 if (hedgeType == "Delta-Vega")
@@ -210,7 +194,7 @@ namespace AutocallPricerFHC
                     delta = deltaGamma.Item1.Sum();
                     gamma = deltaGamma.Item2.Sum();
                 }
-                
+
 
             }
 
@@ -221,33 +205,27 @@ namespace AutocallPricerFHC
                 Vega = vega,
                 Gamma = gamma
             };
-
             
+
             //----------------------------------------------------------------------------
             List<string> historicalDataPaths = new List<string>();
             if (n == 1)
             {
-                
-                //Console.WriteLine(Path.Combine(ggggrDirectory,pathRatesKeys, "Historical" + stockname+ ".xlsx"));
-                //historicalDataPaths.Add(Path.Combine(ggggrDirectory, pathRatesKeys, "Historical" + stockname + ".xlsx"));
-                historicalDataPaths.Add(@"C:\Users\m.ben-el-ghoul\OneDrive - AXIS ALTERNATIVES\Documents\Valo\python\Autocall pricer and FHC computations\Autocall pricer V3\data_and_keys\HistoricalAIRBUS.xlsx");      
-
+                historicalDataPaths.Add(Path.Combine(targetDirectory, pathRatesKeys, "Historical" + stockname + ".xlsx"));
             }
             else
             {
-                historicalDataPaths.Add(Path.Combine(ggggrDirectory, pathRatesKeys, "HistoricalAXA.xlsx"));
-                historicalDataPaths.Add(Path.Combine(ggggrDirectory, pathRatesKeys, "HistoricalAIRBUS.xlsx"));
+                historicalDataPaths.Add(Path.Combine(targetDirectory, pathRatesKeys, "HistoricalAXA.xlsx"));
+                historicalDataPaths.Add(Path.Combine(targetDirectory, pathRatesKeys, "HistoricalAIRBUS.xlsx"));
+                
             }
             int nbrValues = (int)Math.Ceiling(252 * T);
             List<double[]> closingpricesList = new List<double[]>();
             for (int i = 0; i < n; i++)
             {
-                Console.WriteLine(historicalDataPaths[i]);
                 var historicalData = Utility.LoadDataTableFromExcel(historicalDataPaths[i]);
-             
-                Console.WriteLine(historicalDataPaths[i]);
                 double[] closeValues = new double[nbrValues];
-                closeValues = OptionDataProcessor.GetHistPricesFromDataTable(historicalData, "Close", nbrValues);  
+                closeValues = OptionDataProcessor.GetHistPricesFromDataTable(historicalData, "Close", nbrValues);
                 closingpricesList.Add(closeValues);
             }
 
@@ -259,7 +237,7 @@ namespace AutocallPricerFHC
             Console.WriteLine("Testing Fixed FHC for Delta and Vega");
             DataTable FixedDeltaVegaHedging = fhchelpers.FillDeltaVegaHedgeTable(greekscomputation, pathGenerator, payoffCalculator, T, "Fixed");
 
-            double sumFixedTransCosts = Utility.ComputeFHCSum(hedgeType, null , FixedDeltaVegaHedging);
+            double sumFixedTransCosts = Utility.ComputeFHCSum(hedgeType, null, FixedDeltaVegaHedging);
 
 
             //Console.WriteLine("Testing Move Based FHC for Delta");
@@ -278,9 +256,9 @@ namespace AutocallPricerFHC
                         { "LevelBasedDeltaVegaHedging",MoveBasedDeltaVegaHedging}
                     };
             Console.WriteLine("finished Testing Move Based FHC for Delta and Vega");
-            Utility.ExportToOpenExcel(dataTables, Path.Combine(projectDirectory, "AutocallPricerFHC.xlsm"));
+            Utility.ExportToOpenExcel(dataTables, Path.Combine(currentDirectory, "AutocallPricerFHC.xlsm"));
             Console.WriteLine("Finished exporting datatables");
-            double sumLevelBasedTransCosts = Utility.ComputeFHCSum(hedgeType, null , MoveBasedDeltaVegaHedging);
+            double sumLevelBasedTransCosts = Utility.ComputeFHCSum(hedgeType, null, MoveBasedDeltaVegaHedging);
 
 
 
@@ -297,17 +275,16 @@ namespace AutocallPricerFHC
             Console.WriteLine("finishing 3rd approach");
             Console.WriteLine("starting writing in the txt file");
 
-            string textFilePathResults = Path.Combine(projectDirectory, "results.txt");
-            Console.WriteLine(textFilePathResults);
+            string textFilePathResults = Path.Combine(currentDirectory, "results.txt");
             string textOutput = $"Price: {price}\nDelta: {delta}\nVega: {vega}\nGamma: {gamma}\nDeltaFHCClosed: {resultsClosedFHC.Item1}\nVegaFHCClosed: {resultsClosedFHC.Item2}";
-            //string textOutput = $"Price: {price}\nDelta: {delta}\nVega: {vega}\nGamma: {gamma}";
+            
             if (n == 1)
             {
                 foreach (var pair in probabilities)
                 {
                     textOutput += $"\nObservation date {pair.Key + 1.0}: {pair.Value}";
                 }
-            }  
+            }
             textOutput += $"\nNbr hedges in Fixed: {FixedDeltaVegaHedging.Rows.Count}";
             textOutput += $"\nNbr hedges in Level Based: {MoveBasedDeltaVegaHedging.Rows.Count}";
 

@@ -352,7 +352,6 @@ public static class Utility
         }
     }
 
-    // Method to print a single matrix
     public static void PrintMatrix(double[,] matrix)
     {
         int rows = matrix.GetLength(0);
@@ -362,10 +361,10 @@ public static class Utility
         {
             for (int j = 0; j < cols; j++)
             {
-                Console.Write($"{matrix[i, j],6:F7} "); // Format output to 2 decimal places
+                Console.Write($"{matrix[i, j],6:F7} ");
             }
             Console.WriteLine();
         }
-        Console.WriteLine(); // Add an empty line for spacing between matrices
+        Console.WriteLine();
     }
 }
