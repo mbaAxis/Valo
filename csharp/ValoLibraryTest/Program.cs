@@ -685,30 +685,30 @@ int[] months = { 1, 2, 3 };
 //string[,] s = ModelInterface.CDO(maturity, strikes, correl, spreadStandard, "EUR", names.Length, names, nominalIssuer, spread, cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol,
 //    betaAdder,recoveryIssuer,isAmericanFloatLeg,isAmericanFixedLeg,1,1,0,null,null,"1m",1,0.1,months,0.001,"EUR");
 
-//string[] ratings = { "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB" };
-//double[] sector = { 16, 16, 16, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };
+string[] ratings = { "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB", "CC", "BB+", "AAA", "BB" };
+double[] sector = { 16, 16, 16, 4, 4, 5, 6, 2, 5, 4, 5, 6, 2, 5 };
 
-//double[,] result = FRTB.DeltaCSRCDO(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
-//    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
-//double[,] results = FRTB.DeltaCSRCDS(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, spreadStandard, names.Length, names, nominalIssuer,recoveryIssuer, cpnPeriod, cpnConvention, cpnLastSettle);
-//double[] r = FRTB.DeltaCSRCDOProxy(names,ratings,sector,maturity,strikes,correl,spreadStandard,"EUR",names.Length,names,nominalIssuer,spread,cpnPeriod,cpnConvention,
-//    cpnLastSettle,fxCorrel,fxVol,betaAdder);
+double[,] result = FRTB.DeltaCSRCDO(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg);
+double[,] results = FRTB.DeltaCSRCDS(names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, spreadStandard, names.Length, names, nominalIssuer, recoveryIssuer, cpnPeriod, cpnConvention, cpnLastSettle);
+//double[] r = FRTB.DeltaCSRCDOProxy(names, ratings, sector, maturity, strikes, correl, spreadStandard, "EUR", names.Length, names, nominalIssuer, spread, cpnPeriod, cpnConvention,
+//    cpnLastSettle, fxCorrel, fxVol, betaAdder);
 
-//double[,] deltaSensitivities = new double[names.Length, 5];
-//for (int i = 0; i < names.Length; i++)
-//{
-//    for (int j = 0; j < 5; j++)
-//    {
-//        deltaSensitivities[i, j] = result[i, j];
-//    }
-//}
+double[,] deltaSensitivities = new double[names.Length, 5];
+for (int i = 0; i < names.Length; i++)
+{
+    for (int j = 0; j < 5; j++)
+    {
+        deltaSensitivities[i, j] = result[i, j];
+    }
+}
 
-//double floor = 0.0001;
-//FRTB.curvatureCSR(floor, "e", deltaSensitivities, names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
-//    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, "high", isAmericanFloatLeg, isAmericanFixedLeg);
+double floor = 0.0001;
+FRTB.curvatureCSR(floor, "e", deltaSensitivities, names, ratings, sector, paramDate, CDSRollDate, alterMode, intensity, maturity, strikes, correl, spreadStandard, CDSCurrency, names.Length, names, nominalIssuer, spread,
+    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, "high", isAmericanFloatLeg, isAmericanFixedLeg);
 
 //double[] deltaSensi = new double[5];
-//for(int i = 0;i < r.Length - 1; i++)
+//for (int i = 0; i < r.Length - 1; i++)
 //{
 //    deltaSensi[i] = r[i];
 //}
@@ -716,22 +716,23 @@ int[] months = { 1, 2, 3 };
 //    cpnLastSettle, fxCorrel, fxVol, betaAdder);
 
 
-//======================================= TEST DELTA GIRR====================================================
+//======================================= TEST DELTA GIRR =======================================================
 
-double[] curve1GIRR = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
-double[] curve2GIRR = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };//USD
-double[] curve3GIRR = { 0.045525, 0.04448, 0.045115, 0.046085, 0.047005, 0.0478, 0.048495, 0.049075, 0.04961, 0.05008, 0.051595, 0.052305 };//EUR
-string[] currencyG = { "EUR", "EUR", "USD" };
-int[] swapBasisG = { 3, 3, 4 };
-double[] fxRateG = { 1, 1, 1.44 };
-int[] swapPeriodG = { 3, 6, 6 };
-double[,] swapRatesG = { { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529},
-    { 0.045525, 0.04448, 0.045115, 0.046085, 0.047005, 0.0478, 0.048495, 0.049075},
-    { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604 } };
-string[] curveDatesG = { "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "15Y", "30Y" };
-StrippingIRS.StoreCurve(currencyG, swapBasisG, fxRateG, swapPeriodG, currencyG, swapRatesG, curveDatesG, currencyG);
-FRTB.Girr(paramDate, maturity, strikes, correl, spreadStandard, "EUR", names.Length, names, nominalIssuer, spread, cpnPeriod, cpnConvention,
-    cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0);
+//double[] curve1GIRR = { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529, 0.0455901, 0.0458856, 0.0471141, 0.04758 };// Exemple de taux de courbe
+//double[] curve2GIRR = { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604, 0.01698, 0.01787, 0.0212375, 0.0233875 };//USD
+//double[] curve3GIRR = { 0.045525, 0.04448, 0.045115, 0.046085, 0.047005, 0.0478, 0.048495, 0.049075, 0.04961, 0.05008, 0.051595, 0.052305 };//EUR
+//string[] currencyG = { "EUR", "EUR", "USD" };
+//int[] swapBasisG = { 3, 3, 4 };
+//double[] fxRateG = { 1, 1, 1.44 };
+//int[] swapPeriodG = { 3, 6, 6 };
+//double[,] swapRatesG = { { 0.04626, 0.04511, 0.04472, 0.044595, 0.0446379, 0.04479, 0.045035, 0.04529},
+//    { 0.045525, 0.04448, 0.045115, 0.046085, 0.047005, 0.0478, 0.048495, 0.049075},
+//    { 0.00978, 0.01034, 0.01104, 0.01207, 0.01309, 0.0141, 0.01509, 0.01604 } };
+//string[] curveDatesG = { "1Y", "2Y", "3Y", "5Y", "7Y", "10Y", "15Y", "30Y" };
+//StrippingIRS.StoreCurve(currencyG, swapBasisG, fxRateG, swapPeriodG, currencyG, swapRatesG, curveDatesG, currencyG);
+//FRTB.Girr(paramDate, maturity, strikes, correl, spreadStandard, "EUR", names.Length, names, nominalIssuer, spread, cpnPeriod, cpnConvention,
+//    cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0);
+// ====================================== FIN DELTA GIRR ========================================================
 //string[] noms = {
 //    "Airbus SE", "Airbus SE", "Airbus SE",
 //    "Aktiebolaget Volvo", "Aktiebolaget Volvo", "Aktiebolaget Volvo",

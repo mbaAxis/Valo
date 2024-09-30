@@ -734,106 +734,51 @@ namespace ValoLibrary
             {
                 kbUpWard = new double[1];
                 kbDownWard = new double[1];
-                kbUpWard[0] = 0;
-                kbDownWard[0] = 0;
                 double psiUpWard, psiDownWard;
-                if (bucketSECCTP == 16)//21.56 (2)
+                for (int scenarioNumber = 0; scenarioNumber < 3; scenarioNumber++)
                 {
-                    kb = new double[1];
-                    double k1=0;
-                    double k2=0;
-                    for(int i = 0; i < numberOfIssuer; i++)
+                    kbUpWard[0] = 0;
+                    kbDownWard[0] = 0;
+                    if (scenarioNumber == 0)
                     {
-                        k1 += Math.Max(curvature[i, 0],0);
-                        k2 += Math.Max(curvature[i, 1],0);
+                        correlationScenario = "LOW";
                     }
-                    kb[0] = Math.Max(k1, k2);
-                }
-                else
-                {
-                    for (int row1 = 0; row1 < numberOfIssuer; row1++)//Determining the KB in the upWard scenario and downWard scenario
+                    else if (scenarioNumber == 1)
                     {
-                        for (int row2 = 0; row2 < numberOfIssuer; row2++)
+                        correlationScenario = "MEDIUM";
+                    }
+                    else
+                    {
+                        correlationScenario = "HIGH";
+                    }
+                    if (bucketSECCTP == 16)//21.56 (2)
+                    {
+                        kb = new double[1];
+                        double k1 = 0;
+                        double k2 = 0;
+                        for (int i = 0; i < numberOfIssuer; i++)
                         {
-                            double correlParameter = 1.0;
-                            psiUpWard = 1.0;
-                            psiDownWard = 1.0;
-                            if (row1 != row2)
-                            {
-                                if (curvature[row1, 0] < 0 && curvature[row2, 0] < 0)
-                                {
-                                    psiUpWard = 0;
-                                }
-                                if (curvature[row1, 0] < 0 && curvature[row2, 0] < 0)
-                                {
-                                    psiDownWard = 0;
-                                }
-                                correlParameter *= 0.35;
-                                if (String.Equals(correlationScenario.ToUpper(), "HIGH"))//21.6
-                                {
-                                    correlParameter = Math.Min(1.25 * correlParameter, 1.0);
-                                }
-                                else if (String.Equals(correlationScenario.ToUpper(), "LOW"))//21.6
-                                {
-                                    correlParameter = Math.Max(2 * correlParameter - 1.0, 0.75 * correlParameter);
-                                }
-                                correlParameter *= correlParameter;//21.100
-
-                                kbUpWard[0] += curvature[row1, 0] * curvature[row2, 0] * correlParameter * psiUpWard;//21.5 (b)
-                                kbDownWard[0] += curvature[row1, 1] * curvature[row2, 1] * correlParameter * psiDownWard;
-                            }
-                            else
-                            {
-                                kbUpWard[0] += Math.Max(curvature[row1, 0], 0) * Math.Max(curvature[row1, 0], 0);
-                                kbDownWard[0] += Math.Max(curvature[row1, 1], 0) * Math.Max(curvature[row1, 1], 0);
-                            }
-
+                            k1 += Math.Max(curvature[i, 0], 0);
+                            k2 += Math.Max(curvature[i, 1], 0);
                         }
+                        kb[0] = Math.Max(k1, k2);
                     }
-                    kbUpWard[0] = Math.Sqrt(Math.Max(kbUpWard[0], 0));
-                    kbDownWard[0] = Math.Sqrt(Math.Max(kbDownWard[0], 0));
-
-                    kb = new double[1];//21.5 (a)
-                    kb[0] = Math.Max(kbDownWard[0], kbUpWard[0]); //only one bucket, no need of determining upWard, downWard scenario
-                }
-                curvatureRisk = Math.Sqrt(Math.Max(kb[0] * kb[0],0));
-                curvature[0, 2] = curvatureRisk;
-            }
-            else
-            {
-                kbUpWard = new double[18];
-                kbDownWard = new double[18];
-                sbDownWard = new double[18];
-                sbUpWard = new double[18];
-                kb = new double[18];
-                scenario = new int[18];
-                double[] sb = new double[18];
-                for (int bucketNumber = 0; bucketNumber < 18; bucketNumber++)//Aggregatin within bucket
-                {
-                    sbDownWard[bucketNumber] = 0;
-                    sbUpWard[bucketNumber] = 0;
-                    kbUpWard[bucketNumber] = 0;
-                    kbDownWard[bucketNumber] = 0;
-                    int[] bucketIndices = UtilityLittleFunctions.PositionElement(bucket, bucketNumber + 1);
-
-                    if(bucketNumber != 15)
+                    else
                     {
-                        for (int indice1 = 0; indice1 < bucketIndices.Length; indice1++)
+                        for (int row1 = 0; row1 < numberOfIssuer; row1++)//Determining the KB in the upWard scenario and downWard scenario
                         {
-                            sbUpWard[bucketNumber] += curvature[bucketIndices[indice1], 0];
-                            sbDownWard[bucketNumber] += curvature[bucketIndices[indice1], 1];
-                            for (int indice2 = 0; indice2 < bucketIndices.Length; indice2++)
+                            for (int row2 = 0; row2 < numberOfIssuer; row2++)
                             {
                                 double correlParameter = 1.0;
-                                double psiUpWard = 1.0;//21.5 (b)
-                                double psiDownWard = 1.0;
-                                if (bucketIndices[indice1] != bucketIndices[indice2])//names are different, (no basis and tenor in correlation)
+                                psiUpWard = 1.0;
+                                psiDownWard = 1.0;
+                                if (row1 != row2)
                                 {
-                                    if (curvature[bucketIndices[indice1], 0] < 0 && curvature[bucketIndices[indice2], 0] < 0)
+                                    if (curvature[row1, 0] < 0 && curvature[row2, 0] < 0)
                                     {
                                         psiUpWard = 0;
                                     }
-                                    if (curvature[bucketIndices[indice1], 1] < 0 && curvature[bucketIndices[indice2], 1] < 0)
+                                    if (curvature[row1, 0] < 0 && curvature[row2, 0] < 0)
                                     {
                                         psiDownWard = 0;
                                     }
@@ -848,44 +793,153 @@ namespace ValoLibrary
                                     }
                                     correlParameter *= correlParameter;//21.100
 
-                                    kbUpWard[bucketNumber] += curvature[bucketIndices[indice1], 0] * curvature[bucketIndices[indice2], 0] * correlParameter * psiUpWard;//21.5 (b)
-                                    kbDownWard[bucketNumber] += curvature[bucketIndices[indice1], 1] * curvature[bucketIndices[indice2], 1] * correlParameter * psiDownWard;
+                                    kbUpWard[0] += curvature[row1, 0] * curvature[row2, 0] * correlParameter * psiUpWard;//21.5 (b)
+                                    kbDownWard[0] += curvature[row1, 1] * curvature[row2, 1] * correlParameter * psiDownWard;
                                 }
-                                else //both names are equal
+                                else
                                 {
-                                    kbUpWard[bucketNumber] += Math.Max(curvature[bucketIndices[indice1], 0], 0) * Math.Max(curvature[bucketIndices[indice1], 0], 0);
-                                    kbDownWard[bucketNumber] += Math.Max(curvature[bucketIndices[indice1], 1], 0) * Math.Max(curvature[bucketIndices[indice1], 1], 0);
+                                    kbUpWard[0] += Math.Max(curvature[row1, 0], 0) * Math.Max(curvature[row1, 0], 0);
+                                    kbDownWard[0] += Math.Max(curvature[row1, 1], 0) * Math.Max(curvature[row1, 1], 0);
+                                }
+
+                            }
+                        }
+                        kbUpWard[0] = Math.Sqrt(Math.Max(kbUpWard[0], 0));
+                        kbDownWard[0] = Math.Sqrt(Math.Max(kbDownWard[0], 0));
+
+                        kb = new double[1];//21.5 (a)
+                        kb[0] = Math.Max(kbDownWard[0], kbUpWard[0]); //only one bucket, no need of determining upWard, downWard scenario
+                    }
+                    curvatureRisk = Math.Sqrt(Math.Max(kb[0] * kb[0], 0));
+                    curvature[scenarioNumber, 2] = curvatureRisk;
+                }
+            }
+            else
+            {
+                kbUpWard = new double[18];
+                kbDownWard = new double[18];
+                sbDownWard = new double[18];
+                sbUpWard = new double[18];
+                kb = new double[18];
+                scenario = new int[18];
+                double[] sb = new double[18];
+                for (int scenarioNumber = 0; scenarioNumber < 3; scenarioNumber++)
+                {
+                    if (scenarioNumber == 0)
+                    {
+                        correlationScenario = "LOW";
+                    }
+                    else if (scenarioNumber == 1)
+                    {
+                        correlationScenario = "MEDIUM";
+                    }
+                    else
+                    {
+                        correlationScenario = "HIGH";
+                    }
+
+                    for (int bucketNumber = 0; bucketNumber < 18; bucketNumber++)//Aggregatin within bucket
+                    {
+                        sbDownWard[bucketNumber] = 0;
+                        sbUpWard[bucketNumber] = 0;
+                        kbUpWard[bucketNumber] = 0;
+                        kbDownWard[bucketNumber] = 0;
+                        int[] bucketIndices = UtilityLittleFunctions.PositionElement(bucket, bucketNumber + 1);
+
+                        if (bucketNumber != 15)
+                        {
+                            for (int indice1 = 0; indice1 < bucketIndices.Length; indice1++)
+                            {
+                                sbUpWard[bucketNumber] += curvature[bucketIndices[indice1], 0];
+                                sbDownWard[bucketNumber] += curvature[bucketIndices[indice1], 1];
+                                for (int indice2 = 0; indice2 < bucketIndices.Length; indice2++)
+                                {
+                                    double correlParameter = 1.0;
+                                    double psiUpWard = 1.0;//21.5 (b)
+                                    double psiDownWard = 1.0;
+                                    if (bucketIndices[indice1] != bucketIndices[indice2])//names are different, (no basis and tenor in correlation)
+                                    {
+                                        if (curvature[bucketIndices[indice1], 0] < 0 && curvature[bucketIndices[indice2], 0] < 0)
+                                        {
+                                            psiUpWard = 0;
+                                        }
+                                        if (curvature[bucketIndices[indice1], 1] < 0 && curvature[bucketIndices[indice2], 1] < 0)
+                                        {
+                                            psiDownWard = 0;
+                                        }
+                                        correlParameter *= 0.35;
+                                        if (String.Equals(correlationScenario.ToUpper(), "HIGH"))//21.6
+                                        {
+                                            correlParameter = Math.Min(1.25 * correlParameter, 1.0);
+                                        }
+                                        else if (String.Equals(correlationScenario.ToUpper(), "LOW"))//21.6
+                                        {
+                                            correlParameter = Math.Max(2 * correlParameter - 1.0, 0.75 * correlParameter);
+                                        }
+                                        correlParameter *= correlParameter;//21.100
+
+                                        kbUpWard[bucketNumber] += curvature[bucketIndices[indice1], 0] * curvature[bucketIndices[indice2], 0] * correlParameter * psiUpWard;//21.5 (b)
+                                        kbDownWard[bucketNumber] += curvature[bucketIndices[indice1], 1] * curvature[bucketIndices[indice2], 1] * correlParameter * psiDownWard;
+                                    }
+                                    else //both names are equal
+                                    {
+                                        kbUpWard[bucketNumber] += Math.Max(curvature[bucketIndices[indice1], 0], 0) * Math.Max(curvature[bucketIndices[indice1], 0], 0);
+                                        kbDownWard[bucketNumber] += Math.Max(curvature[bucketIndices[indice1], 1], 0) * Math.Max(curvature[bucketIndices[indice1], 1], 0);
+                                    }
+                                }
+                            }
+                            kbUpWard[bucketNumber] = Math.Sqrt(Math.Max(0, kbUpWard[bucketNumber]));
+                            kbDownWard[bucketNumber] = Math.Sqrt(Math.Max(0, kbDownWard[bucketNumber]));
+
+                            //Determining KB
+                            if (kbUpWard[bucketNumber] < kbDownWard[bucketNumber])
+                            {
+                                kb[bucketNumber] = kbDownWard[bucketNumber];
+                                scenario[bucketNumber] = 1;
+                                sb[bucketNumber] = sbDownWard[bucketNumber];
+                            }
+                            else if (kbUpWard[bucketNumber] > kbDownWard[bucketNumber])
+                            {
+                                kb[bucketNumber] = kbUpWard[bucketNumber];
+                                scenario[bucketNumber] = 0;
+                                sb[bucketNumber] = sbUpWard[bucketNumber];
+                            }
+                            else
+                            {
+                                kb[bucketNumber] = kbUpWard[bucketNumber];
+
+                                double s1 = 0;
+                                double s2 = 0;
+                                for (int i = 0; i < bucketIndices.Length; i++)
+                                {
+                                    s1 += curvature[bucketIndices[i], 0];
+                                    s2 += curvature[bucketIndices[i], 1];
+                                }
+                                if (s1 > s2)
+                                {
+                                    scenario[bucketNumber] = 0;
+                                    sb[bucketNumber] = sbUpWard[bucketNumber];
+                                }
+                                else
+                                {
+                                    scenario[bucketNumber] = 1;
+                                    sb[bucketNumber] = sbDownWard[bucketNumber];
                                 }
                             }
                         }
-                        kbUpWard[bucketNumber] = Math.Sqrt(Math.Max(0, kbUpWard[bucketNumber]));
-                        kbDownWard[bucketNumber] = Math.Sqrt(Math.Max(0, kbDownWard[bucketNumber]));
-
-                        //Determining KB
-                        if (kbUpWard[bucketNumber] < kbDownWard[bucketNumber])
+                        else//21.56 (2)
                         {
-                            kb[bucketNumber] = kbDownWard[bucketNumber];
-                            scenario[bucketNumber] = 1;
-                            sb[bucketNumber] = sbDownWard[bucketNumber];
-                        }
-                        else if (kbUpWard[bucketNumber] > kbDownWard[bucketNumber])
-                        {
-                            kb[bucketNumber] = kbUpWard[bucketNumber];
-                            scenario[bucketNumber] = 0;
-                            sb[bucketNumber] = sbUpWard[bucketNumber];
-                        }
-                        else
-                        {
-                            kb[bucketNumber] = kbUpWard[bucketNumber];
-
-                            double s1 = 0;
-                            double s2 = 0;
+                            double k1 = 0;
+                            double k2 = 0;
                             for (int i = 0; i < bucketIndices.Length; i++)
                             {
-                                s1 += curvature[bucketIndices[i], 0];
-                                s2 += curvature[bucketIndices[i], 1];
+                                k1 += Math.Max(curvature[bucketIndices[i], 0], 0);
+                                k2 += Math.Max(curvature[bucketIndices[i], 1], 0);
+                                sbUpWard[bucketNumber] += curvature[bucketIndices[i], 0];
+                                sbDownWard[bucketNumber] += curvature[bucketIndices[i], 1];
                             }
-                            if (s1 > s2)
+                            kb[bucketNumber] = Math.Max(k1, k2);
+                            if (k1 > k2)
                             {
                                 scenario[bucketNumber] = 0;
                                 sb[bucketNumber] = sbUpWard[bucketNumber];
@@ -896,111 +950,88 @@ namespace ValoLibrary
                                 sb[bucketNumber] = sbDownWard[bucketNumber];
                             }
                         }
+
                     }
-                    else//21.56 (2)
+                    //Aggregation across bucket
+                    double[,] correlationMatrixSector =
+                         {{1   ,0.75,0.10,0.20,0.25,0.20,0.15,0.10,0   ,0.45,0.45},
+                         {0.75,1   ,0.05,0.15,0.20,0.15,0.10,0.10,0   ,0.45,0.45},
+                         {0.10,0.05,1   ,0.05,0.15,0.20,0.05,0.20,0   ,0.45,0.45},
+                         {0.20,0.15,0.05,1   ,0.20,0.25,0.05,0.05,0   ,0.45,0.45},
+                         {0.25,0.20,0.15,0.20,1   ,0.25,0.05,0.15,0   ,0.45,0.45},
+                         {0.20,0.15,0.20,0.25,0.25,1   ,0.05,0.20,0   ,0.45,0.45},
+                         {0.15,0.10,0.05,0.05,0.05,0.05,1   ,0.05,0   ,0.45,0.45},
+                         {0.10,0.10,0.20,0.05,0.15,0.20,0.05,1   ,0   ,0.45,0.45},
+                         {0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,0   ,0   },
+                         {0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0   ,1   ,0.75},
+                         {0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0   ,0.75,1   }
+                     };//See 21.57 (2) table 5
+                    for (int i = 0; i < 18; i++)
                     {
-                        double k1 = 0;
-                        double k2 = 0;
-                        for(int i = 0; i < bucketIndices.Length; i++)
+                        int k, l;
+                        if (i + 1 >= 9 && i + 1 <= 15)//determining sector
                         {
-                            k1 += Math.Max(curvature[bucketIndices[i], 0],0);
-                            k2 += Math.Max(curvature[bucketIndices[i], 1], 0);
-                            sbUpWard[bucketNumber] += curvature[bucketIndices[i], 0];
-                            sbDownWard[bucketNumber] += curvature[bucketIndices[i], 1];
+                            k = i - 8;
                         }
-                        kb[bucketNumber] = Math.Max(k1, k2);
-                        if (k1 > k2)
+                        else if (i + 1 >= 16)
                         {
-                            scenario[bucketNumber] = 0;
-                            sb[bucketNumber] = sbUpWard[bucketNumber];
+                            k = i - 7;
                         }
                         else
                         {
-                            scenario[bucketNumber] = 1;
-                            sb[bucketNumber] = sbDownWard[bucketNumber];
+                            k = i;
+                        }
+                        for (int j = 0; j < 18; j++)
+                        {
+                            if (j + 1 >= 9 && j + 1 <= 15)//determining sector
+                            {
+                                l = j - 8;
+                            }
+                            else if (j + 1 >= 16)
+                            {
+                                l = j - 7;
+                            }
+                            else
+                            {
+                                l = j;
+                            }
+
+
+                            if (i == j)
+                            {
+                                curvatureRisk += kb[i] * kb[i];
+                            }
+                            else
+                            {
+                                double psiCurvature = 1.0;
+                                double correlParameter = correlationMatrixSector[k, l];
+                                if (sbUpWard[i] < 0 && sbDownWard[j] < 0)
+                                {
+                                    psiCurvature = 0;
+                                }
+                                if ((i + 1 <= 15 && j + 1 <= 15) && ((i + 1 >= 9 && j + 1 <= 8) || (i + 1 <= 8 && j + 1 >= 9))) //See 21.57 (rating correlation)
+                                {
+                                    correlParameter *= 0.5;
+                                }
+
+                                if (String.Equals(correlationScenario.ToUpper(), "HIGH"))//21.6
+                                {
+                                    correlParameter = Math.Min(1.25 * correlParameter, 1.0);
+                                }
+                                else if (String.Equals(correlationScenario.ToUpper(), "LOW"))//21.6
+                                {
+                                    correlParameter = Math.Max(2 * correlParameter - 1.0, 0.75 * correlParameter);
+                                }
+
+                                correlParameter *= correlParameter;//21.101
+
+                                curvatureRisk += sb[i] * sb[j] * psiCurvature * correlParameter;
+                            }
                         }
                     }
-                    
+                    curvatureRisk = Math.Sqrt(Math.Max(0, curvatureRisk));
+                    curvature[scenarioNumber, 2] = curvatureRisk;
                 }
-                //Aggregation across bucket
-                double[,] correlationMatrixSector =
-                     {{1   ,0.75,0.10,0.20,0.25,0.20,0.15,0.10,0   ,0.45,0.45},
-                     {0.75,1   ,0.05,0.15,0.20,0.15,0.10,0.10,0   ,0.45,0.45},
-                     {0.10,0.05,1   ,0.05,0.15,0.20,0.05,0.20,0   ,0.45,0.45},
-                     {0.20,0.15,0.05,1   ,0.20,0.25,0.05,0.05,0   ,0.45,0.45},
-                     {0.25,0.20,0.15,0.20,1   ,0.25,0.05,0.15,0   ,0.45,0.45},
-                     {0.20,0.15,0.20,0.25,0.25,1   ,0.05,0.20,0   ,0.45,0.45},
-                     {0.15,0.10,0.05,0.05,0.05,0.05,1   ,0.05,0   ,0.45,0.45},
-                     {0.10,0.10,0.20,0.05,0.15,0.20,0.05,1   ,0   ,0.45,0.45},
-                     {0   ,0   ,0   ,0   ,0   ,0   ,0   ,0   ,1   ,0   ,0   },
-                     {0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0   ,1   ,0.75},
-                     {0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0   ,0.75,1   }
-                 };//See 21.57 (2) table 5
-                for (int i = 0; i < 18; i++)
-                {
-                    int k, l;
-                    if (i + 1 >= 9 && i + 1 <= 15)//determining sector
-                    {
-                        k = i - 8;
-                    }
-                    else if (i + 1 >= 16)
-                    {
-                        k = i - 7;
-                    }
-                    else
-                    {
-                        k = i;
-                    }
-                    for (int j = 0; j < 18; j++)
-                    {
-                        if (j + 1 >= 9 && j + 1 <= 15)//determining sector
-                        {
-                            l = j - 8;
-                        }
-                        else if (j + 1 >= 16)
-                        {
-                            l = j - 7;
-                        }
-                        else
-                        {
-                            l = j;
-                        }
-
-
-                        if (i == j)
-                        {
-                            curvatureRisk += kb[i] * kb[i];
-                        }
-                        else
-                        {
-                            double psiCurvature = 1.0;
-                            double correlParameter = correlationMatrixSector[k, l];
-                            if (sbUpWard[i]<0 && sbDownWard[j] < 0)
-                            {
-                                psiCurvature = 0;
-                            }
-                            if ((i + 1 <= 15 && j + 1 <= 15) && ((i + 1 >= 9 && j + 1 <= 8) || (i + 1 <= 8 && j + 1 >= 9))) //See 21.57 (rating correlation)
-                            {
-                                correlParameter *= 0.5;
-                            }
-
-                            if (String.Equals(correlationScenario.ToUpper(), "HIGH"))//21.6
-                            {
-                                correlParameter = Math.Min(1.25 * correlParameter, 1.0);
-                            }
-                            else if (String.Equals(correlationScenario.ToUpper(), "LOW"))//21.6
-                            {
-                                correlParameter = Math.Max(2 * correlParameter - 1.0, 0.75 * correlParameter);
-                            }
-
-                            correlParameter *= correlParameter;//21.101
-
-                            curvatureRisk += sb[i] * sb[j] * psiCurvature * correlParameter;
-                        }
-                    }
-                }
-                curvatureRisk = Math.Sqrt(Math.Max(0, curvatureRisk));
-                curvature[0, 2] = curvatureRisk;
             }
             Console.WriteLine("Curvature :"+curvatureRisk);
             return curvature;
