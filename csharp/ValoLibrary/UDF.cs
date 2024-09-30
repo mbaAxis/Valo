@@ -81,6 +81,11 @@ namespace ValoLibrary
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
     double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0);
         //============================================== FRTB ===========================================
+        double[,] GetGirr(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0);
+
 
         double[] GetDeltaCSRCDOProxy(string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
           string pricingCurrency, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
@@ -301,6 +306,17 @@ namespace ValoLibrary
         }
 
         //============================================FRTB==============================================
+        public double[,] GetGirr(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
+    int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
+    string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
+        {
+            return FRTB.Girr(paramDate,maturity,strikes,correl,spreadStandard,pricingCurrency,numberOfIssuer,issuerList,
+                nominalIssuer,spread,cpnPeriod,cpnConvention,cpnLastSettle,fxCorrel,fxVol,betaAdder,recoveryIssuer,isAmericanFloatLeg,
+                isAmericanFixedLeg,withStochasticRecoveryVAL);
+        }
+
+
         public double[] GetDeltaCSRCDOProxy(string[] names, string[] ratings, double[] sectors, string maturity, double[] strikes, double[] correl, double[] spreadStandard,
   string pricingCurrency, int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
   string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,

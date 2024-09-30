@@ -35,8 +35,9 @@ namespace ValoLibrary
             {
                 for (int j = 0; j < lastIndice; j++)
                 {
-                    CDSresults[j, i] = -Double.Parse(ModelInterface.CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, new int[] { 0 }, 0, girrCurrency)[0, 0]);
-                    CDSresults[j, i] += Double.Parse(ModelInterface.CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, pricingCurrency, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, new int[] { months[i] }, 0.0001, girrCurrency)[0, 0]);
+                    string currencyCDS = StrippingCDS.CreditDefaultSwapCurves.Curves[StrippingCDS.GetCDSCurveId(issuerList[j])].Currency;
+                    CDSresults[j, i] = -Double.Parse(ModelInterface.CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, currencyCDS, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, new int[] { 0 }, 0, girrCurrency)[0, 0]);
+                    CDSresults[j, i] += Double.Parse(ModelInterface.CDS(issuerList[j], maturity, spreadStandard[j] * shockedGIRR, recoveryIssuer[j], nominalIssuer[j], cpnPeriod, cpnConvention, cpnLastSettle, currencyCDS, 0, 0, 1, 1, 0, hedgingCDS, integrationPeriod, 1, new int[] { months[i] }, 0.0001, girrCurrency)[0, 0]);
                     CDSresults[j, i] /= shockedGIRR;
                     CDSresults[j, i] *= riskWeights[i] / additionalWeight;
                     results[i] -= CDSresults[j, i];
@@ -56,9 +57,7 @@ namespace ValoLibrary
         public static double[,] Girr(DateTime paramDate, string maturity, double[] strikes, double[] correl, double[] spreadStandard, string pricingCurrency,
     int numberOfIssuer, string[] issuerList, double[] nominalIssuer, double spread, string cpnPeriod,
     string cpnConvention, string cpnLastSettle, double fxCorrel, double fxVol, double[] betaAdder,
-    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0,
-    double withGreeks = 0, double withJtdVAL = 0, double withStochasticRecoveryVAL = 0, double[] hedgingCDS = null, double? lossUnitAmount = null,
-    string integrationPeriod = "1m", double probMultiplier = 1, double dBeta = 0.1)
+    double[] recoveryIssuer = null, double isAmericanFloatLeg = 0, double isAmericanFixedLeg = 0, double withStochasticRecoveryVAL = 0)
         {
             int indiceIssuer = issuerList.Length;
             for (int i = 0; i < issuerList.Length; i++)//In case there is less issuer than given
@@ -76,7 +75,7 @@ namespace ValoLibrary
             {
                 if (!String.Equals(curvesList[i].Currency, curvesList[i - 1].Currency))
                 {
-                    lastIndice++;//number of bucket
+                    lastIndice++;//number of bucket - 1
                 }
             }
             int[] indice = new int[lastIndice + 1];
@@ -110,8 +109,7 @@ namespace ValoLibrary
                     }
                 }
                 double[] results = DeltaGIRR(indiceIssuer, curvesList[i].Currency, maturity, strikes, correl, spreadStandard, pricingCurrency, numberOfIssuer, issuerList, nominalIssuer, spread,
-                    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, withGreeks, withJtdVAL, withStochasticRecoveryVAL,
-                    hedgingCDS, lossUnitAmount, integrationPeriod, probMultiplier, dBeta);
+                    cpnPeriod, cpnConvention, cpnLastSettle, fxCorrel, fxVol, betaAdder, recoveryIssuer, isAmericanFloatLeg, isAmericanFixedLeg, 0,0, withStochasticRecoveryVAL);
 
                 for (int j = 0; j < results.Length; j++)
                 {
@@ -170,6 +168,7 @@ namespace ValoLibrary
                 {
                     delta += gamma * Sb[b] * Sb[c];
                 }
+                girrSensitivities[0, 10] = delta;
             }
             if (delta < 0)
             {
