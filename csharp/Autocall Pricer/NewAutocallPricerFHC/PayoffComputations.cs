@@ -26,7 +26,7 @@ public class PayoffCalculator
     }
 
     public static List<int> ComputeObsDates(double T, int freqObs, int stepSize = 252)
-    {
+    {// computes the observation dates
         var obsDates = new List<int>();
         int obsDate = (int)Math.Floor(252 * T);
         while (obsDate > 1)
@@ -38,7 +38,7 @@ public class PayoffCalculator
     }
 
     public Dictionary<double,double> ComputeRedemptionProbability(object matrix)
-    {
+    {// computes the probability that an autocall will be redeemed at a certain observation date
         Dictionary<double, double> probabilities = new Dictionary<double, double>();
         if (this.n > 1)
         {
